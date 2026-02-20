@@ -1,0 +1,82 @@
+{
+  "name": "@visioncraft/extension",
+  "displayName": "VisionCraft",
+  "description": "AI-native visual development for VS Code",
+  "version": "1.0.0",
+  "private": true,
+  "publisher": "visioncraft",
+  "engines": {
+    "vscode": "^1.96.0",
+    "node": ">=18.0.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization",
+    "Debuggers"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "visioncraft.openPreview",
+        "title": "VisionCraft: Open Live Preview"
+      },
+      {
+        "command": "visioncraft.startServer",
+        "title": "VisionCraft: Start MCP Server"
+      },
+      {
+        "command": "visioncraft.reloadPreview",
+        "title": "VisionCraft: Reload Preview"
+      },
+      {
+        "command": "visioncraft.toggleCDP",
+        "title": "VisionCraft: Toggle CDP Mode"
+      }
+    ],
+    "configuration": {
+      "title": "VisionCraft",
+      "properties": {
+        "visioncraft.devServerUrl": {
+          "type": "string",
+          "default": "http://localhost:5173",
+          "description": "URL of the running dev server"
+        },
+        "visioncraft.framework": {
+          "type": "string",
+          "enum": ["auto", "react", "vue", "svelte", "html"],
+          "default": "auto",
+          "description": "Framework detection mode"
+        },
+        "visioncraft.screenshotQuality": {
+          "type": "number",
+          "default": 80,
+          "minimum": 30,
+          "maximum": 100,
+          "description": "JPEG quality for screenshots (30-100)"
+        },
+        "visioncraft.enableCDP": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable CDP fallback for advanced features"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:playwright-core --format=cjs --platform=node --target=node18 --sourcemap",
+    "dev": "pnpm build --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@visioncraft/bridge": "workspace:*",
+    "@visioncraft/mcp-server": "workspace:*",
+    "playwright-core": "^1.41.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "visioncraft": {
+      "command": "node",
+      "args": [
+        "/ABSOLUTE/PATH/TO/vscode-eye/packages/mcp-server/dist/index.js"
+      ]
+    }
+  }
+}

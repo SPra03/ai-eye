@@ -1,0 +1,12 @@
+{
+  "name": "visioncraft-test-preview",
+  "version": "1.0.0",
+  "description": "Test page for VisionCraft preview functionality",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["visioncraft", "test", "preview"],
+  "author": "",
+  "license": "MIT"
+}

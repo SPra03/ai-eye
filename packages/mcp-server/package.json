@@ -1,0 +1,59 @@
+{
+  "name": "@visioncraft/mcp-server",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for VisionCraft - AI agent browser automation and inspection",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "visioncraft-mcp": "./dist/index.js"
+  },
+  "author": "VisionCraft Team",
+  "license": "MIT",
+  "homepage": "https://github.com/your-username/visioncraft#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/visioncraft.git",
+    "directory": "packages/mcp-server"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/visioncraft/issues"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude",
+    "ai",
+    "browser-automation",
+    "playwright",
+    "cdp",
+    "visioncraft",
+    "source-mapping",
+    "developer-tools"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --target=node18 --format=esm --sourcemap --banner:js=\"#!/usr/bin/env node\" --external:playwright-core --minify",
+    "dev": "pnpm build --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "playwright-core": "^1.41.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

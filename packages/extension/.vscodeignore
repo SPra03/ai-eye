@@ -1,0 +1,17 @@
+# Source files
+src/**
+tsconfig.json
+*.ts
+
+# Build
+node_modules/**
+.vscode-test/**
+
+# Development
+*.map
+.eslintrc.json
+.prettierrc
+.gitignore
+
+# Documentation
+CONTRIBUTING.md

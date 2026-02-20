@@ -1,0 +1,64 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "watch",
+      "type": "shell",
+      "command": "npx pnpm --filter @visioncraft/extension dev",
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": {
+          "regexp": "^([^\\s].*)\\((\\d+|\\d+,\\d+|\\d+,\\d+,\\d+,\\d+)\\):\\s+(error|warning|info)\\s+(TS\\d+)\\s*:\\s*(.*)$",
+          "file": 1,
+          "location": 2,
+          "severity": 3,
+          "code": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*Done in.*"
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "never"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "npm: dev - packages/extension",
+      "type": "shell",
+      "command": "npx pnpm --filter @visioncraft/extension dev",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "npm: build - packages/extension",
+      "type": "shell",
+      "command": "npx pnpm --filter @visioncraft/extension build",
+      "problemMatcher": "$tsc",
+      "group": "build"
+    },
+    {
+      "label": "npm: build",
+      "type": "shell",
+      "command": "npx pnpm build",
+      "problemMatcher": "$tsc",
+      "group": "build"
+    },
+    {
+      "label": "npm: clean",
+      "type": "shell",
+      "command": "npx pnpm clean",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisionCraft Test Page</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 32px;
+    }
+
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-right: 10px;
+    }
+
+    .button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      transition: border-color 0.3s;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin: 20px 0;
+    }
+
+    .feature-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      color: #444;
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      color: #667eea;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 VisionCraft Test Page</h1>
+    <p>This is a simple test page for VisionCraft live preview functionality. You should see this page rendered inside VS Code!</p>
+
+    <ul class="feature-list">
+      <li>Live preview with embedded iframe</li>
+      <li>Toolbar with navigation controls</li>
+      <li>Bi-directional messaging</li>
+      <li>Port mapping for dev servers</li>
+      <li>Visual status indicators</li>
+    </ul>
+
+    <input
+      type="text"
+      class="input"
+      placeholder="Try typing something..."
+      id="test-input"
+    />
+
+    <div>
+      <button class="button" onclick="handleClick()">Click Me!</button>
+      <button class="button" onclick="changeColor()">Change Color</button>
+      <button class="button" onclick="testMessage()">Test Message</button>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    let clickCount = 0;
+    const colors = ['#667eea', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
+    let colorIndex = 0;
+
+    function handleClick() {
+      clickCount++;
+      const status = document.getElementById('status');
+      status.textContent = `Button clicked ${clickCount} time(s)!`;
+      status.className = 'status success';
+      console.log('Button clicked:', clickCount);
+    }
+
+    function changeColor() {
+      colorIndex = (colorIndex + 1) % colors.length;
+      const newColor = colors[colorIndex];
+      document.body.style.background = `linear-gradient(135deg, ${newColor} 0%, ${colors[(colorIndex + 1) % colors.length]} 100%)`;
+      console.log('Color changed to:', newColor);
+
+      const status = document.getElementById('status');
+      status.textContent = 'Background color changed!';
+      status.className = 'status success';
+    }
+
+    function testMessage() {
+      // This will be used in Phase 4 to test bridge communication
+      console.log('Test message - Bridge communication coming in Phase 4');
+
+      const status = document.getElementById('status');
+      status.textContent = 'Check the console for test message!';
+      status.className = 'status success';
+
+      // Try to communicate with parent (will work once bridge is implemented)
+      window.parent.postMessage({
+        type: 'visioncraft-test',
+        data: 'Hello from test page!'
+      }, '*');
+    }
+
+    // Log page load
+    console.log('VisionCraft test page loaded successfully!');
+    console.log('Current URL:', window.location.href);
+
+    // Listen for messages from parent
+    window.addEventListener('message', (event) => {
+      console.log('Message received from parent:', event.data);
+    });
+
+    // Test that the page is interactive
+    document.getElementById('test-input').addEventListener('input', (e) => {
+      console.log('Input value:', e.target.value);
+    });
+  </script>
+</body>
+</html>
