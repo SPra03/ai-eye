@@ -1,231 +1,524 @@
 # VisionCraft
 
-AI-native visual development extension for VS Code. Provides visual perception to AI coding agents through embedded live preview, source mapping, and MCP integration.
+> **AI-native visual development for VS Code**
+> Bridge the gap between UI and code with live preview, source mapping, and AI agent integration
 
-## Project Status
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![VS Code](https://img.shields.io/badge/VS%20Code-%3E%3D1.96-blue)](https://code.visualstudio.com)
 
-🚧 **Under Active Development** 🚧
+---
 
-### Completed Phases
-- ✅ **Phase 0**: Project Foundation & Setup
-  - Monorepo structure with pnpm workspaces
-  - TypeScript configuration
-  - Build pipeline with esbuild
-  - Development tooling (ESLint, Prettier)
+## What is VisionCraft?
 
-- ✅ **Phase 1**: VS Code Extension Core
-  - Extension entry point with lifecycle management
-  - Configuration manager with auto-detection
-  - PreviewManager stub for webview panel
-  - CDPBridge stub for browser automation
-  - Command registration (openPreview, startServer, etc.)
-  - MCP server provider registration
+VisionCraft is an **AI-native visual development extension** for VS Code that enables both human developers and AI agents to:
 
-- ✅ **Phase 2**: Embedded Live Preview
-  - Full webview panel with toolbar and iframe
-  - Bi-directional messaging (Extension ↔ Webview ↔ iframe)
-  - Navigation controls (back, forward, reload)
-  - URL bar with auto-navigation
-  - Visual status indicators (connected, loading, error)
-  - Port mapping for common dev servers
-  - Content Security Policy configuration
-  - BridgeAutomation API for future bridge script
-  - Error overlay with helpful messages
-  - Test server and sample page
+- 👁️ **See your UI** - Live preview panel embedded in VS Code
+- 🎯 **Navigate visually** - Click elements → jump to source code
+- 🤖 **Enable AI agents** - Let AI see, inspect, and interact with your UI
+- 🔍 **Debug faster** - Visual inspection with source mapping
+- ⚡ **Track HMR** - Real-time Hot Module Replacement status
 
-- ✅ **Phase 3**: Source Mapping Engine
-  - Babel plugin for React/JSX source mapping
-  - Vite plugin for Vue/Svelte/React with Vite
-  - Automatic injection of data-vc-source, data-vc-line, data-vc-col attributes
-  - HMR integration with status broadcasting
-  - Framework-agnostic architecture
-  - Example React app with full source mapping
-  - Comprehensive documentation and guides
+**Perfect for:**
+- Visual debugging and development
+- AI-assisted coding with tools like Claude Code
+- Understanding unfamiliar codebases
+- Rapid prototyping and iteration
+- Teaching and pair programming
 
-- ✅ **Phase 4**: Bridge Script & Browser Automation
-  - Browser bridge script with window.__VISIONCRAFT__ API
-  - Element inspection with source location lookup
-  - Page structure traversal with source mapping
-  - Element interaction (click, type, scroll)
-  - Console log capture with 200-entry ring buffer
-  - Screenshot capability (via html2canvas)
-  - Element finding by text, role, or CSS selector
-  - HMR status tracking
-  - Automatic injection via Vite plugin with ESM compatibility
-  - Comprehensive testing suite and documentation
+---
 
-- ✅ **Phase 5**: MCP Server Implementation ⭐ **FULLY TESTED & WORKING**
-  - MCP server with STDIO transport
-  - Playwright-based browser connection (162MB Chromium)
-  - 13 tools for AI agents (all verified working):
-    - ✅ visioncraft_screenshot - Capture page screenshots (Playwright native)
-    - ✅ visioncraft_inspect_element - Detailed element inspection with source mapping
-    - ✅ visioncraft_get_source - Source code location lookup (file:line:col)
-    - ✅ visioncraft_click - Element interaction with state verification
-    - ✅ visioncraft_type - Text input with event triggering
-    - ✅ visioncraft_scroll - Page scrolling
-    - ✅ visioncraft_find_elements - Search by text/role/CSS
-    - ✅ visioncraft_get_structure - DOM tree with source mapping
-    - ✅ visioncraft_get_console_logs - Console log retrieval
-    - ✅ visioncraft_clear_console_logs - Log management
-    - ✅ visioncraft_get_hmr_status - HMR status tracking
-    - ✅ visioncraft_navigate - URL navigation
-    - ✅ visioncraft_get_current_url - Current page URL
-  - Claude Desktop integration (tested and working)
-  - AI can now see, inspect, locate, and interact with UI elements
-  - Complete source mapping: every element traces back to source code
-  - Comprehensive documentation and testing guide
+## ✨ Features
 
-- ✅ **Phase 6**: HMR Integration & Error Capture ⭐ **FULLY TESTED & WORKING**
-  - Virtual module architecture for bridge injection (proper `import.meta.hot` access)
-  - Enhanced Vite plugin with detailed HMR tracking
-  - Connection monitoring (client connect/disconnect)
-  - Update history (last 20 updates with timestamps)
-  - Latency measurement (17ms average in testing)
-  - Average latency calculation across all updates
-  - Error capture with stack traces (last 10 errors)
-  - Auto-reconnection detection and logging
-  - Multi-framework support (React, Vue, Svelte, CSS)
-  - New MCP tool: visioncraft_clear_hmr_errors
-  - Real-time performance feedback for AI development
-  - esbuild TypeScript transformation in virtual module
-  - Verified working via Claude Desktop MCP integration
+### For Human Developers
 
-- ✅ **Phase 7**: CDP Fallback Implementation ⭐ **COMPLETE**
-  - Three connection modes with automatic fallback
-  - CDP Connect mode (~10MB RAM, <100ms startup)
-  - Playwright Launch mode (default, backwards compatible)
-  - CDP-Only fallback (no bridge dependency)
-  - Automatic mode detection and fallback
-  - Bridge availability detection
-  - Graceful degradation to CDP-only
-  - 10x less RAM, 20x faster startup with CDP Connect
-  - Connection state management
-  - Memory-efficient cleanup
-  - Full documentation with usage examples
+**Live Preview**
+- Embedded browser preview in VS Code
+- Click any element to jump to its source code
+- Real-time HMR updates
+- Interactive debugging
 
-- ✅ **Phase 8**: Testing & Quality Assurance ⭐ **COMPLETE**
-  - Vitest testing infrastructure setup
-  - Babel plugin unit tests (28/28 passing)
-  - Vite plugin unit tests (24/24 passing)
-  - Bridge script interface tests (38/38 passing)
-  - Total: 90/90 automated tests passing (100%)
-  - Manual testing checklist created
-  - Integration testing documented (Phase 7 results)
-  - Test execution in <1 second
-  - Comprehensive test coverage for all packages
-  - CI/CD ready with deterministic tests
+**Source Mapping**
+- Every UI element traces back to source code
+- See exact file, line, and column for each element
+- Works with React, Vue, Svelte
 
-- ✅ **Phase 9**: Documentation & Packaging ⭐ **COMPLETE**
-  - Complete API reference documentation (docs/API.md)
-  - Getting Started guide with quickstart (docs/GETTING-STARTED.md)
-  - Contributing guidelines (CONTRIBUTING.md)
-  - Comprehensive CHANGELOG following best practices
-  - MIT License added
-  - NPM package metadata configured (all 3 packages)
-  - Publishing automation script (scripts/publish.sh)
-  - 53KB of production-ready documentation
-  - SEO-optimized with 25+ keywords
-  - Ready for open-source release and NPM publication
+**Visual Debugging**
+- Console logs captured in VS Code
+- Element inspection with computed styles
+- Bounding boxes and layout information
 
-### Upcoming Phases
-- ⏳ **Phase 10**: Polish & Optimization
+### For AI Agents
 
-## Architecture
+VisionCraft provides **14 MCP tools** for AI agents (Claude, Copilot, etc.):
 
-VisionCraft is built as a monorepo with 5 packages:
+- `visioncraft_screenshot` - Capture page screenshots
+- `visioncraft_inspect_element` - Get element details + source location
+- `visioncraft_get_source` - Find where code is defined
+- `visioncraft_get_structure` - Get component hierarchy
+- `visioncraft_find_elements` - Search by text/role/selector
+- `visioncraft_click` - Interact with buttons
+- `visioncraft_type` - Fill forms
+- `visioncraft_scroll` - Access elements below fold
+- `visioncraft_get_console_logs` - Debug errors
+- `visioncraft_get_hmr_status` - Check build status
+- _...and 4 more_
 
-```
-packages/
-├── extension/        # VS Code extension
-├── mcp-server/      # MCP server for AI agents
-├── babel-plugin/    # Babel plugin for source mapping
-├── vite-plugin/     # Vite plugin for HMR & source mapping
-└── bridge/          # Browser bridge script
-```
+See [docs/AI-USAGE.md](docs/AI-USAGE.md) for complete AI agent guide.
 
-## Development
+---
 
-### Prerequisites
-- Node.js 18+
-- pnpm (or use `npx pnpm`)
-- VS Code 1.96+
+## 🚀 Quick Start
 
-### Setup
+### For Users
+
+**1. Install the VS Code Extension**
+
+_(Coming soon to VS Code Marketplace)_
+
+For now, install from source:
 
 ```bash
-# Install dependencies
-npx pnpm install
-
-# Build all packages
-npx pnpm build
-
-# Watch mode for development
-npx pnpm dev
+git clone https://github.com/your-username/visioncraft.git
+cd visioncraft
+npm install -g pnpm  # or use: npx pnpm
+pnpm install
+pnpm build
 ```
 
-### Running the Extension
+Open in VS Code and press `F5` to launch Extension Development Host.
 
-1. Open this workspace in VS Code
-2. Press `F5` to launch Extension Development Host
-3. In the new window, run command: **VisionCraft: Open Live Preview**
+**2. Install Plugin in Your Project**
 
-### Testing the Preview
+For Vite projects (React, Vue, Svelte):
 
-#### Option 1: Simple Test Server
+```bash
+npm install @visioncraft/vite-plugin --save-dev
+```
+
+```typescript
+// vite.config.ts
+import visionCraft from '@visioncraft/vite-plugin';
+
+export default defineConfig({
+  plugins: [
+    visionCraft(),
+  ],
+});
+```
+
+For Create React App:
+
+```bash
+npm install @visioncraft/babel-plugin react-app-rewired customize-cra --save-dev
+```
+
+See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) for detailed setup.
+
+**3. Start Your Dev Server**
+
+```bash
+npm run dev
+# Dev server running at http://localhost:5173
+```
+
+**4. Open VisionCraft Preview**
+
+In VS Code:
+- Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
+- Type: "VisionCraft: Open Live Preview"
+- Click elements to navigate to source code!
+
+### For AI Agents
+
+**1. Configure Claude Desktop**
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "visioncraft": {
+      "command": "node",
+      "args": ["/path/to/visioncraft/packages/mcp-server/dist/index.js"],
+      "env": {
+        "VISIONCRAFT_URL": "http://localhost:5173"
+      }
+    }
+  }
+}
+```
+
+**2. Use VisionCraft Tools**
+
+```
+You: "Take a screenshot of my app and tell me what you see"
+
+Claude: [Uses visioncraft_screenshot]
+        "I can see a login form with two input fields and a submit button.
+         The button is defined at src/LoginForm.tsx:45.
+         Would you like me to inspect it further?"
+```
+
+See [docs/AI-USAGE.md](docs/AI-USAGE.md) for comprehensive guide.
+
+---
+
+## 📖 Documentation
+
+### Getting Started
+- [Installation Guide](docs/GETTING-STARTED.md) - Setup instructions
+- [Tool Reference](docs/TOOL-REFERENCE.md) - Quick reference cheat sheet
+- [Examples](examples/README.md) - Example projects
+
+### For Developers
+- [API Reference](docs/API.md) - Complete API documentation
+- [Contributing](CONTRIBUTING.md) - Development guidelines
+- [Changelog](CHANGELOG.md) - Version history
+
+### For AI Agents
+- [AI Usage Guide](docs/AI-USAGE.md) - Complete guide for AI agents
+- [Tool Reference](docs/TOOL-REFERENCE.md) - 14 MCP tools explained
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues
+
+### Package Documentation
+- [@visioncraft/extension](packages/extension/README.md) - VS Code extension
+- [@visioncraft/mcp-server](packages/mcp-server/README.md) - MCP server
+- [@visioncraft/vite-plugin](packages/vite-plugin/README.md) - Vite plugin
+- [@visioncraft/babel-plugin](packages/babel-plugin/README.md) - Babel plugin
+- [@visioncraft/bridge](packages/bridge/README.md) - Browser bridge
+
+---
+
+## 🎯 Use Cases
+
+### Visual Debugging
+
+**Before VisionCraft:**
+```
+1. See bug in browser
+2. Search codebase for component
+3. Guess which file it's in
+4. Open multiple files
+5. Find the right element
+```
+
+**With VisionCraft:**
+```
+1. See bug in VisionCraft preview
+2. Click element
+3. VS Code opens exact file and line
+4. Fix bug
+5. See update instantly
+```
+
+### AI-Assisted Development
+
+**Example workflow:**
+```
+User: "The login button doesn't look right"
+
+AI: [Takes screenshot]
+    [Inspects button element]
+    "I can see the button at src/Login.tsx:45.
+     It has incorrect padding. Let me fix it..."
+    [Edits file]
+    [Takes new screenshot]
+    "Fixed! The button now has proper spacing."
+```
+
+### Component Exploration
+
+Navigate unfamiliar codebases visually:
+1. Open preview of the app
+2. Click around to explore components
+3. Understand component hierarchy visually
+4. Jump to relevant source files
+
+---
+
+## 🏗️ Architecture
+
+VisionCraft consists of 5 packages working together:
+
+```
+┌─────────────────────────────────────────┐
+│           VS Code                       │
+│  ┌──────────────────────────────────┐   │
+│  │  VisionCraft Extension           │   │
+│  │  - Live Preview Panel            │   │
+│  │  - Source Navigation             │   │
+│  └──────────────────────────────────┘   │
+└────────────┬────────────────────────────┘
+             │
+             ↓
+┌────────────┴────────────────────────────┐
+│        MCP Server                       │
+│  - 14 AI Agent Tools                    │
+│  - Browser Automation (Playwright/CDP)  │
+└────────────┬────────────────────────────┘
+             │
+             ↓
+┌────────────┴────────────────────────────┐
+│         Browser                         │
+│  ┌──────────────────────────────────┐   │
+│  │  Your App                        │   │
+│  │  + VisionCraft Bridge            │   │
+│  │    (injected by plugin)          │   │
+│  └──────────────────────────────────┘   │
+└─────────────────────────────────────────┘
+             ↑
+             │
+     ┌───────┴────────┐
+     │                │
+┌────┴───┐      ┌─────┴─────┐
+│ Vite   │      │  Babel    │
+│ Plugin │      │  Plugin   │
+└────────┘      └───────────┘
+```
+
+**Components:**
+
+1. **VS Code Extension** - Live preview panel and commands
+2. **MCP Server** - Exposes tools to AI agents via Model Context Protocol
+3. **Vite Plugin** - Injects source mapping for Vite projects
+4. **Babel Plugin** - Injects source mapping for Babel projects
+5. **Browser Bridge** - Runs in browser, provides inspection API
+
+---
+
+## 🎓 Examples
+
+### React + Vite
+
+Complete example with full source mapping:
+
+```bash
+cd examples/react-vite-app
+npm install
+npm run dev
+```
+
+Then open VisionCraft preview and click around!
+
+### Test Preview
+
+Simple HTML test page for quick verification:
 
 ```bash
 cd examples/test-preview
 node server.js
 ```
 
-Then open the preview in VS Code - you should see a beautiful test page with interactive elements.
+See [examples/README.md](examples/README.md) for more examples and framework guides.
 
-#### Option 2: React App with Source Mapping (⭐ Recommended)
+---
+
+## 🛠️ Development
+
+### Setup
 
 ```bash
-cd examples/react-vite-app
-npx pnpm dev
+# Clone repository
+git clone https://github.com/your-username/visioncraft.git
+cd visioncraft
+
+# Install dependencies
+npm install -g pnpm  # or use: npx pnpm
+pnpm install
+
+# Build all packages
+pnpm build
+
+# Watch mode for development
+pnpm dev
 ```
 
-Then open the preview in VS Code at `http://localhost:5173`. Right-click any element and inspect it - you'll see `data-vc-source`, `data-vc-line`, and `data-vc-col` attributes showing exactly where in the source code that element came from!
+### Running Tests
 
-See testing guides for detailed instructions:
-- `QUICK-TEST.md` - Quick browser test for Phase 4 bridge (⭐ Start here!)
-- `TESTING-BRIDGE.md` - Comprehensive bridge API testing
-- `TESTING-MCP.md` - MCP server testing with Claude Desktop (⭐ Phase 5)
-- `examples/test-preview/README.md` - Basic preview testing
-- `examples/react-vite-app/README.md` - Source mapping verification
+```bash
+# Run all tests
+pnpm test
 
-## Available Commands
+# Run specific package tests
+pnpm --filter @visioncraft/vite-plugin test
+pnpm --filter @visioncraft/babel-plugin test
+pnpm --filter @visioncraft/bridge test
+```
 
-- `VisionCraft: Open Live Preview` - Opens the preview panel
-- `VisionCraft: Start MCP Server` - Starts the MCP server (Phase 5)
-- `VisionCraft: Reload Preview` - Reloads the preview (Phase 2)
-- `VisionCraft: Toggle CDP Mode` - Toggles CDP fallback mode
+### Project Structure
 
-## Configuration
+```
+visioncraft/
+├── packages/
+│   ├── extension/        # VS Code extension
+│   ├── mcp-server/      # MCP server for AI agents
+│   ├── babel-plugin/    # Babel source mapping plugin
+│   ├── vite-plugin/     # Vite source mapping plugin
+│   └── bridge/          # Browser bridge script
+├── examples/
+│   ├── react-vite-app/  # React + Vite example
+│   └── test-preview/    # Simple test server
+├── docs/                # Documentation
+└── scripts/             # Build and publish scripts
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+**Ways to contribute:**
+- Report bugs and request features via GitHub Issues
+- Improve documentation
+- Add new framework examples
+- Submit pull requests
+
+**Development workflow:**
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+---
+
+## 🔧 Configuration
+
+### VS Code Extension Settings
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| `visioncraft.devServerUrl` | URL of the running dev server | `http://localhost:5173` |
-| `visioncraft.framework` | Framework detection mode | `auto` |
-| `visioncraft.screenshotQuality` | JPEG quality for screenshots | `80` |
-| `visioncraft.enableCDP` | Enable CDP fallback | `false` |
+| `visioncraft.devServerUrl` | Dev server URL | `http://localhost:5173` |
+| `visioncraft.framework` | Framework detection | `auto` |
+| `visioncraft.screenshotQuality` | Screenshot quality (30-100) | `80` |
+| `visioncraft.enableCDP` | Enable CDP mode | `false` |
 
-## Technology Stack
+### Vite Plugin Options
 
-- **TypeScript 5.7+** - Type-safe development
-- **VS Code Extension API 1.96+** - Extension framework
-- **esbuild** - Fast bundling
-- **pnpm** - Efficient package management
-- **Playwright** - Browser automation (CDP fallback)
+```typescript
+visionCraft({
+  enabled: true,              // Enable source mapping
+  enableHMR: true,           // Track HMR updates
+  root: __dirname,           // Project root
+  include: /\.(jsx|tsx|vue|svelte)$/,  // Files to process
+  exclude: /node_modules/,   // Files to exclude
+  attributePrefix: 'data-vc' // Attribute prefix
+})
+```
 
-## Documentation
+### MCP Server Environment Variables
 
-- [Implementation Plan](./plan.md) - Detailed implementation roadmap
-- [Architecture Document](./VisionCraft_Architecture.docx) - Full technical specification
+```bash
+VISIONCRAFT_URL=http://localhost:5173  # Dev server URL
+VISIONCRAFT_MODE=playwright-launch     # Connection mode
+```
 
-## License
+See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) for complete configuration guide.
 
-MIT
+---
+
+## 📊 Supported Frameworks
+
+| Framework | Support | Plugin |
+|-----------|---------|--------|
+| React (Vite) | ✅ Full | Vite Plugin |
+| Vue 3 (Vite) | ✅ Full | Vite Plugin |
+| Svelte (Vite) | ✅ Full | Vite Plugin |
+| React (CRA) | ✅ Full | Babel Plugin |
+| Next.js | ⚠️ Experimental | Babel Plugin |
+| Angular | ❌ Not yet | - |
+| Plain HTML | ✅ Supported | None needed |
+
+See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) for framework-specific setup.
+
+---
+
+## ⚠️ Troubleshooting
+
+### Common Issues
+
+**"Source mapping not working"**
+→ Ensure plugin is installed and dev server restarted
+→ See [docs/TROUBLESHOOTING.md#source-mapping-issues](docs/TROUBLESHOOTING.md#source-mapping-issues)
+
+**"Not connected to browser"**
+→ Check dev server is running
+→ Verify URL in settings
+→ See [docs/TROUBLESHOOTING.md#mcp-server-issues](docs/TROUBLESHOOTING.md#mcp-server-issues)
+
+**"Element not found"**
+→ Use `visioncraft_find_elements` to search
+→ Take screenshot to see what's actually there
+→ See [docs/TROUBLESHOOTING.md#error-messages-explained](docs/TROUBLESHOOTING.md#error-messages-explained)
+
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for complete troubleshooting guide.
+
+---
+
+## 🎯 Roadmap
+
+### v1.0 (Current)
+- ✅ Core functionality
+- ✅ VS Code extension
+- ✅ MCP server with 14 tools
+- ✅ Vite and Babel plugins
+- ✅ Comprehensive documentation
+- ✅ Example projects
+- ✅ Test coverage (90+ tests)
+
+### v1.1 (Planned)
+- [ ] VS Code Marketplace publication
+- [ ] NPM package publication
+- [ ] Additional framework support (Angular, Solid)
+- [ ] Enhanced AI agent capabilities
+- [ ] Performance optimizations
+
+### v2.0 (Future)
+- [ ] Multi-page application support
+- [ ] Mobile device preview
+- [ ] Collaborative debugging
+- [ ] Plugin ecosystem
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+---
+
+## 📜 License
+
+MIT © 2026 VisionCraft Team
+
+See [LICENSE](LICENSE) for details.
+
+---
+
+## 🙏 Acknowledgments
+
+VisionCraft builds on amazing open-source projects:
+
+- [VS Code Extension API](https://code.visualstudio.com/api)
+- [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
+- [Playwright](https://playwright.dev)
+- [Vite](https://vitejs.dev)
+- [Babel](https://babeljs.io)
+
+---
+
+## 📞 Support & Community
+
+- **Documentation**: [docs/](docs/)
+- **Issues**: [GitHub Issues](https://github.com/your-username/visioncraft/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-username/visioncraft/discussions)
+
+---
+
+## 🌟 Star History
+
+If you find VisionCraft useful, please consider giving it a star on GitHub! ⭐
+
+---
+
+**Built with ❤️ for visual developers and AI agents**
+
+[Get Started](docs/GETTING-STARTED.md) · [Documentation](docs/README.md) · [Examples](examples/README.md) · [Contributing](CONTRIBUTING.md)
