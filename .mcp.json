@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "visioncraft": {
+      "command": "node",
+      "args": ["packages/mcp-server/dist/index.js"],
+      "env": {
+        "VISIONCRAFT_URL": "http://localhost:5175"
+      }
+    }
+  }
+}

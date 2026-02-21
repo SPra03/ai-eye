@@ -57,7 +57,13 @@
         },
         "visioncraft.framework": {
           "type": "string",
-          "enum": ["auto", "react", "vue", "svelte", "html"],
+          "enum": [
+            "auto",
+            "react",
+            "vue",
+            "svelte",
+            "html"
+          ],
           "default": "auto",
           "description": "Framework detection mode"
         },
@@ -74,7 +80,14 @@
           "description": "Enable CDP fallback for advanced features"
         }
       }
-    }
+    },
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "visioncraft",
+        "label": "VisionCraft Live Preview Tools",
+        "description": "AI-native visual development tools for inspecting, interacting with, and debugging web UIs directly in VS Code"
+      }
+    ]
   },
   "scripts": {
     "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:playwright-core --format=cjs --platform=node --target=node18 --sourcemap",
@@ -83,6 +96,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
     "@visioncraft/bridge": "workspace:*",
     "@visioncraft/mcp-server": "workspace:*",
     "playwright-core": "^1.41.0"

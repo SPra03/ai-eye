@@ -365,10 +365,11 @@ function registerMcpServerProvider(context: vscode.ExtensionContext): void {
 
           return [
             {
-              label: 'VisionCraft',
+              label: 'VisionCraft Live Preview Tools',
               command: 'node',
-              args: [context.asAbsolutePath('../../mcp-server/dist/index.js')],
+              args: [context.asAbsolutePath('../mcp-server/dist/index.js')],
               env: {
+                VISIONCRAFT_URL: 'http://localhost:5175',
                 WORKSPACE: workspaceRoot,
                 VSCODE_PID: String(process.pid),
               },
