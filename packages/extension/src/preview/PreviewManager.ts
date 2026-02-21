@@ -199,7 +199,7 @@ export class PreviewManager {
    * Get port mappings for common dev servers
    */
   private getPortMappings(): vscode.WebviewPortMapping[] {
-    const commonPorts = [3000, 4200, 5173, 8080, 8000, 9222];
+    const commonPorts = [3000, 4200, 5173, 5174, 5175, 5176, 8080, 8000, 9222];
     return commonPorts.map((port) => ({
       webviewPort: port,
       extensionHostPort: port,
@@ -416,6 +416,7 @@ export class PreviewManager {
     let isLoading = false;
 
     // Notify extension that webview is ready
+    console.log('VisionCraft webview script loaded!');
     vscode.postMessage({ type: 'ready' });
 
     // ---- Toolbar Actions ----
@@ -519,25 +520,74 @@ export class PreviewManager {
       }
     });
 
-    // Handle messages from extension
+    // Track pending iframe eval requests
+    const pendingIframeRequests = new Map();
+
+    // Handle responses from iframe
     window.addEventListener('message', (e) => {
+      // Check if this is a response from the iframe's VisionCraft bridge
+      if (e.source === frame.contentWindow && e.data?.type === 'visioncraft:response') {
+        const { id, result, error } = e.data;
+
+        if (pendingIframeRequests.has(id)) {
+          const { resolve, reject } = pendingIframeRequests.get(id);
+          pendingIframeRequests.delete(id);
+
+          if (error) {
+            reject(new Error(error));
+          } else {
+            resolve(result);
+          }
+        }
+      }
+    });
+
+    // Handle messages from extension
+    window.addEventListener('message', async (e) => {
       const message = e.data;
+      console.log('Webview received message:', message.type, message);
 
       switch (message.type) {
         case 'evaluate':
-          // Evaluate code in iframe context
+          // Forward eval to iframe via postMessage
           try {
-            const result = frame.contentWindow.eval(message.code);
+            console.log('Forwarding eval to iframe:', message.code);
+
+            // Create a promise that will be resolved when iframe responds
+            const resultPromise = new Promise((resolve, reject) => {
+              pendingIframeRequests.set(message.id, { resolve, reject });
+
+              // Set timeout
+              setTimeout(() => {
+                if (pendingIframeRequests.has(message.id)) {
+                  pendingIframeRequests.delete(message.id);
+                  reject(new Error('Iframe eval timeout'));
+                }
+              }, 5000);
+            });
+
+            // Send message to iframe
+            frame.contentWindow.postMessage({
+              type: 'visioncraft:eval',
+              id: message.id,
+              code: message.code
+            }, '*');
+
+            // Wait for response
+            const result = await resultPromise;
+            console.log('Eval result from iframe:', result);
+
             vscode.postMessage({
               type: 'evalResult',
               id: message.id,
               result: result
             });
           } catch (error) {
+            console.error('Eval error:', error);
             vscode.postMessage({
               type: 'evalResult',
               id: message.id,
-              error: error.message
+              error: error.message || String(error)
             });
           }
           break;

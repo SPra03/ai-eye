@@ -627,6 +627,64 @@ interface HMRStatus {
   } catch (error) {
     // Ignore cross-origin errors
   }
+
+  // Listen for messages from parent (for cross-origin communication)
+  window.addEventListener('message', async (event) => {
+    const message = event.data;
+
+    // Only handle visioncraft messages
+    if (!message || typeof message !== 'object' || !message.type?.startsWith('visioncraft:')) {
+      return;
+    }
+
+    try {
+      let result: any;
+
+      switch (message.type) {
+        case 'visioncraft:eval':
+          // Execute arbitrary code
+          result = eval(message.code);
+
+          // If result is a promise, await it
+          if (result && typeof result.then === 'function') {
+            result = await result;
+          }
+          break;
+
+        case 'visioncraft:call':
+          // Call a method on the API
+          const api = (window as any).__VISIONCRAFT__;
+          if (!api || !api[message.method]) {
+            throw new Error(`Method not found: ${message.method}`);
+          }
+          result = await api[message.method](...(message.args || []));
+          break;
+
+        default:
+          return; // Ignore unknown message types
+      }
+
+      // Send response back to parent
+      window.parent.postMessage(
+        {
+          type: 'visioncraft:response',
+          id: message.id,
+          result,
+        },
+        '*'
+      );
+    } catch (error: any) {
+      // Send error response
+      window.parent.postMessage(
+        {
+          type: 'visioncraft:response',
+          id: message.id,
+          error: error.message || String(error),
+        },
+        '*'
+      );
+    }
+  });
 })();
 
 // Export to ensure this is treated as an ES module

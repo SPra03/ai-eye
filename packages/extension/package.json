@@ -15,6 +15,11 @@
     "Debuggers"
   ],
   "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCommand:visioncraft.openPreview",
+    "onCommand:visioncraft.testScreenshot",
+    "onCommand:visioncraft.runV2Tests"
+  ],
   "contributes": {
     "commands": [
       {
@@ -32,6 +37,14 @@
       {
         "command": "visioncraft.toggleCDP",
         "title": "VisionCraft: Toggle CDP Mode"
+      },
+      {
+        "command": "visioncraft.testScreenshot",
+        "title": "VisionCraft: Test Screenshot (v2)"
+      },
+      {
+        "command": "visioncraft.runV2Tests",
+        "title": "VisionCraft: Run V2 Comprehensive Tests"
       }
     ],
     "configuration": {
@@ -39,7 +52,7 @@
       "properties": {
         "visioncraft.devServerUrl": {
           "type": "string",
-          "default": "http://localhost:5173",
+          "default": "http://localhost:5175",
           "description": "URL of the running dev server"
         },
         "visioncraft.framework": {
