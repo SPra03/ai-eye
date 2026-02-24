@@ -1,17 +1,19 @@
 import * as vscode from 'vscode';
 import { PreviewManager } from './preview/PreviewManager';
-import { CDPBridge } from './automation/CDPBridge';
+// import { CDPBridge } from './automation/CDPBridge'; // v2.2: Not needed, uses WebviewBridge instead
 import { ConfigManager } from './config/ConfigManager';
 import { WebviewBridge } from './webview/WebviewBridge';
 import { EmbeddedMCPServer } from './mcp/EmbeddedMCPServer';
+import { HttpBridge } from './mcp/HttpBridge';
 
 /**
  * Extension state management
  */
 let previewManager: PreviewManager | undefined;
-let cdpBridge: CDPBridge | undefined;
+// let cdpBridge: CDPBridge | undefined; // v2.2: Not needed
 let webviewBridge: WebviewBridge | undefined;
 let embeddedMCPServer: EmbeddedMCPServer | undefined;
+let httpBridge: HttpBridge | undefined;
 let outputChannel: vscode.OutputChannel | undefined;
 
 /**
@@ -50,11 +52,19 @@ export async function activate(context: vscode.ExtensionContext): Promise<Vision
   try {
     // Initialize managers
     previewManager = new PreviewManager(context);
-    cdpBridge = new CDPBridge();
+    // cdpBridge = new CDPBridge(); // v2.2: Not needed
 
     // Initialize v2 components (embedded MCP server)
     webviewBridge = new WebviewBridge(previewManager);
     embeddedMCPServer = new EmbeddedMCPServer(webviewBridge);
+
+    // Initialize v2.2 components (HTTP bridge for embedded webview mode)
+    httpBridge = new HttpBridge(embeddedMCPServer, previewManager);
+    const bridgePort = await httpBridge.start();
+    outputChannel.appendLine(`✨ HTTP Bridge started on port ${bridgePort}`);
+
+    // Store bridge port in context for MCP provider
+    await context.globalState.update('visioncraft.bridgePort', bridgePort);
 
     // Register commands
     registerCommands(context);
@@ -64,6 +74,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Vision
 
     outputChannel.appendLine('VisionCraft extension activated successfully!');
     outputChannel.appendLine('✨ v2 Embedded MCP Server initialized');
+    outputChannel.appendLine('✨ v2.2 HTTP Bridge ready for embedded webview mode');
     outputChannel.appendLine(`Configuration: ${JSON.stringify(ConfigManager.getConfig(), null, 2)}`);
 
     // Return API for other extensions/agents
@@ -362,6 +373,7 @@ function registerMcpServerProvider(context: vscode.ExtensionContext): void {
         onDidChangeMcpServerDefinitions: emitter.event,
         async provideMcpServerDefinitions() {
           const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+          const bridgePort = context.globalState.get<number>('visioncraft.bridgePort');
 
           return [
             {
@@ -369,6 +381,10 @@ function registerMcpServerProvider(context: vscode.ExtensionContext): void {
               command: 'node',
               args: [context.asAbsolutePath('../mcp-server/dist/index.js')],
               env: {
+                // Enable webview mode if bridge is available
+                VISIONCRAFT_WEBVIEW_ENABLED: bridgePort ? 'true' : 'false',
+                VISIONCRAFT_BRIDGE_URL: bridgePort ? `http://localhost:${bridgePort}` : '',
+                // Legacy mode (fallback to external browser)
                 VISIONCRAFT_URL: 'http://localhost:5175',
                 WORKSPACE: workspaceRoot,
                 VSCODE_PID: String(process.pid),
@@ -399,15 +415,22 @@ export async function deactivate(): Promise<void> {
 
   try {
     // Cleanup resources
+    if (httpBridge) {
+      await httpBridge.stop();
+      httpBridge = undefined;
+      outputChannel?.appendLine('HTTP Bridge stopped');
+    }
+
     if (previewManager) {
       previewManager.dispose();
       previewManager = undefined;
     }
 
-    if (cdpBridge) {
-      await cdpBridge.dispose();
-      cdpBridge = undefined;
-    }
+    // v2.2: CDPBridge not used
+    // if (cdpBridge) {
+    //   await cdpBridge.dispose();
+    //   cdpBridge = undefined;
+    // }
 
     outputChannel?.appendLine('VisionCraft extension deactivated successfully');
     outputChannel?.dispose();

@@ -1,9 +1,8 @@
 {
-  "name": "@visioncraft/extension",
+  "name": "visioncraft-extension",
   "displayName": "VisionCraft",
   "description": "AI-native visual development for VS Code",
   "version": "1.0.0",
-  "private": true,
   "publisher": "visioncraft",
   "engines": {
     "vscode": "^1.96.0",
@@ -16,6 +15,7 @@
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
+    "onStartupFinished",
     "onCommand:visioncraft.openPreview",
     "onCommand:visioncraft.testScreenshot",
     "onCommand:visioncraft.runV2Tests"

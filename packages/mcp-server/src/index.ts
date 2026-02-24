@@ -11,6 +11,7 @@ import {
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 import { getBrowserClient } from './browser-client.js';
+import { WebviewClient } from './webview-client.js';
 import { z } from 'zod';
 
 // Tool schemas
@@ -231,6 +232,8 @@ const tools: Tool[] = [
  */
 class VisionCraftMCPServer {
   private server: Server;
+  private isWebviewMode: boolean;
+  private webviewClient: WebviewClient | null = null;
 
   constructor() {
     this.server = new Server(
@@ -245,8 +248,34 @@ class VisionCraftMCPServer {
       }
     );
 
+    // Check if running in webview mode
+    this.isWebviewMode = process.env.VISIONCRAFT_WEBVIEW_ENABLED === 'true';
+
+    if (this.isWebviewMode) {
+      const bridgeUrl = process.env.VISIONCRAFT_BRIDGE_URL;
+      if (!bridgeUrl) {
+        console.error('[MCP] VISIONCRAFT_WEBVIEW_ENABLED is true but VISIONCRAFT_BRIDGE_URL is not set');
+        this.isWebviewMode = false;
+      } else {
+        console.error(`[MCP] Running in webview mode with bridge at ${bridgeUrl}`);
+        this.webviewClient = new WebviewClient(bridgeUrl);
+      }
+    } else {
+      console.error('[MCP] Running in external browser mode (Playwright)');
+    }
+
     this.setupHandlers();
     this.setupErrorHandling();
+  }
+
+  /**
+   * Get the appropriate client based on mode
+   */
+  private getClient(url?: string) {
+    if (this.isWebviewMode && this.webviewClient) {
+      return this.webviewClient;
+    }
+    return getBrowserClient(url);
   }
 
   private setupErrorHandling(): void {
@@ -256,10 +285,20 @@ class VisionCraftMCPServer {
 
     process.on('SIGINT', async () => {
       console.error('[MCP] Shutting down...');
-      const client = getBrowserClient();
-      if (client.isConnected()) {
-        await client.disconnect();
+
+      if (this.isWebviewMode && this.webviewClient) {
+        // Disconnect webview client
+        if (this.webviewClient.isConnected()) {
+          await this.webviewClient.disconnect();
+        }
+      } else {
+        // Disconnect browser client
+        const client = getBrowserClient();
+        if (client.isConnected()) {
+          await client.disconnect();
+        }
       }
+
       process.exit(0);
     });
   }
@@ -275,51 +314,83 @@ class VisionCraftMCPServer {
       const { name, arguments: args } = request.params;
 
       try {
-        const client = getBrowserClient(args?.url as string);
+        const client = this.getClient(args?.url as string);
 
         switch (name) {
           case 'visioncraft_screenshot': {
             const format = (args?.format as 'jpeg' | 'png') || 'jpeg';
             const quality = (args?.quality as number) || 80;
 
-            // Use Playwright's native screenshot instead of html2canvas
-            await client.ensureConnected();
-            const screenshot = await client.evaluate(async () => {
-              // Just return a marker, we'll use Playwright API
-              return true;
-            });
+            if (this.isWebviewMode && this.webviewClient) {
+              // Webview mode: callBridge returns data URL, parse and construct MCP response
+              const dataUrl = await client.callBridge('screenshot', format, quality);
 
-            // Get the page directly and take screenshot
-            const page = (client as any).page;
-            if (!page) {
-              throw new Error(
-                'Browser page not available. ' +
-                'Ensure the browser is connected and the page is loaded. ' +
-                'Try calling visioncraft_navigate first.'
-              );
+              // Debug: Log what we actually received
+              console.error('[MCP Server] Screenshot result type:', typeof dataUrl);
+              console.error('[MCP Server] Screenshot result:', dataUrl ? String(dataUrl).substring(0, 100) : dataUrl);
+
+              // Check if dataUrl is a string
+              if (typeof dataUrl !== 'string') {
+                throw new Error(`Expected string data URL, got ${typeof dataUrl}: ${JSON.stringify(dataUrl)}`);
+              }
+
+              // Extract base64 from data URL (format: data:image/jpeg;base64,...)
+              const base64Match = dataUrl.match(/^data:image\/\w+;base64,(.+)$/);
+              const base64 = base64Match ? base64Match[1] : dataUrl;
+
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: `Screenshot captured successfully (${format}, quality: ${quality})`,
+                  },
+                  {
+                    type: 'image',
+                    data: base64,
+                    mimeType: `image/${format}`,
+                  },
+                ],
+              };
+            } else {
+              // Playwright mode: Use Playwright's native screenshot
+              await client.ensureConnected();
+              const screenshot = await client.evaluate(async () => {
+                // Just return a marker, we'll use Playwright API
+                return true;
+              });
+
+              // Get the page directly and take screenshot
+              const page = (client as any).page;
+              if (!page) {
+                throw new Error(
+                  'Browser page not available. ' +
+                  'Ensure the browser is connected and the page is loaded. ' +
+                  'Try calling visioncraft_navigate first.'
+                );
+              }
+
+              const screenshotBuffer = await page.screenshot({
+                type: format,
+                quality: format === 'jpeg' ? quality : undefined,
+                fullPage: true,
+              });
+
+              const base64 = screenshotBuffer.toString('base64');
+
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: `Screenshot captured successfully (${format}, quality: ${quality})`,
+                  },
+                  {
+                    type: 'image',
+                    data: base64,
+                    mimeType: `image/${format}`,
+                  },
+                ],
+              };
             }
-
-            const screenshotBuffer = await page.screenshot({
-              type: format,
-              quality: format === 'jpeg' ? quality : undefined,
-              fullPage: true,
-            });
-
-            const base64 = screenshotBuffer.toString('base64');
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Screenshot captured successfully (${format}, quality: ${quality})`,
-                },
-                {
-                  type: 'image',
-                  data: base64,
-                  mimeType: `image/${format}`,
-                },
-              ],
-            };
           }
 
           case 'visioncraft_inspect_element': {

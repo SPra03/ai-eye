@@ -640,4 +640,11 @@ export class EmbeddedMCPServer {
       },
     ];
   }
+
+  /**
+   * Get the WebviewBridge instance (for HttpBridge access)
+   */
+  getWebviewBridge(): WebviewBridge {
+    return this.webviewBridge;
+  }
 }

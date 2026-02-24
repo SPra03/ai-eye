@@ -4,8 +4,6 @@
       "command": "node",
       "args": ["packages/mcp-server/dist/index.js"],
       "env": {
-        "VISIONCRAFT_WEBVIEW_ENABLED": "true",
-        "VISIONCRAFT_BRIDGE_URL": "http://localhost:53535",
         "VISIONCRAFT_URL": "http://localhost:5175"
       }
     }
