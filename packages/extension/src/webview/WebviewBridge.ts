@@ -87,7 +87,13 @@ export class WebviewBridge {
    * Capture screenshot of the webview
    * Returns base64-encoded image data
    */
-  async captureScreenshot(format: 'jpeg' | 'png' = 'jpeg', quality: number = 80): Promise<string> {
+  async captureScreenshot(
+    format: 'jpeg' | 'png' = 'jpeg',
+    quality: number = 80,
+    selector?: string,
+    highlight?: string[],
+    highlightColor: string = 'rgba(255, 0, 0, 0.3)'
+  ): Promise<string> {
     await this.waitForReady();
 
     // Check if html2canvas is available
@@ -101,7 +107,23 @@ export class WebviewBridge {
       await this.loadHtml2Canvas();
     }
 
-    // Capture screenshot using html2canvas
+    const bridgeAvailable = await this.isBridgeAvailable();
+
+    if (bridgeAvailable && (selector || highlight)) {
+      // Use bridge captureScreenshot with highlight/crop support
+      const selectorArg = selector ? `'${this.escapeSelector(selector)}'` : 'undefined';
+      const highlightArg = highlight ? JSON.stringify(highlight) : 'undefined';
+      const screenshotCode = `window.__VISIONCRAFT__.captureScreenshot('${format}', ${quality}, ${selectorArg}, ${highlightArg}, '${highlightColor}')`;
+
+      try {
+        const dataUrl = await this.previewManager.evaluate(screenshotCode, 15000);
+        return dataUrl;
+      } catch (error) {
+        throw new Error(`Screenshot capture failed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+
+    // Standard screenshot without highlight/crop
     const screenshotCode = `
       (async () => {
         const canvas = await html2canvas(document.body, {
@@ -121,6 +143,72 @@ export class WebviewBridge {
     } catch (error) {
       throw new Error(`Screenshot capture failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  /**
+   * Identify element at a specific pixel coordinate
+   */
+  async elementAtPoint(x: number, y: number): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+
+    if (bridgeAvailable) {
+      const code = `window.__VISIONCRAFT__.elementAtPoint(${x}, ${y})`;
+      const result = await this.previewManager.evaluate(code, 5000);
+      if (result) {
+        return result;
+      }
+      return { error: `No element found at (${x}, ${y})` };
+    } else {
+      // Fallback without bridge
+      const code = `
+        (() => {
+          const el = document.elementFromPoint(${x}, ${y});
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          const styles = window.getComputedStyle(el);
+          return {
+            tagName: el.tagName,
+            boundingBox: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+            computedStyles: {
+              display: styles.display, position: styles.position,
+              width: styles.width, height: styles.height,
+              color: styles.color, backgroundColor: styles.backgroundColor,
+              fontSize: styles.fontSize
+            },
+            innerText: el.innerText || el.textContent
+          };
+        })()
+      `;
+      const result = await this.previewManager.evaluate(code, 5000);
+      if (!result) {
+        throw new Error(`No element found at (${x}, ${y})`);
+      }
+      return result;
+    }
+  }
+
+  /**
+   * Batch inspect multiple elements at once
+   */
+  async batchInspect(
+    selectors?: string[],
+    region?: { x: number; y: number; width: number; height: number },
+    includeStyles: boolean = false
+  ): Promise<any[]> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('Batch inspect requires VisionCraft bridge');
+    }
+
+    const selectorsArg = selectors ? JSON.stringify(selectors) : 'undefined';
+    const regionArg = region ? JSON.stringify(region) : 'undefined';
+    const code = `window.__VISIONCRAFT__.batchInspect(${selectorsArg}, ${regionArg}, ${includeStyles})`;
+    const result = await this.previewManager.evaluate(code, 10000);
+    return Array.isArray(result) ? result : [];
   }
 
   /**
@@ -346,6 +434,81 @@ export class WebviewBridge {
   }
 
   /**
+   * Get CSS source rules for an element
+   */
+  async getCSSSource(selector: string, properties?: string[]): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('CSS source tracing requires VisionCraft bridge');
+    }
+
+    const propsArg = properties ? JSON.stringify(properties) : 'undefined';
+    const code = `window.__VISIONCRAFT__.getCSSSource('${this.escapeSelector(selector)}', ${propsArg})`;
+    return await this.previewManager.evaluate(code, 5000);
+  }
+
+  /**
+   * Get captured network requests
+   */
+  async getNetworkRequests(
+    filter?: { urlPattern?: string; method?: string; status?: number; hasError?: boolean },
+    limit: number = 50
+  ): Promise<any[]> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      return [];
+    }
+
+    const filterArg = filter ? JSON.stringify(filter) : 'undefined';
+    const code = `window.__VISIONCRAFT__.getNetworkRequests(${filterArg}, ${limit})`;
+    const result = await this.previewManager.evaluate(code, 5000);
+    return Array.isArray(result) ? result : [];
+  }
+
+  /**
+   * Clear captured network requests
+   */
+  async clearNetworkRequests(): Promise<void> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      return;
+    }
+
+    await this.previewManager.evaluate('window.__VISIONCRAFT__.clearNetworkRequests()', 2000);
+  }
+
+  /**
+   * Set viewport size for responsive testing
+   */
+  async setViewport(width: number, height: number): Promise<void> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (bridgeAvailable) {
+      const code = `window.__VISIONCRAFT__.setViewport(${width}, ${height})`;
+      await this.previewManager.evaluate(code, 3000);
+    } else {
+      // Fallback: set CSS directly
+      const code = `
+        (() => {
+          document.documentElement.style.width = '${width}px';
+          document.documentElement.style.height = '${height}px';
+          document.documentElement.style.overflow = 'auto';
+          window.dispatchEvent(new Event('resize'));
+          return { success: true };
+        })()
+      `;
+      await this.previewManager.evaluate(code, 3000);
+    }
+  }
+
+  /**
    * Get console logs from webview
    */
   async getConsoleLogs(level?: string, limit?: number): Promise<any[]> {
@@ -431,13 +594,13 @@ export class WebviewBridge {
   /**
    * Find elements by text, role, or CSS selector
    */
-  async findElements(query: string, mode: 'text' | 'role' | 'css' = 'css'): Promise<any[]> {
+  async findElements(query: string, mode: 'text' | 'role' | 'css' = 'css', includeSource: boolean = false): Promise<any[]> {
     await this.waitForReady();
 
     const bridgeAvailable = await this.isBridgeAvailable();
 
     if (bridgeAvailable) {
-      const code = `window.__VISIONCRAFT__.findElements('${this.escapeSelector(query)}', '${mode}')`;
+      const code = `window.__VISIONCRAFT__.findElements('${this.escapeSelector(query)}', '${mode}', ${includeSource})`;
       const result = await this.previewManager.evaluate(code, 5000);
       return Array.isArray(result) ? result : [];
     } else {

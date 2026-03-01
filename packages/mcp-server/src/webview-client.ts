@@ -123,6 +123,8 @@ export class WebviewClient {
   private mapMethodToTool(method: string): string {
     const methodMap: Record<string, string> = {
       'screenshot': 'visioncraft_screenshot',
+      'elementAtPoint': 'visioncraft_element_at_point',
+      'batchInspect': 'visioncraft_batch_inspect',
       'inspectElement': 'visioncraft_inspect_element',
       'getElementSource': 'visioncraft_get_source',
       'clickElement': 'visioncraft_click',
@@ -131,11 +133,16 @@ export class WebviewClient {
       'hoverElement': 'visioncraft_hover',
       'findElements': 'visioncraft_find_elements',
       'getPageStructure': 'visioncraft_get_structure',
+      'getCSSSource': 'visioncraft_get_css_source',
+      'setViewport': 'visioncraft_set_viewport',
       'getConsoleLogs': 'visioncraft_get_console_logs',
       'clearConsoleLogs': 'visioncraft_clear_console_logs',
+      'getNetworkRequests': 'visioncraft_get_network_requests',
+      'clearNetworkRequests': 'visioncraft_clear_network_requests',
       'getHMRStatus': 'visioncraft_get_hmr_status',
       'clearHMRErrors': 'visioncraft_clear_hmr_errors',
       'getCurrentUrl': 'visioncraft_get_current_url',
+      'visualDiff': 'visioncraft_visual_diff',
       'navigate': 'visioncraft_navigate',
     };
 
@@ -151,6 +158,22 @@ export class WebviewClient {
         return {
           format: args[0] || 'jpeg',
           quality: args[1] || 80,
+          selector: args[2],
+          highlight: args[3],
+          highlightColor: args[4],
+        };
+
+      case 'elementAtPoint':
+        return {
+          x: args[0],
+          y: args[1],
+        };
+
+      case 'batchInspect':
+        return {
+          selectors: args[0],
+          region: args[1],
+          includeStyles: args[2] || false,
         };
 
       case 'inspectElement':
@@ -177,11 +200,30 @@ export class WebviewClient {
         return {
           query: args[0],
           mode: args[1] || 'css',
+          includeSource: args[2] || false,
         };
 
       case 'getPageStructure':
         return {
           maxDepth: args[0] || 5,
+        };
+
+      case 'getCSSSource':
+        return {
+          selector: args[0],
+          properties: args[1],
+        };
+
+      case 'setViewport':
+        return {
+          width: args[0],
+          height: args[1],
+        };
+
+      case 'getNetworkRequests':
+        return {
+          filter: args[0],
+          limit: args[1] || 50,
         };
 
       case 'getConsoleLogs':

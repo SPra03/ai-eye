@@ -74,6 +74,12 @@ export class EmbeddedMCPServer {
         case 'visioncraft_navigate':
           return await this.handleNavigate(args);
 
+        case 'visioncraft_element_at_point':
+          return await this.handleElementAtPoint(args);
+
+        case 'visioncraft_batch_inspect':
+          return await this.handleBatchInspect(args);
+
         case 'visioncraft_inspect_element':
           return await this.handleInspectElement(args);
 
@@ -110,6 +116,21 @@ export class EmbeddedMCPServer {
         case 'visioncraft_get_current_url':
           return await this.handleGetCurrentUrl(args);
 
+        case 'visioncraft_hover':
+          return await this.handleHover(args);
+
+        case 'visioncraft_set_viewport':
+          return await this.handleSetViewport(args);
+
+        case 'visioncraft_get_css_source':
+          return await this.handleGetCSSSource(args);
+
+        case 'visioncraft_get_network_requests':
+          return await this.handleGetNetworkRequests(args);
+
+        case 'visioncraft_clear_network_requests':
+          return await this.handleClearNetworkRequests(args);
+
         default:
           return this.errorResponse(`Unknown tool: ${name}`);
       }
@@ -126,8 +147,11 @@ export class EmbeddedMCPServer {
   private async handleScreenshot(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const format = args.format || 'jpeg';
     const quality = args.quality || 80;
+    const selector = args.selector;
+    const highlight = args.highlight;
+    const highlightColor = args.highlightColor || 'rgba(255, 0, 0, 0.3)';
 
-    const dataUrl = await this.webviewBridge.captureScreenshot(format, quality);
+    const dataUrl = await this.webviewBridge.captureScreenshot(format, quality, selector, highlight, highlightColor);
 
     return {
       content: [
@@ -161,6 +185,49 @@ export class EmbeddedMCPServer {
         {
           type: 'text',
           text: `Successfully navigated to: ${url}`,
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_element_at_point
+   */
+  private async handleElementAtPoint(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const x = args.x;
+    const y = args.y;
+
+    if (x === undefined || y === undefined) {
+      return this.errorResponse('x and y parameters are required');
+    }
+
+    const info = await this.webviewBridge.elementAtPoint(x, y);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(info, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_batch_inspect
+   */
+  private async handleBatchInspect(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selectors = args.selectors as string[] | undefined;
+    const region = args.region as { x: number; y: number; width: number; height: number } | undefined;
+    const includeStyles = (args.includeStyles as boolean) || false;
+
+    const results = await this.webviewBridge.batchInspect(selectors, region, includeStyles);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(results, null, 2),
         },
       ],
     };
@@ -234,12 +301,13 @@ export class EmbeddedMCPServer {
   private async handleFindElements(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const query = args.query;
     const mode = args.mode || 'css';
+    const includeSource = args.includeSource || false;
 
     if (!query) {
       return this.errorResponse('Query parameter is required');
     }
 
-    const elements = await this.webviewBridge.findElements(query, mode as any);
+    const elements = await this.webviewBridge.findElements(query, mode as any, includeSource);
 
     return {
       content: [
@@ -426,6 +494,121 @@ export class EmbeddedMCPServer {
   }
 
   /**
+   * Tool: visioncraft_get_css_source
+   */
+  private async handleGetCSSSource(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selector = args.selector;
+    const properties = args.properties;
+
+    if (!selector) {
+      return this.errorResponse('Selector parameter is required');
+    }
+
+    const result = await this.webviewBridge.getCSSSource(selector, properties);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_get_network_requests
+   */
+  private async handleGetNetworkRequests(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const filter = args.filter;
+    const limit = args.limit || 50;
+
+    const requests = await this.webviewBridge.getNetworkRequests(filter, limit);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(requests, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_clear_network_requests
+   */
+  private async handleClearNetworkRequests(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    await this.webviewBridge.clearNetworkRequests();
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: 'Network requests cleared successfully',
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_set_viewport
+   */
+  private async handleSetViewport(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const presets: Record<string, { width: number; height: number }> = {
+      mobile: { width: 375, height: 812 },
+      tablet: { width: 768, height: 1024 },
+      desktop: { width: 1440, height: 900 },
+    };
+
+    let width = args.width as number;
+    let height = args.height as number;
+    const preset = args.preset as string | undefined;
+
+    if (preset && presets[preset]) {
+      width = presets[preset].width;
+      height = presets[preset].height;
+    }
+
+    if (!width || !height) {
+      return this.errorResponse('Either preset or width+height must be provided');
+    }
+
+    await this.webviewBridge.setViewport(width, height);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Viewport set to ${width}x${height}`,
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_hover
+   */
+  private async handleHover(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selector = args.selector;
+
+    if (!selector) {
+      return this.errorResponse('Selector parameter is required');
+    }
+
+    await this.webviewBridge.hoverElement(selector);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Successfully hovered over: ${selector}`,
+        },
+      ],
+    };
+  }
+
+  /**
    * Create an error response
    */
   private errorResponse(message: string): MCPToolCallResponse {
@@ -447,7 +630,7 @@ export class EmbeddedMCPServer {
     return [
       {
         name: 'visioncraft_screenshot',
-        description: 'Capture a screenshot of the current page in VS Code webview',
+        description: 'Capture a screenshot of the current page in VS Code webview. Optionally crop to an element or highlight elements.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -461,6 +644,19 @@ export class EmbeddedMCPServer {
               minimum: 0,
               maximum: 100,
               description: 'JPEG quality 0-100 (default: 80)',
+            },
+            selector: {
+              type: 'string',
+              description: 'Crop screenshot to this element\'s bounding box (+ 10px padding)',
+            },
+            highlight: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Draw colored overlay rectangles on these elements',
+            },
+            highlightColor: {
+              type: 'string',
+              description: 'Color for highlight overlays (default: "rgba(255, 0, 0, 0.3)")',
             },
           },
         },
@@ -477,6 +673,18 @@ export class EmbeddedMCPServer {
             },
           },
           required: ['url'],
+        },
+      },
+      {
+        name: 'visioncraft_element_at_point',
+        description: 'Identify the element at a specific pixel coordinate on the page',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            x: { type: 'number', description: 'X coordinate (pixels from left)' },
+            y: { type: 'number', description: 'Y coordinate (pixels from top)' },
+          },
+          required: ['x', 'y'],
         },
       },
       {
@@ -534,6 +742,10 @@ export class EmbeddedMCPServer {
               type: 'string',
               enum: ['text', 'role', 'css'],
               description: 'Search mode (default: css)',
+            },
+            includeSource: {
+              type: 'boolean',
+              description: 'When true, return file line/col for each element',
             },
           },
           required: ['query'],
@@ -636,6 +848,84 @@ export class EmbeddedMCPServer {
         inputSchema: {
           type: 'object',
           properties: {},
+        },
+      },
+      {
+        name: 'visioncraft_batch_inspect',
+        description: 'Inspect multiple elements at once by selectors or rectangular region',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selectors: { type: 'array', items: { type: 'string' }, description: 'CSS selectors to inspect' },
+            region: {
+              type: 'object',
+              properties: { x: { type: 'number' }, y: { type: 'number' }, width: { type: 'number' }, height: { type: 'number' } },
+              description: 'Region to find source-mapped elements in',
+            },
+            includeStyles: { type: 'boolean', description: 'Include computed styles (default: false)' },
+          },
+        },
+      },
+      {
+        name: 'visioncraft_hover',
+        description: 'Hover over an element to trigger CSS :hover states, tooltips, and dropdowns',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selector: {
+              type: 'string',
+              description: 'CSS selector for the element to hover over',
+            },
+          },
+          required: ['selector'],
+        },
+      },
+      {
+        name: 'visioncraft_get_css_source',
+        description: 'Trace CSS rules that apply to an element',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selector: { type: 'string', description: 'CSS selector for the element' },
+            properties: { type: 'array', items: { type: 'string' }, description: 'Specific properties to trace' },
+          },
+          required: ['selector'],
+        },
+      },
+      {
+        name: 'visioncraft_get_network_requests',
+        description: 'Get captured network requests (fetch and XHR)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'object',
+              properties: {
+                urlPattern: { type: 'string' },
+                method: { type: 'string' },
+                status: { type: 'number' },
+                hasError: { type: 'boolean' },
+              },
+            },
+            limit: { type: 'number', description: 'Max requests to return (default: 50)' },
+          },
+        },
+      },
+      {
+        name: 'visioncraft_clear_network_requests',
+        description: 'Clear captured network requests',
+        inputSchema: { type: 'object', properties: {} },
+      },
+      {
+        name: 'visioncraft_set_viewport',
+        description: 'Set viewport size for responsive design testing',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            width: { type: 'number', description: 'Viewport width in pixels' },
+            height: { type: 'number', description: 'Viewport height in pixels' },
+            preset: { type: 'string', enum: ['mobile', 'tablet', 'desktop'], description: 'Device preset' },
+          },
         },
       },
     ];

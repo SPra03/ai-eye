@@ -190,7 +190,10 @@ export class HttpBridge {
         case 'visioncraft_screenshot':
           result = await webviewBridge.captureScreenshot(
             (args.format as 'jpeg' | 'png') || 'jpeg',
-            (args.quality as number) || 80
+            (args.quality as number) || 80,
+            args.selector as string | undefined,
+            args.highlight as string[] | undefined,
+            (args.highlightColor as string) || 'rgba(255, 0, 0, 0.3)'
           );
           break;
 
@@ -206,7 +209,20 @@ export class HttpBridge {
         case 'visioncraft_find_elements':
           result = await webviewBridge.findElements(
             args.query as string,
-            (args.mode as 'css' | 'xpath' | 'text') || 'css'
+            (args.mode as 'css' | 'xpath' | 'text') || 'css',
+            (args.includeSource as boolean) || false
+          );
+          break;
+
+        case 'visioncraft_element_at_point':
+          result = await webviewBridge.elementAtPoint(args.x as number, args.y as number);
+          break;
+
+        case 'visioncraft_batch_inspect':
+          result = await webviewBridge.batchInspect(
+            args.selectors as string[] | undefined,
+            args.region as { x: number; y: number; width: number; height: number } | undefined,
+            (args.includeStyles as boolean) || false
           );
           break;
 
@@ -229,6 +245,23 @@ export class HttpBridge {
           result = { success: true };
           break;
 
+        case 'visioncraft_set_viewport': {
+          const presets: Record<string, { width: number; height: number }> = {
+            mobile: { width: 375, height: 812 },
+            tablet: { width: 768, height: 1024 },
+            desktop: { width: 1440, height: 900 },
+          };
+          let w = args.width as number;
+          let h = args.height as number;
+          if (args.preset && presets[args.preset as string]) {
+            w = presets[args.preset as string].width;
+            h = presets[args.preset as string].height;
+          }
+          await webviewBridge.setViewport(w, h);
+          result = { success: true, viewport: { width: w, height: h } };
+          break;
+        }
+
         case 'visioncraft_scroll':
           await webviewBridge.scrollTo((args.x as number) || 0, (args.y as number) || 0);
           result = { success: true };
@@ -240,6 +273,25 @@ export class HttpBridge {
 
         case 'visioncraft_get_structure':
           result = await webviewBridge.getPageStructure();
+          break;
+
+        case 'visioncraft_get_css_source':
+          result = await webviewBridge.getCSSSource(
+            args.selector as string,
+            args.properties as string[] | undefined
+          );
+          break;
+
+        case 'visioncraft_get_network_requests':
+          result = await webviewBridge.getNetworkRequests(
+            args.filter as any,
+            (args.limit as number) || 50
+          );
+          break;
+
+        case 'visioncraft_clear_network_requests':
+          await webviewBridge.clearNetworkRequests();
+          result = { success: true };
           break;
 
         case 'visioncraft_get_console_logs':

@@ -6,15 +6,28 @@
 
 interface VisionCraftAPI {
   // Core inspection
+  elementAtPoint: (x: number, y: number) => ElementInspectionResult | ErrorResult;
   inspectElement: (selector: string) => ElementInspectionResult | ErrorResult;
+  batchInspect: (selectors?: string[], region?: { x: number; y: number; width: number; height: number }, includeStyles?: boolean) => (ElementInspectionResult | ErrorResult)[];
   getPageStructure: (maxDepth?: number) => PageStructureNode;
-  findElements: (query: string, mode?: 'text' | 'role' | 'css') => ElementSearchResult[];
+  findElements: (query: string, mode?: 'text' | 'role' | 'css', includeSource?: boolean) => ElementSearchResult[];
   getElementSource: (selector: string) => SourceLocation | ErrorResult;
 
   // Interaction
   clickElement: (selector: string) => ActionResult;
+  hoverElement: (selector: string) => ActionResult;
   typeText: (selector: string, text: string) => ActionResult;
   scrollTo: (x: number, y: number) => ActionResult;
+
+  // Viewport
+  setViewport: (width: number, height: number) => ActionResult;
+
+  // CSS Source
+  getCSSSource: (selector: string, properties?: string[]) => any;
+
+  // Network
+  getNetworkRequests: (filter?: { urlPattern?: string; method?: string; status?: number; hasError?: boolean }, limit?: number) => any[];
+  clearNetworkRequests: () => void;
 
   // Debugging
   consoleLogs: ConsoleLog[];
@@ -22,7 +35,7 @@ interface VisionCraftAPI {
   clearConsoleLogs: () => void;
 
   // Screenshots
-  captureScreenshot: (format?: 'jpeg' | 'png', quality?: number) => Promise<string>;
+  captureScreenshot: (format?: 'jpeg' | 'png', quality?: number, selector?: string, highlight?: string[], highlightColor?: string) => Promise<string>;
 
   // HMR status
   getHMRStatus: () => HMRStatus;
@@ -107,6 +120,118 @@ interface HMRStatus {
 
   console.log('[VisionCraft] Initializing bridge script...');
 
+  // ====== Network Request Capture ======
+  interface NetworkRequest {
+    url: string;
+    method: string;
+    status: number;
+    duration: number;
+    timestamp: number;
+    error?: string;
+  }
+
+  const MAX_NETWORK_REQUESTS = 200;
+  const networkRequests: NetworkRequest[] = [];
+
+  // Monkey-patch fetch
+  const originalFetch = window.fetch;
+  window.fetch = async function (...fetchArgs: any[]) {
+    const startTime = Date.now();
+    const input = fetchArgs[0];
+    const init = fetchArgs[1] || {};
+    const url = typeof input === 'string' ? input : (input as Request).url;
+    const method = init.method || (typeof input === 'object' ? (input as Request).method : 'GET') || 'GET';
+
+    try {
+      const response = await originalFetch.apply(window, fetchArgs as any);
+      networkRequests.push({
+        url,
+        method: method.toUpperCase(),
+        status: response.status,
+        duration: Date.now() - startTime,
+        timestamp: startTime,
+      });
+      if (networkRequests.length > MAX_NETWORK_REQUESTS) {
+        networkRequests.shift();
+      }
+      return response;
+    } catch (error: any) {
+      networkRequests.push({
+        url,
+        method: method.toUpperCase(),
+        status: 0,
+        duration: Date.now() - startTime,
+        timestamp: startTime,
+        error: error.message || String(error),
+      });
+      if (networkRequests.length > MAX_NETWORK_REQUESTS) {
+        networkRequests.shift();
+      }
+      throw error;
+    }
+  };
+
+  // Monkey-patch XMLHttpRequest
+  const originalXHROpen = XMLHttpRequest.prototype.open;
+  const originalXHRSend = XMLHttpRequest.prototype.send;
+
+  XMLHttpRequest.prototype.open = function (method: string, url: string | URL, ...rest: any[]) {
+    (this as any).__vc_method = method;
+    (this as any).__vc_url = String(url);
+    return originalXHROpen.apply(this, [method, url, ...rest] as any);
+  };
+
+  XMLHttpRequest.prototype.send = function (...sendArgs: any[]) {
+    const startTime = Date.now();
+    const method = (this as any).__vc_method || 'GET';
+    const url = (this as any).__vc_url || '';
+
+    this.addEventListener('loadend', function () {
+      networkRequests.push({
+        url,
+        method: method.toUpperCase(),
+        status: this.status,
+        duration: Date.now() - startTime,
+        timestamp: startTime,
+        error: this.status === 0 ? 'Network error' : undefined,
+      });
+      if (networkRequests.length > MAX_NETWORK_REQUESTS) {
+        networkRequests.shift();
+      }
+    });
+
+    return originalXHRSend.apply(this, sendArgs as any);
+  };
+
+  function getNetworkRequests(
+    filter?: { urlPattern?: string; method?: string; status?: number; hasError?: boolean },
+    limit: number = 50
+  ): NetworkRequest[] {
+    let filtered = [...networkRequests];
+
+    if (filter) {
+      if (filter.urlPattern) {
+        const pattern = new RegExp(filter.urlPattern);
+        filtered = filtered.filter((r) => pattern.test(r.url));
+      }
+      if (filter.method) {
+        filtered = filtered.filter((r) => r.method === filter.method!.toUpperCase());
+      }
+      if (filter.status !== undefined) {
+        filtered = filtered.filter((r) => r.status === filter.status);
+      }
+      if (filter.hasError !== undefined) {
+        filtered = filtered.filter((r) => filter.hasError ? !!r.error || r.status >= 400 : !r.error && r.status < 400);
+      }
+    }
+
+    return filtered.slice(-limit);
+  }
+
+  function clearNetworkRequests(): void {
+    networkRequests.length = 0;
+  }
+
   // ====== Console Log Capture ======
   const MAX_LOGS = 200;
   const consoleLogs: ConsoleLog[] = [];
@@ -164,6 +289,81 @@ interface HMRStatus {
     captureLog('info', args);
     originalConsole.info.apply(console, args);
   };
+
+  // ====== Element At Point ======
+  function elementAtPoint(x: number, y: number): ElementInspectionResult | ErrorResult {
+    try {
+      // Screenshots are captured at devicePixelRatio scale by html2canvas,
+      // so coordinates from screenshot images need to be converted to CSS viewport coords
+      const dpr = window.devicePixelRatio || 1;
+      const cssX = x / dpr;
+      const cssY = y / dpr;
+
+      let el = document.elementFromPoint(cssX, cssY);
+      if (!el) {
+        // Retry with raw coordinates in case caller already provides CSS coords
+        el = document.elementFromPoint(x, y);
+      }
+      if (!el) {
+        return { error: `No element found at point (${x}, ${y})` };
+      }
+
+      // Walk up to find nearest source-mapped parent if needed
+      let sourceEl: Element | null = el;
+      while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+        sourceEl = sourceEl.parentElement;
+      }
+
+      const targetEl = el;
+      const rect = targetEl.getBoundingClientRect();
+      const computed = window.getComputedStyle(targetEl);
+
+      const sourceFile = sourceEl?.getAttribute('data-vc-source') || null;
+      const sourceLine = sourceEl?.getAttribute('data-vc-line') || null;
+      const sourceCol = sourceEl?.getAttribute('data-vc-col') || null;
+
+      const computedStyles: Record<string, string> = {
+        display: computed.display,
+        position: computed.position,
+        width: computed.width,
+        height: computed.height,
+        color: computed.color,
+        backgroundColor: computed.backgroundColor,
+        fontSize: computed.fontSize,
+        fontWeight: computed.fontWeight,
+        padding: computed.padding,
+        margin: computed.margin,
+        border: computed.border,
+        zIndex: computed.zIndex,
+      };
+
+      const attributes: Record<string, string> = {};
+      for (let i = 0; i < targetEl.attributes.length; i++) {
+        const attr = targetEl.attributes[i];
+        attributes[attr.name] = attr.value;
+      }
+
+      return {
+        tagName: targetEl.tagName,
+        sourceFile,
+        sourceLine,
+        sourceCol,
+        boundingBox: {
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height,
+        },
+        computedStyles,
+        innerText: (targetEl as HTMLElement).innerText?.substring(0, 200),
+        innerHTML: targetEl.innerHTML?.substring(0, 500),
+        attributes,
+        selector: generateSelector(targetEl, 0),
+      } as any;
+    } catch (error) {
+      return { error: String(error) };
+    }
+  }
 
   // ====== Element Inspection ======
   function inspectElement(selector: string): ElementInspectionResult | ErrorResult {
@@ -223,6 +423,85 @@ interface HMRStatus {
     } catch (error) {
       return { error: String(error) };
     }
+  }
+
+  // ====== Batch Inspect ======
+  function batchInspect(
+    selectors?: string[],
+    region?: { x: number; y: number; width: number; height: number },
+    includeStyles: boolean = false
+  ): (ElementInspectionResult | ErrorResult)[] {
+    const results: (ElementInspectionResult | ErrorResult)[] = [];
+
+    if (selectors && selectors.length > 0) {
+      for (const selector of selectors) {
+        results.push(inspectElement(selector));
+      }
+    }
+
+    if (region) {
+      // Find all source-mapped elements in the region
+      const allElements = document.querySelectorAll('[data-vc-source]');
+      for (let i = 0; i < allElements.length; i++) {
+        const el = allElements[i];
+        const rect = el.getBoundingClientRect();
+
+        // Check if element intersects with region
+        if (
+          rect.right > region.x &&
+          rect.left < region.x + region.width &&
+          rect.bottom > region.y &&
+          rect.top < region.y + region.height
+        ) {
+          const sourceFile = el.getAttribute('data-vc-source');
+          const sourceLine = el.getAttribute('data-vc-line');
+          const sourceCol = el.getAttribute('data-vc-col');
+
+          const entry: any = {
+            tagName: el.tagName,
+            sourceFile,
+            sourceLine,
+            sourceCol,
+            boundingBox: {
+              x: rect.x,
+              y: rect.y,
+              width: rect.width,
+              height: rect.height,
+            },
+            selector: generateSelector(el, i),
+            innerText: (el as HTMLElement).innerText?.substring(0, 100),
+          };
+
+          if (includeStyles) {
+            const computed = window.getComputedStyle(el);
+            entry.computedStyles = {
+              display: computed.display,
+              position: computed.position,
+              width: computed.width,
+              height: computed.height,
+              color: computed.color,
+              backgroundColor: computed.backgroundColor,
+              fontSize: computed.fontSize,
+              fontWeight: computed.fontWeight,
+              padding: computed.padding,
+              margin: computed.margin,
+            };
+          }
+
+          // Get attributes
+          const attributes: Record<string, string> = {};
+          for (let j = 0; j < el.attributes.length; j++) {
+            const attr = el.attributes[j];
+            attributes[attr.name] = attr.value;
+          }
+          entry.attributes = attributes;
+
+          results.push(entry);
+        }
+      }
+    }
+
+    return results;
   }
 
   // ====== Get Element Source ======
@@ -297,7 +576,8 @@ interface HMRStatus {
   // ====== Find Elements ======
   function findElements(
     query: string,
-    mode: 'text' | 'role' | 'css' = 'css'
+    mode: 'text' | 'role' | 'css' = 'css',
+    includeSource: boolean = false
   ): ElementSearchResult[] {
     try {
       let elements: Element[] = [];
@@ -333,12 +613,21 @@ interface HMRStatus {
         }
       }
 
-      return elements.map((el, index) => ({
-        selector: generateSelector(el, index),
-        source: el.getAttribute('data-vc-source'),
-        text: (el as HTMLElement).innerText?.substring(0, 50),
-        role: el.getAttribute('role'),
-      }));
+      return elements.map((el, index) => {
+        const result: any = {
+          selector: generateSelector(el, index),
+          source: el.getAttribute('data-vc-source'),
+          text: (el as HTMLElement).innerText?.substring(0, 50),
+          role: el.getAttribute('role'),
+        };
+
+        if (includeSource) {
+          result.line = el.getAttribute('data-vc-line');
+          result.col = el.getAttribute('data-vc-col');
+        }
+
+        return result;
+      });
     } catch (error) {
       console.error('[VisionCraft] Error finding elements:', error);
       return [];
@@ -391,9 +680,110 @@ interface HMRStatus {
     }
   }
 
+  function hoverElement(selector: string): ActionResult {
+    try {
+      const el = document.querySelector(selector);
+      if (!el) {
+        return { success: false, error: `Element not found: ${selector}` };
+      }
+
+      el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  }
+
   function scrollTo(x: number, y: number): ActionResult {
     try {
       window.scrollTo(x, y);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  }
+
+  // ====== CSS Source ======
+  function getCSSSource(
+    selector: string,
+    properties?: string[]
+  ): { property: string; value: string; selector: string; file: string | null }[] | ErrorResult {
+    try {
+      const el = document.querySelector(selector);
+      if (!el) {
+        return { error: `Element not found: ${selector}` };
+      }
+
+      const results: { property: string; value: string; selector: string; file: string | null }[] = [];
+
+      // Iterate through all stylesheets
+      for (let i = 0; i < document.styleSheets.length; i++) {
+        const sheet = document.styleSheets[i];
+        let rules: CSSRuleList;
+
+        try {
+          rules = sheet.cssRules || sheet.rules;
+        } catch (e) {
+          // Cross-origin stylesheet, skip
+          continue;
+        }
+
+        for (let j = 0; j < rules.length; j++) {
+          const rule = rules[j] as CSSStyleRule;
+          if (!rule.selectorText) continue;
+
+          try {
+            if (!el.matches(rule.selectorText)) continue;
+          } catch {
+            continue;
+          }
+
+          // This rule matches the element
+          const style = rule.style;
+          for (let k = 0; k < style.length; k++) {
+            const prop = style[k];
+
+            // Filter by properties if specified
+            if (properties && properties.length > 0 && !properties.includes(prop)) {
+              continue;
+            }
+
+            results.push({
+              property: prop,
+              value: style.getPropertyValue(prop),
+              selector: rule.selectorText,
+              file: sheet.href || (sheet.ownerNode as HTMLElement)?.getAttribute('data-vc-source') || 'inline',
+            });
+          }
+        }
+      }
+
+      return results;
+    } catch (error) {
+      return { error: String(error) };
+    }
+  }
+
+  // ====== Viewport ======
+  function setViewport(width: number, height: number): ActionResult {
+    try {
+      // Remove any existing viewport wrapper
+      const existing = document.getElementById('vc-viewport-wrapper');
+      if (existing) {
+        existing.remove();
+        document.body.style.removeProperty('width');
+        document.body.style.removeProperty('overflow');
+      }
+
+      // Apply CSS-based viewport constraint to trigger @media queries
+      document.documentElement.style.width = `${width}px`;
+      document.documentElement.style.height = `${height}px`;
+      document.documentElement.style.overflow = 'auto';
+
+      // Dispatch resize event so responsive JS can react
+      window.dispatchEvent(new Event('resize'));
+
       return { success: true };
     } catch (error) {
       return { success: false, error: String(error) };
@@ -422,7 +812,10 @@ interface HMRStatus {
   // ====== Screenshots ======
   async function captureScreenshot(
     format: 'jpeg' | 'png' = 'jpeg',
-    quality: number = 80
+    quality: number = 80,
+    selector?: string,
+    highlight?: string[],
+    highlightColor: string = 'rgba(255, 0, 0, 0.3)'
   ): Promise<string> {
     try {
       // Check if html2canvas is available
@@ -430,11 +823,61 @@ interface HMRStatus {
         throw new Error('html2canvas not loaded');
       }
 
+      // Inject highlight overlays if requested
+      const overlays: HTMLElement[] = [];
+      if (highlight && highlight.length > 0) {
+        for (const sel of highlight) {
+          const elements = document.querySelectorAll(sel);
+          elements.forEach((el) => {
+            const rect = el.getBoundingClientRect();
+            const overlay = document.createElement('div');
+            overlay.style.position = 'absolute';
+            overlay.style.left = `${rect.left + window.scrollX}px`;
+            overlay.style.top = `${rect.top + window.scrollY}px`;
+            overlay.style.width = `${rect.width}px`;
+            overlay.style.height = `${rect.height}px`;
+            overlay.style.backgroundColor = highlightColor;
+            overlay.style.pointerEvents = 'none';
+            overlay.style.zIndex = '999999';
+            overlay.setAttribute('data-vc-highlight', 'true');
+            document.body.appendChild(overlay);
+            overlays.push(overlay);
+          });
+        }
+      }
+
       const canvas = await (window as any).html2canvas(document.body, {
         allowTaint: true,
         useCORS: true,
         logging: false,
       });
+
+      // Remove highlight overlays
+      for (const overlay of overlays) {
+        overlay.remove();
+      }
+
+      // Crop to element if selector provided
+      if (selector) {
+        const el = document.querySelector(selector);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const padding = 10;
+          const sx = Math.max(0, rect.left + window.scrollX - padding);
+          const sy = Math.max(0, rect.top + window.scrollY - padding);
+          const sw = Math.min(canvas.width - sx, rect.width + padding * 2);
+          const sh = Math.min(canvas.height - sy, rect.height + padding * 2);
+
+          const cropCanvas = document.createElement('canvas');
+          cropCanvas.width = sw;
+          cropCanvas.height = sh;
+          const ctx = cropCanvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+            return cropCanvas.toDataURL(`image/${format}`, quality / 100);
+          }
+        }
+      }
 
       return canvas.toDataURL(`image/${format}`, quality / 100);
     } catch (error) {
@@ -582,15 +1025,28 @@ interface HMRStatus {
   // ====== Public API ======
   const VisionCraftAPI: VisionCraftAPI & { clearHMRErrors: () => void } = {
     // Inspection
+    elementAtPoint,
     inspectElement,
+    batchInspect,
     getPageStructure,
     findElements,
     getElementSource,
 
     // Interaction
     clickElement,
+    hoverElement,
     typeText,
     scrollTo,
+
+    // CSS Source
+    getCSSSource,
+
+    // Viewport
+    setViewport,
+
+    // Network
+    getNetworkRequests,
+    clearNetworkRequests,
 
     // Debugging
     consoleLogs,
