@@ -16,6 +16,7 @@ export interface PreviewMessage {
   code?: string;
   result?: unknown;
   error?: string;
+  timeout?: number;
 }
 
 export interface BridgeEvaluationResult {

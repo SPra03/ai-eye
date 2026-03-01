@@ -17,26 +17,30 @@ export class PreviewManager {
   /**
    * Open the preview panel
    */
-  async openPreview(): Promise<void> {
+  async openPreview(silent: boolean = false): Promise<void> {
     this.devServerUrl = await ConfigManager.getDevServerUrl();
 
     // Check if dev server is accessible
     const isAccessible = await ConfigManager.validateDevServer(this.devServerUrl);
     if (!isAccessible) {
-      const action = await vscode.window.showWarningMessage(
-        `Dev server at ${this.devServerUrl} is not accessible. Please start your dev server first.`,
-        'Open Settings',
-        'Retry',
-        'Continue Anyway'
-      );
+      if (silent) {
+        // Skip dialog in programmatic mode, continue anyway
+      } else {
+        const action = await vscode.window.showWarningMessage(
+          `Dev server at ${this.devServerUrl} is not accessible. Please start your dev server first.`,
+          'Open Settings',
+          'Retry',
+          'Continue Anyway'
+        );
 
-      if (action === 'Open Settings') {
-        vscode.commands.executeCommand('workbench.action.openSettings', 'visioncraft.devServerUrl');
-        return;
-      } else if (action === 'Retry') {
-        return this.openPreview();
+        if (action === 'Open Settings') {
+          vscode.commands.executeCommand('workbench.action.openSettings', 'visioncraft.devServerUrl');
+          return;
+        } else if (action === 'Retry') {
+          return this.openPreview(silent);
+        }
+        // Continue anyway if user chooses
       }
-      // Continue anyway if user chooses
     }
 
     // Create or show existing panel
@@ -94,7 +98,11 @@ export class PreviewManager {
             // Handle evaluation result from bridge
             if (message.id && this.messageHandlers.has(message.id)) {
               const handler = this.messageHandlers.get(message.id);
-              handler?.(message.result);
+              if (message.error) {
+                handler?.({ __error: message.error });
+              } else {
+                handler?.(message.result);
+              }
               this.messageHandlers.delete(message.id);
             }
             break;
@@ -168,7 +176,11 @@ export class PreviewManager {
       // Setup response handler
       this.messageHandlers.set(id, (result) => {
         clearTimeout(timeoutHandle);
-        resolve(result);
+        if (result && result.__error) {
+          reject(new Error(result.__error));
+        } else {
+          resolve(result);
+        }
       });
 
       // Send evaluation request
@@ -176,6 +188,7 @@ export class PreviewManager {
         type: 'evaluate',
         id,
         code,
+        timeout,
       });
     });
   }
@@ -563,7 +576,7 @@ export class PreviewManager {
                   pendingIframeRequests.delete(message.id);
                   reject(new Error('Iframe eval timeout'));
                 }
-              }, 5000);
+              }, message.timeout || 5000);
             });
 
             // Send message to iframe

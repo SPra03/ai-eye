@@ -325,10 +325,6 @@ class VisionCraftMCPServer {
               // Webview mode: callBridge returns data URL, parse and construct MCP response
               const dataUrl = await client.callBridge('screenshot', format, quality);
 
-              // Debug: Log what we actually received
-              console.error('[MCP Server] Screenshot result type:', typeof dataUrl);
-              console.error('[MCP Server] Screenshot result:', dataUrl ? String(dataUrl).substring(0, 100) : dataUrl);
-
               // Check if dataUrl is a string
               if (typeof dataUrl !== 'string') {
                 throw new Error(`Expected string data URL, got ${typeof dataUrl}: ${JSON.stringify(dataUrl)}`);
@@ -563,7 +559,17 @@ class VisionCraftMCPServer {
           }
 
           case 'visioncraft_get_current_url': {
-            const url = client.getUrl();
+            let url: string;
+            try {
+              // Try to get the actual URL from the browser/webview
+              url = await client.callBridge('getCurrentUrl');
+              if (typeof url !== 'string' || !url) {
+                url = client.getUrl();
+              }
+            } catch {
+              // Fall back to tracked URL
+              url = client.getUrl();
+            }
 
             return {
               content: [

@@ -11,6 +11,7 @@
 export class WebviewClient {
   private bridgeUrl: string;
   private _isConnected: boolean = false;
+  private _currentUrl: string = '';
 
   constructor(bridgeUrl: string) {
     this.bridgeUrl = bridgeUrl;
@@ -21,7 +22,15 @@ export class WebviewClient {
    */
   async connect(): Promise<void> {
     try {
-      const response = await fetch(`${this.bridgeUrl}/health`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout for health check
+
+      const response = await fetch(`${this.bridgeUrl}/health`, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
       if (!response.ok) {
         throw new Error(`Bridge health check failed: ${response.status}`);
       }
@@ -52,14 +61,14 @@ export class WebviewClient {
    * Get current URL
    */
   getUrl(): string {
-    // URL is managed by the webview, return placeholder
-    return 'webview://vscode';
+    return this._currentUrl || 'about:blank';
   }
 
   /**
    * Navigate to URL
    */
   async navigate(url: string): Promise<void> {
+    this._currentUrl = url;
     await this.callBridge('navigate', url);
   }
 
@@ -69,8 +78,12 @@ export class WebviewClient {
    */
   async callBridge(method: string, ...args: any[]): Promise<any> {
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout for tool calls
+
       const response = await fetch(`${this.bridgeUrl}/tools/call`, {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -83,6 +96,8 @@ export class WebviewClient {
           },
         }),
       });
+
+      clearTimeout(timeout);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -183,34 +198,5 @@ export class WebviewClient {
       default:
         return {};
     }
-  }
-
-  /**
-   * Extract the actual result from the MCP tool response
-   */
-  private extractResult(mcpResponse: any): any {
-    if (!mcpResponse || !mcpResponse.content || mcpResponse.content.length === 0) {
-      return null;
-    }
-
-    const firstContent = mcpResponse.content[0];
-
-    // If it's an image (screenshot), return the data
-    if (firstContent.type === 'image' && firstContent.data) {
-      // Return as data URL
-      return `data:${firstContent.mimeType || 'image/jpeg'};base64,${firstContent.data}`;
-    }
-
-    // If it's text, try to parse as JSON
-    if (firstContent.type === 'text' && firstContent.text) {
-      try {
-        return JSON.parse(firstContent.text);
-      } catch {
-        // Return as is if not JSON
-        return firstContent.text;
-      }
-    }
-
-    return firstContent;
   }
 }

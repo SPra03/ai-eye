@@ -42,9 +42,12 @@ export class WebviewBridge {
    */
   async isReady(): Promise<boolean> {
     try {
-      const result = await this.previewManager.evaluate('typeof window !== "undefined"', 1000);
+      const result = await this.previewManager.evaluate(
+        'typeof window.__VISIONCRAFT__ !== "undefined" && window.__VISIONCRAFT__.ready === true',
+        2000
+      );
       return result === true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -308,6 +311,25 @@ export class WebviewBridge {
   }
 
   /**
+   * Hover over an element
+   */
+  async hoverElement(selector: string): Promise<void> {
+    await this.waitForReady();
+
+    const code = `
+      (() => {
+        const element = document.querySelector('${this.escapeSelector(selector)}');
+        if (!element) throw new Error('Element not found: ${this.escapeSelector(selector)}');
+        element.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+        element.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        return { success: true };
+      })()
+    `;
+
+    await this.previewManager.evaluate(code, 3000);
+  }
+
+  /**
    * Scroll the page
    */
   async scrollTo(x: number, y: number): Promise<void> {
@@ -341,6 +363,48 @@ export class WebviewBridge {
 
     const result = await this.previewManager.evaluate(code, 2000);
     return Array.isArray(result) ? result : [];
+  }
+
+  /**
+   * Clear console logs
+   */
+  async clearConsoleLogs(): Promise<void> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      return;
+    }
+
+    await this.previewManager.evaluate('window.__VISIONCRAFT__.clearConsoleLogs()', 2000);
+  }
+
+  /**
+   * Get HMR status
+   */
+  async getHMRStatus(): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      return { connected: false, lastUpdate: null, errors: [], updates: [], totalUpdates: 0, averageLatency: 0 };
+    }
+
+    return await this.previewManager.evaluate('window.__VISIONCRAFT__.getHMRStatus()', 2000);
+  }
+
+  /**
+   * Clear HMR errors
+   */
+  async clearHMRErrors(): Promise<void> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      return;
+    }
+
+    await this.previewManager.evaluate('window.__VISIONCRAFT__.clearHMRErrors()', 2000);
   }
 
   /**

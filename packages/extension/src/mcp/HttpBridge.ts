@@ -164,7 +164,15 @@ export class HttpBridge {
     try {
       // Read request body
       const body = await this.readRequestBody(req);
-      const request: HttpBridgeRequest = JSON.parse(body);
+
+      // Parse JSON with error handling
+      let request: HttpBridgeRequest;
+      try {
+        request = JSON.parse(body);
+      } catch (error) {
+        this.sendError(res, 400, 'Invalid JSON in request body');
+        return;
+      }
 
       // Ensure preview is open and ready before processing tool calls
       await this.ensurePreviewReady();
@@ -222,7 +230,7 @@ export class HttpBridge {
           break;
 
         case 'visioncraft_scroll':
-          await webviewBridge.scrollTo(args.selector as string);
+          await webviewBridge.scrollTo((args.x as number) || 0, (args.y as number) || 0);
           result = { success: true };
           break;
 
@@ -271,32 +279,44 @@ export class HttpBridge {
    */
   private async ensurePreviewReady(): Promise<void> {
     try {
-      // Check if preview is already open
-      const isReady = await this.embeddedMCPServer.getWebviewBridge().isReady();
-      if (isReady) {
-        return;
-      }
+      const bridgeReady = await this.embeddedMCPServer.getWebviewBridge().isBridgeAvailable();
+      if (bridgeReady) return;
 
-      // Open preview if not open
       console.log('[HttpBridge] Opening preview...');
-      await this.previewManager.openPreview();
+      await this.previewManager.openPreview(true); // silent mode
 
-      // Wait for it to be ready (with timeout)
-      await this.embeddedMCPServer.getWebviewBridge().waitForReady(10000);
-      console.log('[HttpBridge] Preview ready');
+      // Wait for bridge to be available (not just window)
+      const startTime = Date.now();
+      const timeout = 15000;
+      while (Date.now() - startTime < timeout) {
+        if (await this.embeddedMCPServer.getWebviewBridge().isBridgeAvailable()) {
+          console.log('[HttpBridge] Bridge ready');
+          return;
+        }
+        await new Promise(r => setTimeout(r, 500));
+      }
+      throw new Error('Bridge did not become available within timeout');
     } catch (error) {
-      console.error('[HttpBridge] Failed to open preview:', error);
       throw new Error('Failed to open preview: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
   /**
-   * Read HTTP request body
+   * Read HTTP request body with size limit
    */
   private readRequestBody(req: http.IncomingMessage): Promise<string> {
     return new Promise((resolve, reject) => {
       let body = '';
+      let size = 0;
+      const maxSize = 10 * 1024 * 1024; // 10MB limit
+
       req.on('data', (chunk) => {
+        size += chunk.length;
+        if (size > maxSize) {
+          reject(new Error('Request body too large (max 10MB)'));
+          req.destroy();
+          return;
+        }
         body += chunk.toString();
       });
       req.on('end', () => {
