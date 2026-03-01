@@ -546,7 +546,7 @@ class VisionCraftMCPServer {
 
           case 'visioncraft_navigate': {
             const url = args?.url as string;
-            await client.navigate(url);
+            await client.callBridge('navigate', url);
 
             return {
               content: [
