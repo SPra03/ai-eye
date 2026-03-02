@@ -39,10 +39,14 @@ describe('WebviewClient', () => {
       getCurrentUrl: 'visioncraft_get_current_url',
       visualDiff: 'visioncraft_visual_diff',
       navigate: 'visioncraft_navigate',
+      // v4 additions
+      getStyleDiff: 'visioncraft_style_diff',
+      getComponentTree: 'visioncraft_get_component_tree',
+      auditAccessibility: 'visioncraft_audit_accessibility',
     };
 
-    it('should map all 22 methods to tool names', () => {
-      expect(Object.keys(expectedMappings)).toHaveLength(22);
+    it('should map all 25 methods to tool names', () => {
+      expect(Object.keys(expectedMappings)).toHaveLength(25);
     });
 
     for (const [method, expectedTool] of Object.entries(expectedMappings)) {
@@ -265,6 +269,65 @@ describe('WebviewClient', () => {
         expect(result).toEqual({});
       });
     }
+  });
+
+  describe('Argument Mapping: v4 getStyleDiff', () => {
+    it('should map selector and action', () => {
+      const result = mapArgsToToolArgs('getStyleDiff', ['.btn', 'hover']);
+      expect(result.selector).toBe('.btn');
+      expect(result.action).toBe('hover');
+    });
+
+    it('should map actionArg for class operations', () => {
+      const result = mapArgsToToolArgs('getStyleDiff', ['.btn', 'addClass', 'active']);
+      expect(result.actionArg).toBe('active');
+    });
+
+    it('should map optional properties array', () => {
+      const result = mapArgsToToolArgs('getStyleDiff', ['.btn', 'hover', undefined, ['color', 'background-color']]);
+      expect(result.properties).toEqual(['color', 'background-color']);
+    });
+  });
+
+  describe('Argument Mapping: v4 getComponentTree', () => {
+    it('should map selector', () => {
+      const result = mapArgsToToolArgs('getComponentTree', ['#root']);
+      expect(result.selector).toBe('#root');
+    });
+
+    it('should default maxDepth to 10', () => {
+      const result = mapArgsToToolArgs('getComponentTree', []);
+      expect(result.maxDepth).toBe(10);
+    });
+
+    it('should default framework to auto', () => {
+      const result = mapArgsToToolArgs('getComponentTree', []);
+      expect(result.framework).toBe('auto');
+    });
+
+    it('should map custom maxDepth and framework', () => {
+      const result = mapArgsToToolArgs('getComponentTree', [undefined, 5, 'react']);
+      expect(result.maxDepth).toBe(5);
+      expect(result.framework).toBe('react');
+    });
+  });
+
+  describe('Argument Mapping: v4 auditAccessibility', () => {
+    it('should map selector', () => {
+      const result = mapArgsToToolArgs('auditAccessibility', ['#main']);
+      expect(result.selector).toBe('#main');
+    });
+
+    it('should map tags', () => {
+      const result = mapArgsToToolArgs('auditAccessibility', [undefined, ['wcag2a', 'wcag2aa']]);
+      expect(result.tags).toEqual(['wcag2a', 'wcag2aa']);
+    });
+
+    it('should handle no arguments', () => {
+      const result = mapArgsToToolArgs('auditAccessibility', []);
+      expect(result.selector).toBeUndefined();
+      expect(result.tags).toBeUndefined();
+    });
   });
 
   describe('Client State', () => {

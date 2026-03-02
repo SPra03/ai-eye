@@ -144,6 +144,9 @@ export class WebviewClient {
       'getCurrentUrl': 'visioncraft_get_current_url',
       'visualDiff': 'visioncraft_visual_diff',
       'navigate': 'visioncraft_navigate',
+      'getStyleDiff': 'visioncraft_style_diff',
+      'getComponentTree': 'visioncraft_get_component_tree',
+      'auditAccessibility': 'visioncraft_audit_accessibility',
     };
 
     return methodMap[method] || method;
@@ -218,6 +221,28 @@ export class WebviewClient {
         return {
           width: args[0],
           height: args[1],
+          preset: args[2],
+        };
+
+      case 'getStyleDiff':
+        return {
+          selector: args[0],
+          action: args[1],
+          actionArg: args[2],
+          properties: args[3],
+        };
+
+      case 'getComponentTree':
+        return {
+          selector: args[0],
+          maxDepth: args[1] || 10,
+          framework: args[2] || 'auto',
+        };
+
+      case 'auditAccessibility':
+        return {
+          selector: args[0],
+          tags: args[1],
         };
 
       case 'getNetworkRequests':

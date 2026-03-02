@@ -335,11 +335,61 @@ export class PreviewManager {
       50% { opacity: 0.5; }
     }
 
+    #viewport-container {
+      width: 100%;
+      height: calc(100vh - 36px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--vscode-editor-background);
+      overflow: auto;
+    }
+
+    #viewport-container.device-mode {
+      background: #1a1a2e;
+    }
+
+    #device-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #device-frame.device-active {
+      width: auto;
+      height: auto;
+      border: 2px solid #444;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    #device-label {
+      display: none;
+      padding: 4px 12px;
+      font-size: 11px;
+      color: #999;
+      background: #2a2a3e;
+      text-align: center;
+      width: 100%;
+    }
+
+    #device-frame.device-active #device-label {
+      display: block;
+    }
+
     #preview-frame {
       width: 100%;
       border: none;
-      height: calc(100vh - 36px);
+      height: 100%;
       background: white;
+    }
+
+    #device-frame:not(.device-active) #preview-frame {
+      height: calc(100vh - 36px);
     }
 
     #error-overlay {
@@ -403,11 +453,16 @@ export class PreviewManager {
     </div>
   </div>
 
-  <iframe
-    id="preview-frame"
-    src="${this.devServerUrl}"
-    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
-  ></iframe>
+  <div id="viewport-container">
+    <div id="device-frame">
+      <div id="device-label"></div>
+      <iframe
+        id="preview-frame"
+        src="${this.devServerUrl}"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
+      ></iframe>
+    </div>
+  </div>
 
   <div id="error-overlay">
     <div class="error-icon">⚠️</div>
@@ -424,6 +479,9 @@ export class PreviewManager {
     const errorOverlay = document.getElementById('error-overlay');
     const errorMessage = document.getElementById('error-message');
     const errorDetails = document.getElementById('error-details');
+    const viewportContainer = document.getElementById('viewport-container');
+    const deviceFrame = document.getElementById('device-frame');
+    const deviceLabel = document.getElementById('device-label');
 
     // Track loading state
     let isLoading = false;
@@ -611,6 +669,67 @@ export class PreviewManager {
 
         case 'navigate':
           navigateToUrl(message.data);
+          break;
+
+        case 'setViewport':
+          // Resize the actual iframe element for true responsive viewport
+          if (message.width && message.height) {
+            frame.style.width = message.width + 'px';
+            frame.style.height = message.height + 'px';
+            deviceFrame.classList.add('device-active');
+            viewportContainer.classList.add('device-mode');
+            deviceLabel.textContent = (message.label || message.width + 'x' + message.height);
+          } else {
+            // Reset to full width
+            frame.style.width = '100%';
+            frame.style.height = '100%';
+            deviceFrame.classList.remove('device-active');
+            viewportContainer.classList.remove('device-mode');
+            deviceLabel.textContent = '';
+          }
+          // Respond with success
+          if (message.id) {
+            vscode.postMessage({
+              type: 'evalResult',
+              id: message.id,
+              result: { success: true, viewport: { width: message.width, height: message.height } }
+            });
+          }
+          break;
+
+        case 'callBridge':
+          // Forward a bridge call to the iframe via postMessage
+          try {
+            const bridgeResultPromise = new Promise((resolve, reject) => {
+              pendingIframeRequests.set(message.id, { resolve, reject });
+              setTimeout(() => {
+                if (pendingIframeRequests.has(message.id)) {
+                  pendingIframeRequests.delete(message.id);
+                  reject(new Error('Iframe bridge call timeout'));
+                }
+              }, message.timeout || 15000);
+            });
+
+            frame.contentWindow.postMessage({
+              type: 'visioncraft:call',
+              id: message.id,
+              method: message.method,
+              args: message.args || []
+            }, '*');
+
+            const bridgeResult = await bridgeResultPromise;
+            vscode.postMessage({
+              type: 'evalResult',
+              id: message.id,
+              result: bridgeResult
+            });
+          } catch (bridgeError) {
+            vscode.postMessage({
+              type: 'evalResult',
+              id: message.id,
+              error: bridgeError.message || String(bridgeError)
+            });
+          }
           break;
       }
     });

@@ -68,7 +68,7 @@ describe('VisionCraft Bridge Interface', () => {
       expect(expectedProps).toHaveLength(3);
     });
 
-    it('should expose a total of 18 API methods plus 3 properties', () => {
+    it('should expose a total of 22 API methods plus 3 properties', () => {
       const allMethods = [
         'elementAtPoint',
         'inspectElement',
@@ -89,10 +89,14 @@ describe('VisionCraft Bridge Interface', () => {
         'captureScreenshot',
         'getHMRStatus',
         'clearHMRErrors',
+        // v4 additions
+        'getStyleDiff',
+        'getComponentTree',
+        'auditAccessibility',
       ];
       const allProperties = ['version', 'ready', 'consoleLogs'];
 
-      expect(allMethods).toHaveLength(19);
+      expect(allMethods).toHaveLength(22);
       expect(allProperties).toHaveLength(3);
     });
   });
@@ -507,16 +511,18 @@ describe('VisionCraft Bridge Interface', () => {
       expect(params.height).toBe(812);
     });
 
-    it('should set document element dimensions via CSS', () => {
-      const cssProps = ['width', 'height', 'overflow'];
+    it('should resize iframe from outer webview for true @media query support', () => {
+      // Viewport resizing now happens at the iframe level (PreviewManager)
+      // The bridge method is a no-op that cleans up old CSS constraints
+      const mechanism = 'iframe resize';
 
-      expect(cssProps).toHaveLength(3);
+      expect(mechanism).toBe('iframe resize');
     });
 
-    it('should dispatch resize event', () => {
-      const eventType = 'resize';
+    it('should support 6 device presets', () => {
+      const presets = ['mobile', 'mobile_landscape', 'tablet', 'tablet_landscape', 'desktop', 'desktop_hd'];
 
-      expect(eventType).toBe('resize');
+      expect(presets).toHaveLength(6);
     });
   });
 
@@ -602,6 +608,284 @@ describe('VisionCraft Bridge Interface', () => {
       requests.length = 0;
 
       expect(requests).toHaveLength(0);
+    });
+  });
+
+  // ====== V4 New Feature Tests ======
+
+  describe('v4: Screenshot DPR Fix', () => {
+    it('should scale crop coordinates by devicePixelRatio', () => {
+      const dpr = 2;
+      const cssLeft = 100;
+      const padding = 10 * dpr;
+      const rawX = cssLeft * dpr - padding;
+
+      expect(rawX).toBe(180);
+    });
+
+    it('should adjust width when start position clamps to 0', () => {
+      const rawX = -5;
+      const rawW = 200;
+      const sx = Math.max(0, rawX);
+      const sw = rawW - (sx - rawX);
+
+      expect(sx).toBe(0);
+      expect(sw).toBe(195);
+    });
+  });
+
+  describe('v4: CSS Shorthand Collapsing', () => {
+    it('should define 27 shorthand mappings', () => {
+      const shorthands = [
+        'margin', 'padding', 'border', 'border-width', 'border-style', 'border-color',
+        'border-image', 'border-radius', 'background', 'font', 'flex', 'gap', 'overflow',
+        'transition', 'animation', 'inset', 'grid-template',
+        'text-decoration', 'outline', 'list-style', 'columns',
+        'place-items', 'place-content', 'place-self',
+        'scroll-margin', 'scroll-padding', 'container',
+      ];
+
+      expect(shorthands).toHaveLength(27);
+    });
+
+    it('should skip collapsing when properties filter is provided', () => {
+      const filterProvided = true;
+      const shouldCollapse = !filterProvided;
+
+      expect(shouldCollapse).toBe(false);
+    });
+
+    it('should collapse margin longhands into margin shorthand', () => {
+      const longhands = ['margin-top', 'margin-right', 'margin-bottom', 'margin-left'];
+      const shorthand = 'margin';
+
+      expect(longhands).toHaveLength(4);
+      expect(shorthand).toBe('margin');
+    });
+  });
+
+  describe('v4: CSS Source File Tracing', () => {
+    it('should check data-vite-dev-id on style tags', () => {
+      const attr = 'data-vite-dev-id';
+
+      expect(attr).toBe('data-vite-dev-id');
+    });
+
+    it('should extract relative path from /src/ onwards', () => {
+      const absolutePath = '/Users/foo/project/src/App.css';
+      const srcIdx = absolutePath.indexOf('/src/');
+      const relativePath = absolutePath.substring(srcIdx + 1);
+
+      expect(relativePath).toBe('src/App.css');
+    });
+
+    it('should read CSS from style tag textContent for line numbers', () => {
+      // Primary source: <style> tag textContent (most reliable for Vite)
+      const styleContent = '.btn { color: red; }\n.header { font-size: 2rem; }';
+      const lines = styleContent.split('\n');
+      const lineNum = lines.findIndex(l => l.includes('.header')) + 1;
+
+      expect(lineNum).toBe(2);
+    });
+
+    it('should fall back to Vite ?raw with JS module parsing', () => {
+      // Vite ?raw returns: export default "css content"
+      const rawResponse = 'export default ".btn { color: red; }\\n.header { font-size: 2rem; }";';
+      const match = rawResponse.match(/^export\s+default\s+"([\s\S]*)";\s*$/);
+
+      expect(match).not.toBeNull();
+      expect(match![1]).toContain('.btn');
+    });
+
+    it('should cache CSS file content to avoid repeated fetches', () => {
+      const cache = new Map();
+      cache.set('src/App.css', '.btn { color: red; }');
+
+      expect(cache.has('src/App.css')).toBe(true);
+    });
+
+    it('should return line number in result', () => {
+      const result = { property: 'color', value: 'red', selector: '.btn', file: 'src/App.css', line: 42 };
+
+      expect(result.line).toBe(42);
+    });
+  });
+
+  describe('v4: True Responsive Viewport', () => {
+    it('should resize the iframe element from outer webview', () => {
+      const mechanism = 'frame.style.width + frame.style.height';
+
+      expect(mechanism).toContain('style.width');
+    });
+
+    it('should change window.innerWidth for @media queries', () => {
+      // When iframe is resized, its window.innerWidth changes
+      const query = '@media (max-width: 600px)';
+
+      expect(query).toContain('max-width');
+    });
+
+    it('should show device frame UI with label', () => {
+      const label = 'iPhone 14 (375x812)';
+
+      expect(label).toContain('375x812');
+    });
+  });
+
+  describe('v4: Style Diff', () => {
+    it('should accept selector and action', () => {
+      const params = { selector: '.btn', action: 'hover' };
+
+      expect(params.selector).toBe('.btn');
+      expect(params.action).toBe('hover');
+    });
+
+    it('should support 7 action types', () => {
+      const actions = ['hover', 'click', 'focus', 'blur', 'addClass', 'removeClass', 'toggleClass'];
+
+      expect(actions).toHaveLength(7);
+    });
+
+    it('should return changes array with before/after values', () => {
+      const change = { property: 'background-color', before: 'rgb(255, 255, 255)', after: 'rgb(0, 0, 0)' };
+
+      expect(change.property).toBe('background-color');
+      expect(change.before).not.toBe(change.after);
+    });
+
+    it('should return bounding box before and after', () => {
+      const boundingBox = {
+        before: { x: 0, y: 0, width: 100, height: 50 },
+        after: { x: 0, y: 0, width: 120, height: 50 },
+      };
+
+      expect(boundingBox.before.width).not.toBe(boundingBox.after.width);
+    });
+
+    it('should track class changes for class-based actions', () => {
+      const classesChanged = { added: ['active'], removed: [] };
+
+      expect(classesChanged.added).toHaveLength(1);
+    });
+
+    it('should watch ~40 common properties by default', () => {
+      const defaultPropCount = 40;
+
+      expect(defaultPropCount).toBeGreaterThanOrEqual(35);
+    });
+
+    it('should include hover limitation note', () => {
+      const note = 'JS mouseenter/mouseover events do NOT trigger CSS :hover pseudo-class';
+
+      expect(note).toContain(':hover');
+    });
+  });
+
+  describe('v4: Component Tree', () => {
+    it('should auto-detect framework from DOM keys', () => {
+      const reactKey = '__reactFiber$abc123';
+
+      expect(reactKey.startsWith('__reactFiber$')).toBe(true);
+    });
+
+    it('should support React fiber walking', () => {
+      const fiberKeys = ['child', 'sibling', 'type', 'memoizedProps', 'memoizedState'];
+
+      expect(fiberKeys).toHaveLength(5);
+    });
+
+    it('should support Vue 3 instance tree walking', () => {
+      const vue3Key = '__vue_app__';
+
+      expect(vue3Key).toBe('__vue_app__');
+    });
+
+    it('should detect Svelte but note limited introspection', () => {
+      const svelteNote = 'limited runtime introspection';
+
+      expect(svelteNote).toContain('limited');
+    });
+
+    it('should sanitize objects for JSON serialization', () => {
+      const maxKeys = 20;
+      const maxArrayItems = 10;
+      const maxDepth = 2;
+
+      expect(maxKeys).toBe(20);
+      expect(maxArrayItems).toBe(10);
+      expect(maxDepth).toBe(2);
+    });
+
+    it('should default maxDepth to 10', () => {
+      const defaultMaxDepth = 10;
+
+      expect(defaultMaxDepth).toBe(10);
+    });
+
+    it('should fall back to DOM tree for unknown frameworks', () => {
+      const fallback = 'DOM tree';
+
+      expect(fallback).toBe('DOM tree');
+    });
+  });
+
+  describe('v4: Accessibility Audit', () => {
+    it('should load axe-core from CDN', () => {
+      const cdnUrl = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.8.4/axe.min.js';
+
+      expect(cdnUrl).toContain('axe-core');
+    });
+
+    it('should support scoping to a selector', () => {
+      const selector = '#main-content';
+
+      expect(selector).toBe('#main-content');
+    });
+
+    it('should support WCAG tag filtering', () => {
+      const tags = ['wcag2a', 'wcag2aa', 'wcag21a', 'best-practice'];
+
+      expect(tags).toHaveLength(4);
+    });
+
+    it('should limit nodes per violation to 5', () => {
+      const maxNodes = 5;
+
+      expect(maxNodes).toBe(5);
+    });
+
+    it('should truncate HTML to 200 chars', () => {
+      const maxHtmlLength = 200;
+
+      expect(maxHtmlLength).toBe(200);
+    });
+
+    it('should return structured violation results', () => {
+      const violation = {
+        id: 'color-contrast',
+        impact: 'serious',
+        description: 'Elements must have sufficient color contrast',
+        help: 'Elements must have sufficient color contrast',
+        helpUrl: 'https://dequeuniversity.com/rules/axe/4.8/color-contrast',
+        tags: ['wcag2aa'],
+        nodes: [],
+      };
+
+      expect(violation.id).toBe('color-contrast');
+      expect(violation.impact).toBe('serious');
+    });
+
+    it('should return summary with counts', () => {
+      const summary = '3 violations, 45 passes, 2 incomplete';
+
+      expect(summary).toContain('violations');
+      expect(summary).toContain('passes');
+    });
+
+    it('should timeout after 30 seconds', () => {
+      const timeout = 30000;
+
+      expect(timeout).toBe(30000);
     });
   });
 

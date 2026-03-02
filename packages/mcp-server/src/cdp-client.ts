@@ -44,8 +44,13 @@ export class CDPClient {
           await this.connectViaCDPOnly();
         }
 
-        // Check if bridge is available
-        await this.checkBridgeAvailability();
+        // Check if bridge is available (skip for external sites)
+        if (!this.config.skipBridgeCheck) {
+          await this.checkBridgeAvailability();
+        } else {
+          this.hasBridge = false;
+          console.error('[CDP] Bridge check skipped (external site mode)');
+        }
 
         console.error(`[CDP] Connected successfully via ${mode}`);
         this.connectionMode = mode;
@@ -192,20 +197,29 @@ export class CDPClient {
   private async launchViaPlaywright(): Promise<void> {
     console.error('[CDP] Launching new browser via Playwright...');
 
-    // Don't specify --remote-debugging-port for Playwright Launch mode
-    // to avoid conflicts with CDP Connect mode on port 9222
     this.browser = await chromium.launch({
       headless: false,
       timeout: this.config.timeout,
+      args: [
+        '--disable-extensions',
+        '--no-first-run',
+        '--disable-default-apps',
+      ],
     });
 
-    this.context = await this.browser.newContext();
+    this.context = await this.browser.newContext({
+      viewport: { width: 1440, height: 900 },
+    });
     this.page = await this.context.newPage();
 
-    await this.page.goto(this.config.url, {
-      waitUntil: 'domcontentloaded',
-      timeout: this.config.timeout,
-    });
+    // Only navigate if URL is a real page (not about:blank or empty)
+    const url = this.config.url;
+    if (url && url !== 'about:blank' && !url.startsWith('about:')) {
+      await this.page.goto(url, {
+        waitUntil: 'domcontentloaded',
+        timeout: this.config.timeout,
+      });
+    }
 
     console.error('[CDP] Browser launched successfully');
 

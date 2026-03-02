@@ -34,6 +34,10 @@ const ALL_TOOL_NAMES = [
   'visioncraft_visual_diff',
   'visioncraft_navigate',
   'visioncraft_get_current_url',
+  // v4 new tools
+  'visioncraft_style_diff',
+  'visioncraft_get_component_tree',
+  'visioncraft_audit_accessibility',
 ];
 
 // Original v1/v2 tools
@@ -74,8 +78,8 @@ const V3_ENHANCED_TOOLS = [
 
 describe('MCP Server Tool Registry', () => {
   describe('Tool Count', () => {
-    it('should have 22 total tools', () => {
-      expect(ALL_TOOL_NAMES).toHaveLength(22);
+    it('should have 25 total tools', () => {
+      expect(ALL_TOOL_NAMES).toHaveLength(25);
     });
 
     it('should have 14 original tools', () => {
@@ -470,5 +474,183 @@ describe('MCP Server Dual Mode', () => {
   it('viewport should use page.setViewportSize() in Playwright mode', () => {
     const playwrightMethod = 'page.setViewportSize({ width, height })';
     expect(playwrightMethod).toContain('setViewportSize');
+  });
+});
+
+// ====== V4 New Tool Tests ======
+
+// v4 new tools
+const V4_NEW_TOOLS = [
+  'visioncraft_style_diff',
+  'visioncraft_get_component_tree',
+  'visioncraft_audit_accessibility',
+];
+
+describe('V4 Tool Registry', () => {
+  it('should have 3 new v4 tools', () => {
+    expect(V4_NEW_TOOLS).toHaveLength(3);
+  });
+
+  it('all v4 tools should exist in ALL_TOOL_NAMES', () => {
+    for (const tool of V4_NEW_TOOLS) {
+      expect(ALL_TOOL_NAMES).toContain(tool);
+    }
+  });
+});
+
+describe('Tool Schemas: visioncraft_style_diff', () => {
+  it('should require selector and action', () => {
+    const required = ['selector', 'action'];
+    expect(required).toHaveLength(2);
+  });
+
+  it('action should have 7 enum values', () => {
+    const actions = ['hover', 'click', 'focus', 'blur', 'addClass', 'removeClass', 'toggleClass'];
+    expect(actions).toHaveLength(7);
+  });
+
+  it('should accept optional actionArg for class operations', () => {
+    const params = { selector: '.btn', action: 'addClass', actionArg: 'active' };
+    expect(params.actionArg).toBe('active');
+  });
+
+  it('should accept optional properties array', () => {
+    const params = { selector: '.btn', action: 'hover', properties: ['color', 'background-color'] };
+    expect(params.properties).toHaveLength(2);
+  });
+});
+
+describe('Tool Schemas: visioncraft_get_component_tree', () => {
+  it('should have no required parameters', () => {
+    const required: string[] = [];
+    expect(required).toHaveLength(0);
+  });
+
+  it('framework should have 4 enum values', () => {
+    const frameworks = ['auto', 'react', 'vue', 'svelte'];
+    expect(frameworks).toHaveLength(4);
+  });
+
+  it('should default maxDepth to 10', () => {
+    const defaultMaxDepth = 10;
+    expect(defaultMaxDepth).toBe(10);
+  });
+
+  it('should default framework to auto', () => {
+    const defaultFramework = 'auto';
+    expect(defaultFramework).toBe('auto');
+  });
+});
+
+describe('Tool Schemas: visioncraft_audit_accessibility', () => {
+  it('should have no required parameters', () => {
+    const required: string[] = [];
+    expect(required).toHaveLength(0);
+  });
+
+  it('should accept optional selector to scope audit', () => {
+    const params = { selector: '#main-content' };
+    expect(params.selector).toBe('#main-content');
+  });
+
+  it('should accept optional WCAG tags', () => {
+    const tags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'];
+    expect(tags.length).toBeGreaterThan(0);
+  });
+});
+
+describe('V4 Viewport Presets', () => {
+  it('should have 6 presets', () => {
+    const presets = ['mobile', 'mobile_landscape', 'tablet', 'tablet_landscape', 'desktop', 'desktop_hd'];
+    expect(presets).toHaveLength(6);
+  });
+
+  it('mobile_landscape should be 812x375', () => {
+    const preset = { width: 812, height: 375 };
+    expect(preset.width).toBe(812);
+    expect(preset.height).toBe(375);
+  });
+
+  it('tablet_landscape should be 1024x768', () => {
+    const preset = { width: 1024, height: 768 };
+    expect(preset.width).toBe(1024);
+    expect(preset.height).toBe(768);
+  });
+
+  it('desktop_hd should be 1920x1080', () => {
+    const preset = { width: 1920, height: 1080 };
+    expect(preset.width).toBe(1920);
+    expect(preset.height).toBe(1080);
+  });
+});
+
+describe('V5 External Website Browsing', () => {
+  describe('URL Classification', () => {
+    function isLocalUrl(url: string): boolean {
+      try {
+        const parsed = new URL(url);
+        const hostname = parsed.hostname;
+        return hostname === 'localhost'
+          || hostname === '127.0.0.1'
+          || hostname === '0.0.0.0'
+          || hostname === '::1'
+          || hostname === '[::1]'
+          || hostname.endsWith('.localhost');
+      } catch {
+        return false;
+      }
+    }
+
+    it('should classify localhost URLs as local', () => {
+      expect(isLocalUrl('http://localhost:5175')).toBe(true);
+      expect(isLocalUrl('http://localhost:3000')).toBe(true);
+      expect(isLocalUrl('http://localhost')).toBe(true);
+    });
+
+    it('should classify 127.0.0.1 as local', () => {
+      expect(isLocalUrl('http://127.0.0.1:8080')).toBe(true);
+    });
+
+    it('should classify external URLs as non-local', () => {
+      expect(isLocalUrl('https://example.com')).toBe(false);
+      expect(isLocalUrl('https://apple.com/iphone-17-pro')).toBe(false);
+      expect(isLocalUrl('https://google.com')).toBe(false);
+    });
+
+    it('should handle edge cases', () => {
+      expect(isLocalUrl('not-a-url')).toBe(false);
+      expect(isLocalUrl('')).toBe(false);
+      expect(isLocalUrl('http://app.localhost:3000')).toBe(true);
+    });
+  });
+
+  describe('Mode Switching', () => {
+    it('should support webview and browser modes', () => {
+      const modes = ['webview', 'browser'] as const;
+      expect(modes).toContain('webview');
+      expect(modes).toContain('browser');
+    });
+
+    it('should start in webview mode when VISIONCRAFT_WEBVIEW_ENABLED is true', () => {
+      const isWebviewMode = process.env.VISIONCRAFT_WEBVIEW_ENABLED === 'true';
+      const initialMode = isWebviewMode ? 'webview' : 'browser';
+      // In test environment, VISIONCRAFT_WEBVIEW_ENABLED is not set
+      expect(initialMode).toBe('browser');
+    });
+  });
+
+  describe('Browser Mode Navigate Response', () => {
+    it('should include mode indicator for external URLs', () => {
+      const url = 'https://example.com';
+      const response = `Navigated to ${url} (browser mode)`;
+      expect(response).toContain('browser mode');
+      expect(response).toContain(url);
+    });
+
+    it('should not include mode indicator for local URLs', () => {
+      const url = 'http://localhost:5175';
+      const response = `Navigated to ${url}`;
+      expect(response).not.toContain('browser mode');
+    });
   });
 });

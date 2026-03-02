@@ -248,16 +248,20 @@ export class HttpBridge {
         case 'visioncraft_set_viewport': {
           const presets: Record<string, { width: number; height: number }> = {
             mobile: { width: 375, height: 812 },
+            mobile_landscape: { width: 812, height: 375 },
             tablet: { width: 768, height: 1024 },
+            tablet_landscape: { width: 1024, height: 768 },
             desktop: { width: 1440, height: 900 },
+            desktop_hd: { width: 1920, height: 1080 },
           };
           let w = args.width as number;
           let h = args.height as number;
-          if (args.preset && presets[args.preset as string]) {
-            w = presets[args.preset as string].width;
-            h = presets[args.preset as string].height;
+          const preset = args.preset as string | undefined;
+          if (preset && presets[preset]) {
+            w = presets[preset].width;
+            h = presets[preset].height;
           }
-          await webviewBridge.setViewport(w, h);
+          await webviewBridge.setViewport(w, h, preset);
           result = { success: true, viewport: { width: w, height: h } };
           break;
         }
@@ -310,6 +314,30 @@ export class HttpBridge {
         case 'visioncraft_clear_hmr_errors':
           await webviewBridge.clearHMRErrors();
           result = { success: true };
+          break;
+
+        case 'visioncraft_style_diff':
+          result = await webviewBridge.getStyleDiff(
+            args.selector as string,
+            args.action as string,
+            args.actionArg as string | undefined,
+            args.properties as string[] | undefined
+          );
+          break;
+
+        case 'visioncraft_get_component_tree':
+          result = await webviewBridge.getComponentTree(
+            args.selector as string | undefined,
+            (args.maxDepth as number) || 10,
+            (args.framework as string) || 'auto'
+          );
+          break;
+
+        case 'visioncraft_audit_accessibility':
+          result = await webviewBridge.auditAccessibility(
+            args.selector as string | undefined,
+            args.tags as string[] | undefined
+          );
           break;
 
         default:

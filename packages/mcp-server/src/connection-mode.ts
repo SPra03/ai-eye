@@ -59,6 +59,11 @@ export interface ConnectionConfig {
    * Whether to enable automatic fallback
    */
   enableFallback?: boolean;
+
+  /**
+   * Skip bridge availability check (for external sites where bridge won't exist)
+   */
+  skipBridgeCheck?: boolean;
 }
 
 export interface ConnectionResult {
@@ -78,4 +83,5 @@ export const DEFAULT_CONNECTION_CONFIG: Required<ConnectionConfig> = {
   url: 'http://localhost:5175',
   timeout: 30000,
   enableFallback: true,
+  skipBridgeCheck: false,
 };

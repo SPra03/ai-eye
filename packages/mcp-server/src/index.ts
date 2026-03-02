@@ -10,8 +10,11 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
-import { getBrowserClient } from './browser-client.js';
+import { getBrowserClient, BrowserClient } from './browser-client.js';
 import { WebviewClient } from './webview-client.js';
+import * as playwrightTools from './playwright-tools.js';
+import type { ConsoleLogEntry, NetworkRequestEntry } from './playwright-tools.js';
+import type { Page } from 'playwright-core';
 import { z } from 'zod';
 
 // Visual diff imports (lazy-loaded)
@@ -289,8 +292,8 @@ const tools: Tool[] = [
         },
         preset: {
           type: 'string',
-          enum: ['mobile', 'tablet', 'desktop'],
-          description: 'Device preset: mobile (375x812), tablet (768x1024), desktop (1440x900). Overrides width/height if provided.'
+          enum: ['mobile', 'mobile_landscape', 'tablet', 'tablet_landscape', 'desktop', 'desktop_hd'],
+          description: 'Device preset: mobile (375x812), mobile_landscape (812x375), tablet (768x1024), tablet_landscape (1024x768), desktop (1440x900), desktop_hd (1920x1080). Overrides width/height if provided.'
         }
       },
       required: []
@@ -416,6 +419,80 @@ const tools: Tool[] = [
       properties: {},
       required: []
     }
+  },
+  {
+    name: 'visioncraft_style_diff',
+    description: 'Capture computed styles before and after an action (hover, click, focus, addClass, etc.) and return only the changed properties. Useful for debugging CSS transitions and interactive states. Note: JS mouseenter/mouseover events do NOT trigger CSS :hover pseudo-class — use addClass/toggleClass for reliable style comparison, or use Playwright mode for real cursor hover.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selector: {
+          type: 'string',
+          description: 'CSS selector for the element to observe'
+        },
+        action: {
+          type: 'string',
+          enum: ['hover', 'click', 'focus', 'blur', 'addClass', 'removeClass', 'toggleClass'],
+          description: 'Action to perform between style captures'
+        },
+        actionArg: {
+          type: 'string',
+          description: 'Class name for addClass/removeClass/toggleClass actions'
+        },
+        properties: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Specific CSS properties to watch (default: ~40 common properties)'
+        }
+      },
+      required: ['selector', 'action']
+    }
+  },
+  {
+    name: 'visioncraft_get_component_tree',
+    description: 'Show the React, Vue, or Svelte component hierarchy with component names, props, and state. Walks framework-specific internals (React Fiber, Vue instance tree) to provide a developer-friendly view instead of raw DOM.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selector: {
+          type: 'string',
+          description: 'CSS selector for the root element (default: #root or #app or body)'
+        },
+        maxDepth: {
+          type: 'number',
+          description: 'Maximum depth to traverse (default: 10)',
+          default: 10,
+          minimum: 1,
+          maximum: 50
+        },
+        framework: {
+          type: 'string',
+          enum: ['auto', 'react', 'vue', 'svelte'],
+          description: 'Framework to use for introspection (default: auto-detect)',
+          default: 'auto'
+        }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'visioncraft_audit_accessibility',
+    description: 'Run a WCAG accessibility audit using axe-core (same engine as Chrome DevTools Lighthouse). Returns violations with impact level, description, help URL, and affected elements.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selector: {
+          type: 'string',
+          description: 'CSS selector to scope the audit to a specific subtree (default: entire page)'
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'WCAG tags to check. Options: wcag2a, wcag2aa, wcag21a, wcag21aa, best-practice (default: all)'
+        }
+      },
+      required: []
+    }
   }
 ];
 
@@ -427,6 +504,11 @@ class VisionCraftMCPServer {
   private isWebviewMode: boolean;
   private webviewClient: WebviewClient | null = null;
   private lastScreenshotBuffer: Buffer | null = null;
+  private currentMode: 'webview' | 'browser' = 'webview';
+  private browserClient: BrowserClient | null = null;
+  private browserListenersAttached: boolean = false;
+  private consoleLogs: ConsoleLogEntry[] = [];
+  private networkRequests: NetworkRequestEntry[] = [];
 
   constructor() {
     this.server = new Server(
@@ -449,12 +531,15 @@ class VisionCraftMCPServer {
       if (!bridgeUrl) {
         console.error('[MCP] VISIONCRAFT_WEBVIEW_ENABLED is true but VISIONCRAFT_BRIDGE_URL is not set');
         this.isWebviewMode = false;
+        this.currentMode = 'browser';
       } else {
         console.error(`[MCP] Running in webview mode with bridge at ${bridgeUrl}`);
         this.webviewClient = new WebviewClient(bridgeUrl);
+        this.currentMode = 'webview';
       }
     } else {
       console.error('[MCP] Running in external browser mode (Playwright)');
+      this.currentMode = 'browser';
     }
 
     this.setupHandlers();
@@ -465,10 +550,123 @@ class VisionCraftMCPServer {
    * Get the appropriate client based on mode
    */
   private getClient(url?: string) {
-    if (this.isWebviewMode && this.webviewClient) {
+    if (this.currentMode === 'webview' && this.webviewClient) {
       return this.webviewClient;
     }
     return getBrowserClient(url);
+  }
+
+  /**
+   * Check if a URL points to a local server
+   */
+  private isLocalUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url);
+      const hostname = parsed.hostname;
+      return hostname === 'localhost'
+        || hostname === '127.0.0.1'
+        || hostname === '0.0.0.0'
+        || hostname === '::1'
+        || hostname === '[::1]'
+        || hostname.endsWith('.localhost');
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Lazily create and connect the Playwright browser client
+   */
+  private async ensureBrowserClient(): Promise<BrowserClient> {
+    if (!this.browserClient) {
+      // Create with PLAYWRIGHT_LAUNCH mode, no URL yet (navigate will set it)
+      this.browserClient = getBrowserClient('about:blank', {
+        mode: 'playwright-launch' as any,
+        enableFallback: false,
+        skipBridgeCheck: true,
+      });
+    }
+    await this.browserClient.ensureConnected();
+    this.setupPlaywrightListeners();
+    return this.browserClient;
+  }
+
+  /**
+   * Get the Playwright page, throwing a clear error if not available
+   */
+  private getPlaywrightPage(): Page {
+    const page = this.browserClient?.page;
+    if (!page) {
+      throw new Error('Browser not connected. Call visioncraft_navigate with an external URL first.');
+    }
+    return page;
+  }
+
+  /**
+   * Attach Playwright event listeners for console/network capture
+   */
+  private setupPlaywrightListeners(): void {
+    if (this.browserListenersAttached) return;
+    const page = this.browserClient?.page;
+    if (!page) return;
+
+    this.browserListenersAttached = true;
+
+    // Capture console logs
+    page.on('console', (msg) => {
+      this.consoleLogs.push({
+        level: msg.type() === 'warning' ? 'warn' : msg.type(),
+        message: msg.text(),
+        timestamp: Date.now(),
+      });
+      if (this.consoleLogs.length > 200) this.consoleLogs.shift();
+    });
+
+    // Capture network requests
+    const pendingRequests = new Map<string, { url: string; method: string; timestamp: number }>();
+
+    page.on('request', (request) => {
+      const key = request.url() + '|' + request.method();
+      pendingRequests.set(key, {
+        url: request.url(),
+        method: request.method(),
+        timestamp: Date.now(),
+      });
+    });
+
+    page.on('response', (response) => {
+      const key = response.url() + '|' + response.request().method();
+      const pending = pendingRequests.get(key);
+      if (pending) {
+        this.networkRequests.push({
+          url: pending.url,
+          method: pending.method,
+          status: response.status(),
+          duration: Date.now() - pending.timestamp,
+          timestamp: pending.timestamp,
+        });
+        pendingRequests.delete(key);
+        if (this.networkRequests.length > 200) this.networkRequests.shift();
+      }
+    });
+
+    page.on('requestfailed', (request) => {
+      const key = request.url() + '|' + request.method();
+      const pending = pendingRequests.get(key);
+      if (pending) {
+        this.networkRequests.push({
+          url: pending.url,
+          method: pending.method,
+          status: 0,
+          duration: Date.now() - pending.timestamp,
+          timestamp: pending.timestamp,
+          error: request.failure()?.errorText || 'Network error',
+        });
+        pendingRequests.delete(key);
+      }
+    });
+
+    console.error('[MCP] Playwright event listeners attached for console/network capture');
   }
 
   private setupErrorHandling(): void {
@@ -479,13 +677,16 @@ class VisionCraftMCPServer {
     process.on('SIGINT', async () => {
       console.error('[MCP] Shutting down...');
 
-      if (this.isWebviewMode && this.webviewClient) {
-        // Disconnect webview client
-        if (this.webviewClient.isConnected()) {
-          await this.webviewClient.disconnect();
-        }
+      // Disconnect webview client if active
+      if (this.webviewClient?.isConnected()) {
+        await this.webviewClient.disconnect();
+      }
+
+      // Disconnect browser client if active
+      if (this.browserClient?.isConnected()) {
+        await this.browserClient.disconnect();
       } else {
-        // Disconnect browser client
+        // Disconnect singleton browser client
         const client = getBrowserClient();
         if (client.isConnected()) {
           await client.disconnect();
@@ -517,7 +718,7 @@ class VisionCraftMCPServer {
             const highlight = args?.highlight as string[] | undefined;
             const highlightColor = (args?.highlightColor as string) || 'rgba(255, 0, 0, 0.3)';
 
-            if (this.isWebviewMode && this.webviewClient) {
+            if (this.currentMode === 'webview' && this.webviewClient) {
               // Webview mode: callBridge returns data URL, parse and construct MCP response
               const dataUrl = await client.callBridge('screenshot', format, quality, selector, highlight, highlightColor);
 
@@ -558,22 +759,8 @@ class VisionCraftMCPServer {
                 ],
               };
             } else {
-              // Playwright mode: Use Playwright's native screenshot
-              await client.ensureConnected();
-              const screenshot = await client.evaluate(async () => {
-                // Just return a marker, we'll use Playwright API
-                return true;
-              });
-
-              // Get the page directly and take screenshot
-              const page = (client as any).page;
-              if (!page) {
-                throw new Error(
-                  'Browser page not available. ' +
-                  'Ensure the browser is connected and the page is loaded. ' +
-                  'Try calling visioncraft_navigate first.'
-                );
-              }
+              // Browser mode: Use Playwright's native screenshot
+              const page = this.getPlaywrightPage();
 
               // Inject highlight overlays if requested
               if (highlight && highlight.length > 0) {
@@ -641,179 +828,129 @@ class VisionCraftMCPServer {
           case 'visioncraft_element_at_point': {
             const x = args?.x as number;
             const y = args?.y as number;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.elementAtPoint(this.getPlaywrightPage(), x, y);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('elementAtPoint', x, y);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_inspect_element': {
             const selector = args?.selector as string;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.inspectElement(this.getPlaywrightPage(), selector);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('inspectElement', selector);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_get_source': {
             const selector = args?.selector as string;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.getSource(this.getPlaywrightPage(), selector);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('getElementSource', selector);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_click': {
             const selector = args?.selector as string;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.click(this.getPlaywrightPage(), selector);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('clickElement', selector);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_type': {
             const selector = args?.selector as string;
             const text = args?.text as string;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.type(this.getPlaywrightPage(), selector, text);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('typeText', selector, text);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_scroll': {
             const x = (args?.x as number) || 0;
             const y = args?.y as number;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.scroll(this.getPlaywrightPage(), x, y);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('scrollTo', x, y);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_batch_inspect': {
             const selectors = args?.selectors as string[] | undefined;
             const region = args?.region as { x: number; y: number; width: number; height: number } | undefined;
             const includeStyles = (args?.includeStyles as boolean) || false;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.batchInspect(this.getPlaywrightPage(), selectors, region, includeStyles);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('batchInspect', selectors, region, includeStyles);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_hover': {
             const selector = args?.selector as string;
-
-            if (this.isWebviewMode && this.webviewClient) {
-              const result = await client.callBridge('hoverElement', selector);
-              return {
-                content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-              };
-            } else {
-              // Playwright mode: use real hover for CSS :hover
-              await client.ensureConnected();
-              const page = (client as any).page;
-              if (page) {
-                await page.locator(selector).hover();
-              } else {
-                await client.callBridge('hoverElement', selector);
-              }
-              return {
-                content: [{ type: 'text', text: JSON.stringify({ success: true }, null, 2) }],
-              };
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.hover(this.getPlaywrightPage(), selector);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
             }
+            const result = await client.callBridge('hoverElement', selector);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_find_elements': {
             const query = args?.query as string;
             const mode = (args?.mode as 'text' | 'role' | 'css') || 'css';
             const includeSource = (args?.includeSource as boolean) || false;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.findElements(this.getPlaywrightPage(), query, mode, includeSource);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('findElements', query, mode, includeSource);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_get_structure': {
             const maxDepth = (args?.maxDepth as number) || 5;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.getStructure(this.getPlaywrightPage(), maxDepth);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('getPageStructure', maxDepth);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_get_css_source': {
             const selector = args?.selector as string;
             const properties = args?.properties as string[] | undefined;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.getCSSSource(this.getPlaywrightPage(), selector, properties);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('getCSSSource', selector, properties);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_set_viewport': {
             const presets: Record<string, { width: number; height: number }> = {
               mobile: { width: 375, height: 812 },
+              mobile_landscape: { width: 812, height: 375 },
               tablet: { width: 768, height: 1024 },
+              tablet_landscape: { width: 1024, height: 768 },
               desktop: { width: 1440, height: 900 },
+              desktop_hd: { width: 1920, height: 1080 },
             };
 
             let width = args?.width as number;
@@ -830,18 +967,15 @@ class VisionCraftMCPServer {
               throw new Error('Either preset or width+height must be provided');
             }
 
-            if (this.isWebviewMode && this.webviewClient) {
+            if (this.currentMode === 'webview' && this.webviewClient) {
               const result = await client.callBridge('setViewport', width, height);
               return {
                 content: [{ type: 'text', text: `Viewport set to ${width}x${height} (scale: ${deviceScaleFactor})` }],
               };
             } else {
-              // Playwright mode: use native viewport
-              await client.ensureConnected();
-              const page = (client as any).page;
-              if (page) {
-                await page.setViewportSize({ width, height });
-              }
+              // Browser mode: use native viewport
+              const page = this.getPlaywrightPage();
+              await page.setViewportSize({ width, height });
               return {
                 content: [{ type: 'text', text: `Viewport set to ${width}x${height} (scale: ${deviceScaleFactor})` }],
               };
@@ -851,83 +985,59 @@ class VisionCraftMCPServer {
           case 'visioncraft_get_console_logs': {
             const level = args?.level as string | undefined;
             const limit = args?.limit as number | undefined;
+            if (this.currentMode === 'browser') {
+              const result = playwrightTools.filterConsoleLogs(this.consoleLogs, level, limit);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('getConsoleLogs', level, limit);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_clear_console_logs': {
+            if (this.currentMode === 'browser') {
+              this.consoleLogs = [];
+              return { content: [{ type: 'text', text: 'Console logs cleared' }] };
+            }
             await client.callBridge('clearConsoleLogs');
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: 'Console logs cleared',
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: 'Console logs cleared' }] };
           }
 
           case 'visioncraft_get_network_requests': {
             const filter = args?.filter as { urlPattern?: string; method?: string; status?: number; hasError?: boolean } | undefined;
             const limit = (args?.limit as number) || 50;
+            if (this.currentMode === 'browser') {
+              const result = playwrightTools.filterNetworkRequests(this.networkRequests, filter, limit);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('getNetworkRequests', filter, limit);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_clear_network_requests': {
+            if (this.currentMode === 'browser') {
+              this.networkRequests = [];
+              return { content: [{ type: 'text', text: 'Network requests cleared' }] };
+            }
             await client.callBridge('clearNetworkRequests');
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: 'Network requests cleared',
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: 'Network requests cleared' }] };
           }
 
           case 'visioncraft_get_hmr_status': {
+            if (this.currentMode === 'browser') {
+              const result = playwrightTools.getHMRStatus();
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             const result = await client.callBridge('getHMRStatus');
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           case 'visioncraft_clear_hmr_errors': {
+            if (this.currentMode === 'browser') {
+              const result = playwrightTools.clearHMRErrors();
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
             await client.callBridge('clearHMRErrors');
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: 'HMR errors cleared',
-                },
-              ],
-            };
+            return { content: [{ type: 'text', text: 'HMR errors cleared' }] };
           }
 
           case 'visioncraft_visual_diff': {
@@ -939,15 +1049,13 @@ class VisionCraftMCPServer {
 
             // Take a new screenshot
             let newBuffer: Buffer;
-            if (this.isWebviewMode && this.webviewClient) {
+            if (this.currentMode === 'webview' && this.webviewClient) {
               const dataUrl = await client.callBridge('screenshot', 'png', 100);
               const base64Match = (dataUrl as string).match(/^data:image\/\w+;base64,(.+)$/);
               const base64 = base64Match ? base64Match[1] : dataUrl;
               newBuffer = Buffer.from(base64 as string, 'base64');
             } else {
-              await client.ensureConnected();
-              const page = (client as any).page;
-              if (!page) throw new Error('Browser page not available');
+              const page = this.getPlaywrightPage();
               newBuffer = await page.screenshot({ type: 'png', fullPage: true });
             }
 
@@ -1017,39 +1125,79 @@ class VisionCraftMCPServer {
 
           case 'visioncraft_navigate': {
             const url = args?.url as string;
-            await client.callBridge('navigate', url);
 
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: `Navigated to ${url}`,
-                },
-              ],
-            };
+            if (this.isLocalUrl(url) && this.webviewClient) {
+              // Local URL: use webview mode
+              this.currentMode = 'webview';
+              await this.webviewClient.callBridge('navigate', url);
+              return {
+                content: [{ type: 'text', text: `Navigated to ${url}` }],
+              };
+            } else {
+              // External URL: switch to browser mode
+              this.currentMode = 'browser';
+              const browser = await this.ensureBrowserClient();
+              await browser.navigate(url);
+              // Clear stale captures from previous page
+              this.consoleLogs = [];
+              this.networkRequests = [];
+              return {
+                content: [{ type: 'text', text: `Navigated to ${url} (browser mode)` }],
+              };
+            }
           }
 
           case 'visioncraft_get_current_url': {
+            if (this.currentMode === 'browser') {
+              const url = await playwrightTools.getCurrentUrl(this.getPlaywrightPage());
+              return { content: [{ type: 'text', text: url }] };
+            }
             let url: string;
             try {
-              // Try to get the actual URL from the browser/webview
               url = await client.callBridge('getCurrentUrl');
               if (typeof url !== 'string' || !url) {
                 url = client.getUrl();
               }
             } catch {
-              // Fall back to tracked URL
               url = client.getUrl();
             }
+            return { content: [{ type: 'text', text: url }] };
+          }
 
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: url,
-                },
-              ],
-            };
+          case 'visioncraft_style_diff': {
+            const selector = args?.selector as string;
+            const action = args?.action as string;
+            const actionArg = args?.actionArg as string | undefined;
+            const properties = args?.properties as string[] | undefined;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.styleDiff(this.getPlaywrightPage(), selector, action, actionArg, properties);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
+            const result = await client.callBridge('getStyleDiff', selector, action, actionArg, properties);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+          }
+
+          case 'visioncraft_get_component_tree': {
+            const selector = args?.selector as string | undefined;
+            const maxDepth = (args?.maxDepth as number) || 10;
+            const framework = (args?.framework as string) || 'auto';
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.getComponentTree(this.getPlaywrightPage(), selector, maxDepth, framework);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
+            const result = await client.callBridge('getComponentTree', selector, maxDepth, framework);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+          }
+
+          case 'visioncraft_audit_accessibility': {
+            const selector = args?.selector as string | undefined;
+            const tags = args?.tags as string[] | undefined;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.auditAccessibility(this.getPlaywrightPage(), selector, tags);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
+            const result = await client.callBridge('auditAccessibility', selector, tags);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
           default:

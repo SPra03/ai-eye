@@ -131,6 +131,15 @@ export class EmbeddedMCPServer {
         case 'visioncraft_clear_network_requests':
           return await this.handleClearNetworkRequests(args);
 
+        case 'visioncraft_style_diff':
+          return await this.handleStyleDiff(args);
+
+        case 'visioncraft_get_component_tree':
+          return await this.handleGetComponentTree(args);
+
+        case 'visioncraft_audit_accessibility':
+          return await this.handleAuditAccessibility(args);
+
         default:
           return this.errorResponse(`Unknown tool: ${name}`);
       }
@@ -552,13 +561,83 @@ export class EmbeddedMCPServer {
   }
 
   /**
+   * Tool: visioncraft_style_diff
+   */
+  private async handleStyleDiff(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selector = args.selector;
+    const action = args.action;
+    const actionArg = args.actionArg;
+    const properties = args.properties;
+
+    if (!selector) {
+      return this.errorResponse('Selector parameter is required');
+    }
+    if (!action) {
+      return this.errorResponse('Action parameter is required');
+    }
+
+    const result = await this.webviewBridge.getStyleDiff(selector, action, actionArg, properties);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_get_component_tree
+   */
+  private async handleGetComponentTree(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selector = args.selector;
+    const maxDepth = args.maxDepth || 10;
+    const framework = args.framework || 'auto';
+
+    const result = await this.webviewBridge.getComponentTree(selector, maxDepth, framework);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_audit_accessibility
+   */
+  private async handleAuditAccessibility(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selector = args.selector;
+    const tags = args.tags;
+
+    const result = await this.webviewBridge.auditAccessibility(selector, tags);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
    * Tool: visioncraft_set_viewport
    */
   private async handleSetViewport(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const presets: Record<string, { width: number; height: number }> = {
       mobile: { width: 375, height: 812 },
+      mobile_landscape: { width: 812, height: 375 },
       tablet: { width: 768, height: 1024 },
+      tablet_landscape: { width: 1024, height: 768 },
       desktop: { width: 1440, height: 900 },
+      desktop_hd: { width: 1920, height: 1080 },
     };
 
     let width = args.width as number;
@@ -574,13 +653,13 @@ export class EmbeddedMCPServer {
       return this.errorResponse('Either preset or width+height must be provided');
     }
 
-    await this.webviewBridge.setViewport(width, height);
+    await this.webviewBridge.setViewport(width, height, preset);
 
     return {
       content: [
         {
           type: 'text',
-          text: `Viewport set to ${width}x${height}`,
+          text: `Viewport set to ${width}x${height}${preset ? ` (${preset})` : ''}`,
         },
       ],
     };
@@ -918,13 +997,50 @@ export class EmbeddedMCPServer {
       },
       {
         name: 'visioncraft_set_viewport',
-        description: 'Set viewport size for responsive design testing',
+        description: 'Set viewport size for responsive design testing. Resizes the actual iframe for true @media query support.',
         inputSchema: {
           type: 'object',
           properties: {
             width: { type: 'number', description: 'Viewport width in pixels' },
             height: { type: 'number', description: 'Viewport height in pixels' },
-            preset: { type: 'string', enum: ['mobile', 'tablet', 'desktop'], description: 'Device preset' },
+            preset: { type: 'string', enum: ['mobile', 'mobile_landscape', 'tablet', 'tablet_landscape', 'desktop', 'desktop_hd'], description: 'Device preset' },
+          },
+        },
+      },
+      {
+        name: 'visioncraft_style_diff',
+        description: 'Capture computed styles before/after an action and return only changes',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selector: { type: 'string', description: 'CSS selector for the element' },
+            action: { type: 'string', enum: ['hover', 'click', 'focus', 'blur', 'addClass', 'removeClass', 'toggleClass'], description: 'Action to perform' },
+            actionArg: { type: 'string', description: 'Class name for class actions' },
+            properties: { type: 'array', items: { type: 'string' }, description: 'Specific properties to watch' },
+          },
+          required: ['selector', 'action'],
+        },
+      },
+      {
+        name: 'visioncraft_get_component_tree',
+        description: 'Show React/Vue/Svelte component hierarchy with names, props, and state',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selector: { type: 'string', description: 'CSS selector for root element' },
+            maxDepth: { type: 'number', description: 'Max depth (default: 10)' },
+            framework: { type: 'string', enum: ['auto', 'react', 'vue', 'svelte'], description: 'Framework (default: auto)' },
+          },
+        },
+      },
+      {
+        name: 'visioncraft_audit_accessibility',
+        description: 'Run WCAG accessibility audit using axe-core',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selector: { type: 'string', description: 'Scope audit to this element' },
+            tags: { type: 'array', items: { type: 'string' }, description: 'WCAG tags: wcag2a, wcag2aa, wcag21a, best-practice' },
           },
         },
       },

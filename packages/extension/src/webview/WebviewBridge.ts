@@ -484,28 +484,77 @@ export class WebviewBridge {
   }
 
   /**
-   * Set viewport size for responsive testing
+   * Set viewport size for responsive testing.
+   * Sends a message to the outer webview page to resize the iframe element,
+   * which changes window.innerWidth/innerHeight and triggers @media queries.
    */
-  async setViewport(width: number, height: number): Promise<void> {
-    await this.waitForReady();
+  async setViewport(width: number, height: number, preset?: string, label?: string): Promise<void> {
+    // Send setViewport message to the outer webview (not the iframe)
+    // PreviewManager's webview script handles resizing the iframe element
+    return new Promise((resolve, reject) => {
+      const id = (this.previewManager as any).nextMessageId++;
 
-    const bridgeAvailable = await this.isBridgeAvailable();
-    if (bridgeAvailable) {
-      const code = `window.__VISIONCRAFT__.setViewport(${width}, ${height})`;
-      await this.previewManager.evaluate(code, 3000);
-    } else {
-      // Fallback: set CSS directly
-      const code = `
-        (() => {
-          document.documentElement.style.width = '${width}px';
-          document.documentElement.style.height = '${height}px';
-          document.documentElement.style.overflow = 'auto';
-          window.dispatchEvent(new Event('resize'));
-          return { success: true };
-        })()
-      `;
-      await this.previewManager.evaluate(code, 3000);
-    }
+      const timeoutHandle = setTimeout(() => {
+        (this.previewManager as any).messageHandlers.delete(id);
+        reject(new Error('setViewport timeout'));
+      }, 5000);
+
+      (this.previewManager as any).messageHandlers.set(id, (result: any) => {
+        clearTimeout(timeoutHandle);
+        if (result && result.__error) {
+          reject(new Error(result.__error));
+        } else {
+          resolve();
+        }
+      });
+
+      const presetLabels: Record<string, string> = {
+        mobile: 'iPhone 14 (375x812)',
+        mobile_landscape: 'Mobile Landscape (812x375)',
+        tablet: 'iPad (768x1024)',
+        tablet_landscape: 'iPad Landscape (1024x768)',
+        desktop: 'Desktop (1440x900)',
+        desktop_hd: 'Desktop HD (1920x1080)',
+      };
+
+      (this.previewManager as any).postMessage({
+        type: 'setViewport',
+        id,
+        width,
+        height,
+        label: label || (preset ? presetLabels[preset] : `${width}x${height}`),
+      });
+    });
+  }
+
+  /**
+   * Reset viewport to full width (desktop default)
+   */
+  async resetViewport(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const id = (this.previewManager as any).nextMessageId++;
+
+      const timeoutHandle = setTimeout(() => {
+        (this.previewManager as any).messageHandlers.delete(id);
+        reject(new Error('resetViewport timeout'));
+      }, 5000);
+
+      (this.previewManager as any).messageHandlers.set(id, (result: any) => {
+        clearTimeout(timeoutHandle);
+        if (result && result.__error) {
+          reject(new Error(result.__error));
+        } else {
+          resolve();
+        }
+      });
+
+      (this.previewManager as any).postMessage({
+        type: 'setViewport',
+        id,
+        width: null,
+        height: null,
+      });
+    });
   }
 
   /**
@@ -635,6 +684,68 @@ export class WebviewBridge {
 
     const code = `window.__VISIONCRAFT__.getPageStructure(${maxDepth})`;
     return await this.previewManager.evaluate(code, 10000);
+  }
+
+  /**
+   * Get style diff before/after an action
+   */
+  async getStyleDiff(
+    selector: string,
+    action: string,
+    actionArg?: string,
+    properties?: string[]
+  ): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('Style diff requires VisionCraft bridge');
+    }
+
+    const actionArgStr = actionArg ? `'${this.escapeSelector(actionArg)}'` : 'undefined';
+    const propsStr = properties ? JSON.stringify(properties) : 'undefined';
+    const code = `window.__VISIONCRAFT__.getStyleDiff('${this.escapeSelector(selector)}', '${action}', ${actionArgStr}, ${propsStr})`;
+    return await this.previewManager.evaluate(code, 10000);
+  }
+
+  /**
+   * Get React/Vue/Svelte component tree
+   */
+  async getComponentTree(
+    selector?: string,
+    maxDepth: number = 10,
+    framework: string = 'auto'
+  ): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('Component tree requires VisionCraft bridge');
+    }
+
+    const selectorArg = selector ? `'${this.escapeSelector(selector)}'` : 'undefined';
+    const code = `window.__VISIONCRAFT__.getComponentTree(${selectorArg}, ${maxDepth}, '${framework}')`;
+    return await this.previewManager.evaluate(code, 10000);
+  }
+
+  /**
+   * Run accessibility audit using axe-core
+   */
+  async auditAccessibility(
+    selector?: string,
+    tags?: string[]
+  ): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('Accessibility audit requires VisionCraft bridge');
+    }
+
+    const selectorArg = selector ? `'${this.escapeSelector(selector)}'` : 'undefined';
+    const tagsArg = tags ? JSON.stringify(tags) : 'undefined';
+    const code = `window.__VISIONCRAFT__.auditAccessibility(${selectorArg}, ${tagsArg})`;
+    return await this.previewManager.evaluate(code, 35000);
   }
 
   /**
