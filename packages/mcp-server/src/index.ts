@@ -579,8 +579,8 @@ class VisionCraftMCPServer {
    */
   private async ensureBrowserClient(): Promise<BrowserClient> {
     if (!this.browserClient) {
-      // Create with PLAYWRIGHT_LAUNCH mode, no URL yet (navigate will set it)
-      this.browserClient = getBrowserClient('about:blank', {
+      // Create directly (not via singleton) to ensure correct config
+      this.browserClient = new BrowserClient('about:blank', {
         mode: 'playwright-launch' as any,
         enableFallback: false,
         skipBridgeCheck: true,

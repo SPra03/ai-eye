@@ -29,6 +29,7 @@ interface HttpBridgeResponse {
  */
 export class HttpBridge {
   private server: http.Server | undefined;
+  private static readonly DEFAULT_PORT = 18420;
   private port: number = 0;
   private isRunning: boolean = false;
 
@@ -51,23 +52,43 @@ export class HttpBridge {
         await this.handleRequest(req, res);
       });
 
-      // Listen on random available port (localhost only)
-      this.server.listen(0, 'localhost', () => {
-        const address = this.server!.address();
-        if (address && typeof address === 'object') {
-          this.port = address.port;
-          this.isRunning = true;
-          console.log(`[HttpBridge] Started on http://localhost:${this.port}`);
-          resolve(this.port);
-        } else {
-          reject(new Error('Failed to get server address'));
-        }
-      });
+      // Try fixed port first, fall back to random if taken
+      const tryListen = (port: number) => {
+        this.server!.listen(port, 'localhost', () => {
+          const address = this.server!.address();
+          if (address && typeof address === 'object') {
+            this.port = address.port;
+            this.isRunning = true;
+            console.log(`[HttpBridge] Started on http://localhost:${this.port}`);
+            resolve(this.port);
+          } else {
+            reject(new Error('Failed to get server address'));
+          }
+        });
+      };
 
-      this.server.on('error', (error) => {
+      this.server.on('error', (error: NodeJS.ErrnoException) => {
+        if (error.code === 'EADDRINUSE' && this.port === 0) {
+          // Fixed port was taken, fall back to random
+          console.log(`[HttpBridge] Port ${HttpBridge.DEFAULT_PORT} in use, using random port`);
+          this.server!.listen(0, 'localhost', () => {
+            const address = this.server!.address();
+            if (address && typeof address === 'object') {
+              this.port = address.port;
+              this.isRunning = true;
+              console.log(`[HttpBridge] Started on http://localhost:${this.port}`);
+              resolve(this.port);
+            } else {
+              reject(new Error('Failed to get server address'));
+            }
+          });
+          return;
+        }
         console.error('[HttpBridge] Server error:', error);
         reject(error);
       });
+
+      tryListen(HttpBridge.DEFAULT_PORT);
     });
   }
 

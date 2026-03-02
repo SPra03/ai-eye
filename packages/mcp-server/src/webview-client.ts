@@ -77,44 +77,56 @@ export class WebviewClient {
    * This forwards the call through the HTTP bridge to the embedded MCP server
    */
   async callBridge(method: string, ...args: any[]): Promise<any> {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout for tool calls
+    const maxRetries = 2;
+    let lastError: Error | undefined;
 
-      const response = await fetch(`${this.bridgeUrl}/tools/call`, {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          method: 'tools/call',
-          params: {
-            // Map the method name to the corresponding VisionCraft tool
-            name: this.mapMethodToTool(method),
-            arguments: this.mapArgsToToolArgs(method, args),
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout for tool calls
+
+        const response = await fetch(`${this.bridgeUrl}/tools/call`, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            method: 'tools/call',
+            params: {
+              // Map the method name to the corresponding VisionCraft tool
+              name: this.mapMethodToTool(method),
+              arguments: this.mapArgsToToolArgs(method, args),
+            },
+          }),
+        });
 
-      clearTimeout(timeout);
+        clearTimeout(timeout);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error.message || 'Unknown error');
+        }
+
+        // HttpBridge now returns raw results directly (not MCP format)
+        return data.result;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.error(`[WebviewClient] callBridge(${method}) attempt ${attempt + 1} failed:`, lastError.message);
+
+        if (attempt < maxRetries) {
+          // Brief pause before retry
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error.message || 'Unknown error');
-      }
-
-      // HttpBridge now returns raw results directly (not MCP format)
-      return data.result;
-    } catch (error) {
-      console.error(`[WebviewClient] callBridge(${method}) failed:`, error);
-      throw error;
     }
+
+    throw lastError || new Error(`callBridge(${method}) failed after ${maxRetries + 1} attempts`);
   }
 
   /**
