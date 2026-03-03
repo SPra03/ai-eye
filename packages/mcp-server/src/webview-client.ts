@@ -104,7 +104,12 @@ export class WebviewClient {
         clearTimeout(timeout);
 
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          let errorDetail = response.statusText;
+          try {
+            const errorBody = await response.json() as any;
+            errorDetail = errorBody.error?.message || errorBody.error || errorDetail;
+          } catch {}
+          throw new Error(`HTTP ${response.status}: ${errorDetail}`);
         }
 
         const data = await response.json();
@@ -159,6 +164,11 @@ export class WebviewClient {
       'getStyleDiff': 'visioncraft_style_diff',
       'getComponentTree': 'visioncraft_get_component_tree',
       'auditAccessibility': 'visioncraft_audit_accessibility',
+      'measureElement': 'visioncraft_measure_element',
+      'measureSpacing': 'visioncraft_measure_spacing',
+      'getComputedLayout': 'visioncraft_get_computed_layout',
+      'getPalette': 'visioncraft_get_palette',
+      'waitForHMR': 'visioncraft_wait_for_hmr',
     };
 
     return methodMap[method] || method;
@@ -272,6 +282,33 @@ export class WebviewClient {
       case 'navigate':
         return {
           url: args[0],
+        };
+
+      case 'measureElement':
+        return {
+          selectorA: args[0],
+          selectorB: args[1],
+        };
+
+      case 'measureSpacing':
+        return {
+          selector: args[0],
+        };
+
+      case 'getComputedLayout':
+        return {
+          selector: args[0],
+        };
+
+      case 'getPalette':
+        return {
+          selector: args[0],
+          limit: args[1] || 20,
+        };
+
+      case 'waitForHMR':
+        return {
+          timeout: args[0] || 10000,
         };
 
       default:

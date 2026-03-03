@@ -140,6 +140,21 @@ export class EmbeddedMCPServer {
         case 'visioncraft_audit_accessibility':
           return await this.handleAuditAccessibility(args);
 
+        case 'visioncraft_measure_element':
+          return await this.handleMeasureElement(args);
+
+        case 'visioncraft_measure_spacing':
+          return await this.handleMeasureSpacing(args);
+
+        case 'visioncraft_get_computed_layout':
+          return await this.handleGetComputedLayout(args);
+
+        case 'visioncraft_get_palette':
+          return await this.handleGetPalette(args);
+
+        case 'visioncraft_wait_for_hmr':
+          return await this.handleWaitForHMR(args);
+
         default:
           return this.errorResponse(`Unknown tool: ${name}`);
       }
@@ -688,6 +703,110 @@ export class EmbeddedMCPServer {
   }
 
   /**
+   * Tool: visioncraft_measure_element
+   */
+  private async handleMeasureElement(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selectorA = args.selectorA;
+    const selectorB = args.selectorB;
+
+    if (!selectorA || !selectorB) {
+      return this.errorResponse('selectorA and selectorB parameters are required');
+    }
+
+    const result = await this.webviewBridge.measureElement(selectorA, selectorB);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_measure_spacing
+   */
+  private async handleMeasureSpacing(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selector = args.selector;
+
+    if (!selector) {
+      return this.errorResponse('Selector parameter is required');
+    }
+
+    const result = await this.webviewBridge.measureSpacing(selector);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_get_computed_layout
+   */
+  private async handleGetComputedLayout(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selector = args.selector;
+
+    if (!selector) {
+      return this.errorResponse('Selector parameter is required');
+    }
+
+    const result = await this.webviewBridge.getComputedLayout(selector);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_get_palette
+   */
+  private async handleGetPalette(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const selector = args.selector;
+    const limit = args.limit || 20;
+
+    const result = await this.webviewBridge.getPalette(selector, limit);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
+   * Tool: visioncraft_wait_for_hmr
+   */
+  private async handleWaitForHMR(args: Record<string, any>): Promise<MCPToolCallResponse> {
+    const timeout = args.timeout || 10000;
+
+    const result = await this.webviewBridge.waitForHMR(timeout);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  /**
    * Create an error response
    */
   private errorResponse(message: string): MCPToolCallResponse {
@@ -1041,6 +1160,62 @@ export class EmbeddedMCPServer {
           properties: {
             selector: { type: 'string', description: 'Scope audit to this element' },
             tags: { type: 'array', items: { type: 'string' }, description: 'WCAG tags: wcag2a, wcag2aa, wcag21a, best-practice' },
+          },
+        },
+      },
+      // v6 new tools
+      {
+        name: 'visioncraft_measure_element',
+        description: 'Measure distance between two elements',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selectorA: { type: 'string', description: 'CSS selector for first element' },
+            selectorB: { type: 'string', description: 'CSS selector for second element' },
+          },
+          required: ['selectorA', 'selectorB'],
+        },
+      },
+      {
+        name: 'visioncraft_measure_spacing',
+        description: 'Get padding, margin, border-width, and gap as numeric pixel values',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selector: { type: 'string', description: 'CSS selector for the element' },
+          },
+          required: ['selector'],
+        },
+      },
+      {
+        name: 'visioncraft_get_computed_layout',
+        description: 'Get flex/grid layout properties and children sizes',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selector: { type: 'string', description: 'CSS selector for the container element' },
+          },
+          required: ['selector'],
+        },
+      },
+      {
+        name: 'visioncraft_get_palette',
+        description: 'Extract color palette from page or element',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            selector: { type: 'string', description: 'CSS selector to scope extraction' },
+            limit: { type: 'number', description: 'Max colors to return (default: 20)' },
+          },
+        },
+      },
+      {
+        name: 'visioncraft_wait_for_hmr',
+        description: 'Wait for HMR update to complete',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            timeout: { type: 'number', description: 'Max wait time in ms (default: 10000)' },
           },
         },
       },

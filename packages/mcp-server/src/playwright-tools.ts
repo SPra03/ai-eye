@@ -53,6 +53,12 @@ export async function inspectElement(page: Page, selector: string) {
         backgroundColor: computed.backgroundColor,
         fontSize: computed.fontSize,
         fontWeight: computed.fontWeight,
+        fontFamily: computed.fontFamily,
+        fontStyle: computed.fontStyle,
+        lineHeight: computed.lineHeight,
+        letterSpacing: computed.letterSpacing,
+        textAlign: computed.textAlign,
+        textTransform: computed.textTransform,
         padding: computed.padding,
         margin: computed.margin,
         border: computed.border,
@@ -101,6 +107,12 @@ export async function elementAtPoint(page: Page, x: number, y: number) {
         backgroundColor: computed.backgroundColor,
         fontSize: computed.fontSize,
         fontWeight: computed.fontWeight,
+        fontFamily: computed.fontFamily,
+        fontStyle: computed.fontStyle,
+        lineHeight: computed.lineHeight,
+        letterSpacing: computed.letterSpacing,
+        textAlign: computed.textAlign,
+        textTransform: computed.textTransform,
         padding: computed.padding,
         margin: computed.margin,
         border: computed.border,
@@ -164,6 +176,12 @@ export async function batchInspect(
             backgroundColor: computed.backgroundColor,
             fontSize: computed.fontSize,
             fontWeight: computed.fontWeight,
+            fontFamily: computed.fontFamily,
+            fontStyle: computed.fontStyle,
+            lineHeight: computed.lineHeight,
+            letterSpacing: computed.letterSpacing,
+            textAlign: computed.textAlign,
+            textTransform: computed.textTransform,
           };
         }
 
@@ -869,6 +887,188 @@ export async function auditAccessibility(
     },
     { sel: selector, tagList: tags }
   );
+}
+
+// ====== Measurement & Layout ======
+
+export async function measureElement(page: Page, selectorA: string, selectorB: string) {
+  return await page.evaluate(({ selA, selB }: { selA: string; selB: string }) => {
+    const elA = document.querySelector(selA);
+    const elB = document.querySelector(selB);
+    if (!elA) return { error: `Element not found: ${selA}` };
+    if (!elB) return { error: `Element not found: ${selB}` };
+
+    const a = elA.getBoundingClientRect();
+    const b = elB.getBoundingClientRect();
+
+    const top = b.top - a.bottom;
+    const bottom = a.top - b.bottom;
+    const left = b.left - a.right;
+    const right = a.left - b.right;
+
+    const horizontal = Math.max(0, Math.max(left, right));
+    const vertical = Math.max(0, Math.max(top, bottom));
+
+    const overlapX = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+    const overlapY = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    const overlap = overlapX > 0 && overlapY > 0;
+
+    return {
+      elementA: { selector: selA, boundingBox: { x: Math.round(a.x), y: Math.round(a.y), width: Math.round(a.width), height: Math.round(a.height) } },
+      elementB: { selector: selB, boundingBox: { x: Math.round(b.x), y: Math.round(b.y), width: Math.round(b.width), height: Math.round(b.height) } },
+      distances: {
+        top: Math.round(top),
+        right: Math.round(right),
+        bottom: Math.round(bottom),
+        left: Math.round(left),
+        horizontal: Math.round(horizontal),
+        vertical: Math.round(vertical),
+      },
+      overlap,
+      overlapArea: overlap ? { width: Math.round(overlapX), height: Math.round(overlapY) } : undefined,
+    };
+  }, { selA: selectorA, selB: selectorB });
+}
+
+export async function measureSpacing(page: Page, selector: string) {
+  return await page.evaluate((sel: string) => {
+    const el = document.querySelector(sel);
+    if (!el) return { error: `Element not found: ${sel}` };
+
+    const computed = window.getComputedStyle(el);
+
+    return {
+      padding: {
+        top: parseFloat(computed.paddingTop) || 0,
+        right: parseFloat(computed.paddingRight) || 0,
+        bottom: parseFloat(computed.paddingBottom) || 0,
+        left: parseFloat(computed.paddingLeft) || 0,
+      },
+      margin: {
+        top: parseFloat(computed.marginTop) || 0,
+        right: parseFloat(computed.marginRight) || 0,
+        bottom: parseFloat(computed.marginBottom) || 0,
+        left: parseFloat(computed.marginLeft) || 0,
+      },
+      borderWidth: {
+        top: parseFloat(computed.borderTopWidth) || 0,
+        right: parseFloat(computed.borderRightWidth) || 0,
+        bottom: parseFloat(computed.borderBottomWidth) || 0,
+        left: parseFloat(computed.borderLeftWidth) || 0,
+      },
+      gap: {
+        row: parseFloat(computed.rowGap) || 0,
+        column: parseFloat(computed.columnGap) || 0,
+      },
+      boxSizing: computed.boxSizing,
+    };
+  }, selector);
+}
+
+export async function getComputedLayout(page: Page, selector: string) {
+  return await page.evaluate((sel: string) => {
+    const el = document.querySelector(sel);
+    if (!el) return { error: `Element not found: ${sel}` };
+
+    const computed = window.getComputedStyle(el);
+
+    const children: { selector: string; width: number; height: number }[] = [];
+    for (let i = 0; i < el.children.length && i < 50; i++) {
+      const child = el.children[i];
+      const rect = child.getBoundingClientRect();
+      let childSel = child.tagName.toLowerCase();
+      if (child.id) childSel = `#${child.id}`;
+      else if (child.className && typeof child.className === 'string') {
+        const cls = child.className.trim().split(/\s+/).slice(0, 2).join('.');
+        if (cls) childSel += `.${cls}`;
+      }
+      children.push({
+        selector: childSel,
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      });
+    }
+
+    return {
+      layout: {
+        display: computed.display,
+        flexDirection: computed.flexDirection,
+        flexWrap: computed.flexWrap,
+        justifyContent: computed.justifyContent,
+        alignItems: computed.alignItems,
+        alignContent: computed.alignContent,
+        gap: computed.gap,
+        gridTemplateColumns: computed.gridTemplateColumns,
+        gridTemplateRows: computed.gridTemplateRows,
+        gridAutoFlow: computed.gridAutoFlow,
+        position: computed.position,
+        overflow: computed.overflow,
+      },
+      children: {
+        count: el.children.length,
+        sizes: children,
+      },
+    };
+  }, selector);
+}
+
+export async function getPalette(page: Page, selector?: string, limit: number = 20) {
+  return await page.evaluate(({ sel, limit }: { sel?: string; limit: number }) => {
+    const root = sel ? document.querySelector(sel) : document.body;
+    if (!root) return { error: `Element not found: ${sel}` };
+
+    const colorMap = new Map<string, { count: number; properties: string[] }>();
+
+    function rgbToHex(rgb: string): string | null {
+      const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) return null;
+      const r = parseInt(match[1]);
+      const g = parseInt(match[2]);
+      const b = parseInt(match[3]);
+      return '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
+    }
+
+    function addColor(value: string, property: string) {
+      if (!value || value === 'transparent' || value === 'rgba(0, 0, 0, 0)') return;
+      const hex = rgbToHex(value);
+      if (!hex) return;
+      const existing = colorMap.get(hex);
+      if (existing) {
+        existing.count++;
+        if (!existing.properties.includes(property)) existing.properties.push(property);
+      } else {
+        colorMap.set(hex, { count: 1, properties: [property] });
+      }
+    }
+
+    const elements = root.querySelectorAll('*');
+    let totalElements = 0;
+    for (let i = 0; i < elements.length && i < 500; i++) {
+      const el = elements[i] as HTMLElement;
+      if (el.offsetWidth === 0 && el.offsetHeight === 0) continue;
+      totalElements++;
+      const computed = window.getComputedStyle(el);
+      addColor(computed.color, 'color');
+      addColor(computed.backgroundColor, 'backgroundColor');
+      addColor(computed.borderColor, 'borderColor');
+    }
+
+    const colors = Array.from(colorMap.entries())
+      .map(([hex, data]) => ({
+        hex,
+        rgb: hex.replace(/^#/, '').match(/.{2}/g)!.map(h => parseInt(h, 16)).join(', '),
+        count: data.count,
+        properties: data.properties,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+
+    return { colors, totalElements };
+  }, { sel: selector, limit });
+}
+
+export function waitForHMR(): { updated: false; note: string } {
+  return { updated: false, note: 'HMR waiting only available for local Vite dev servers via webview mode.' };
 }
 
 // ====== Navigation ======

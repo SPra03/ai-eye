@@ -749,6 +749,82 @@ export class WebviewBridge {
   }
 
   /**
+   * Measure distance between two elements
+   */
+  async measureElement(selectorA: string, selectorB: string): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('Measure element requires VisionCraft bridge');
+    }
+
+    const code = `window.__VISIONCRAFT__.measureElement('${this.escapeSelector(selectorA)}', '${this.escapeSelector(selectorB)}')`;
+    return await this.previewManager.evaluate(code, 5000);
+  }
+
+  /**
+   * Get padding, margin, border-width, and gap of an element
+   */
+  async measureSpacing(selector: string): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('Measure spacing requires VisionCraft bridge');
+    }
+
+    const code = `window.__VISIONCRAFT__.measureSpacing('${this.escapeSelector(selector)}')`;
+    return await this.previewManager.evaluate(code, 5000);
+  }
+
+  /**
+   * Get flex/grid layout properties and child sizes
+   */
+  async getComputedLayout(selector: string): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('Computed layout requires VisionCraft bridge');
+    }
+
+    const code = `window.__VISIONCRAFT__.getComputedLayout('${this.escapeSelector(selector)}')`;
+    return await this.previewManager.evaluate(code, 5000);
+  }
+
+  /**
+   * Extract color palette from page or element
+   */
+  async getPalette(selector?: string, limit: number = 20): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('Palette extraction requires VisionCraft bridge');
+    }
+
+    const selectorArg = selector ? `'${this.escapeSelector(selector)}'` : 'undefined';
+    const code = `window.__VISIONCRAFT__.getPalette(${selectorArg}, ${limit})`;
+    return await this.previewManager.evaluate(code, 10000);
+  }
+
+  /**
+   * Wait for HMR update to complete
+   */
+  async waitForHMR(timeout: number = 10000): Promise<any> {
+    await this.waitForReady();
+
+    const bridgeAvailable = await this.isBridgeAvailable();
+    if (!bridgeAvailable) {
+      throw new Error('HMR wait requires VisionCraft bridge');
+    }
+
+    const code = `window.__VISIONCRAFT__.waitForHMR(${timeout})`;
+    return await this.previewManager.evaluate(code, timeout + 2000);
+  }
+
+  /**
    * Load html2canvas library dynamically
    */
   private async loadHtml2Canvas(): Promise<void> {

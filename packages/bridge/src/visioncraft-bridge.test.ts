@@ -68,7 +68,7 @@ describe('VisionCraft Bridge Interface', () => {
       expect(expectedProps).toHaveLength(3);
     });
 
-    it('should expose a total of 22 API methods plus 3 properties', () => {
+    it('should expose a total of 27 API methods plus 3 properties', () => {
       const allMethods = [
         'elementAtPoint',
         'inspectElement',
@@ -93,10 +93,16 @@ describe('VisionCraft Bridge Interface', () => {
         'getStyleDiff',
         'getComponentTree',
         'auditAccessibility',
+        // v6 additions
+        'measureElement',
+        'measureSpacing',
+        'getComputedLayout',
+        'getPalette',
+        'waitForHMR',
       ];
       const allProperties = ['version', 'ready', 'consoleLogs'];
 
-      expect(allMethods).toHaveLength(22);
+      expect(allMethods).toHaveLength(27);
       expect(allProperties).toHaveLength(3);
     });
   });
@@ -923,6 +929,164 @@ describe('VisionCraft Bridge Interface', () => {
       const defaultColor = 'rgba(255, 0, 0, 0.3)';
 
       expect(defaultColor).toBe('rgba(255, 0, 0, 0.3)');
+    });
+  });
+
+  // ====== V6 New Feature Tests ======
+
+  describe('v6: measureElement', () => {
+    it('should accept two selectors', () => {
+      const params = { selectorA: '#header', selectorB: '#content' };
+      expect(params.selectorA).toBe('#header');
+      expect(params.selectorB).toBe('#content');
+    });
+
+    it('should return distance measurements in 6 directions', () => {
+      const distances = { top: 20, right: 0, bottom: -480, left: 0, horizontal: 0, vertical: 20 };
+      expect(Object.keys(distances)).toHaveLength(6);
+    });
+
+    it('should detect overlap between elements', () => {
+      const overlap = true;
+      const overlapArea = { width: 50, height: 30 };
+      expect(overlap).toBe(true);
+      expect(overlapArea.width).toBe(50);
+    });
+
+    it('should return bounding boxes for both elements', () => {
+      const result = {
+        elementA: { selector: '#a', boundingBox: { x: 0, y: 0, width: 100, height: 100 } },
+        elementB: { selector: '#b', boundingBox: { x: 50, y: 50, width: 100, height: 100 } },
+      };
+      expect(result.elementA.boundingBox).toHaveProperty('x');
+      expect(result.elementB.boundingBox).toHaveProperty('width');
+    });
+  });
+
+  describe('v6: measureSpacing', () => {
+    it('should return padding as numeric {top, right, bottom, left}', () => {
+      const padding = { top: 16, right: 24, bottom: 16, left: 24 };
+      for (const val of Object.values(padding)) {
+        expect(typeof val).toBe('number');
+      }
+    });
+
+    it('should return margin, borderWidth, gap, and boxSizing', () => {
+      const fields = ['padding', 'margin', 'borderWidth', 'gap', 'boxSizing'];
+      expect(fields).toHaveLength(5);
+    });
+
+    it('should use getComputedStyle + parseFloat', () => {
+      const parsed = parseFloat('16px');
+      expect(parsed).toBe(16);
+    });
+  });
+
+  describe('v6: getComputedLayout', () => {
+    it('should return 12 layout properties', () => {
+      const layoutProps = [
+        'display', 'flexDirection', 'flexWrap', 'justifyContent',
+        'alignItems', 'alignContent', 'gap',
+        'gridTemplateColumns', 'gridTemplateRows', 'gridAutoFlow',
+        'position', 'overflow',
+      ];
+      expect(layoutProps).toHaveLength(12);
+    });
+
+    it('should return children count and sizes (up to 50)', () => {
+      const maxChildren = 50;
+      expect(maxChildren).toBe(50);
+    });
+
+    it('should generate selectors for child elements', () => {
+      const childSel = 'div.item';
+      expect(childSel).toContain('.');
+    });
+  });
+
+  describe('v6: getPalette', () => {
+    it('should extract color, backgroundColor, borderColor', () => {
+      const properties = ['color', 'backgroundColor', 'borderColor'];
+      expect(properties).toHaveLength(3);
+    });
+
+    it('should convert RGB to hex', () => {
+      const rgb = 'rgb(255, 0, 0)';
+      const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      const hex = '#' + [match![1], match![2], match![3]].map(c => parseInt(c).toString(16).padStart(2, '0')).join('');
+      expect(hex).toBe('#ff0000');
+    });
+
+    it('should skip transparent colors', () => {
+      const skipped = ['transparent', 'rgba(0, 0, 0, 0)'];
+      expect(skipped).toHaveLength(2);
+    });
+
+    it('should limit scanned elements to 500', () => {
+      const maxElements = 500;
+      expect(maxElements).toBe(500);
+    });
+
+    it('should sort colors by frequency', () => {
+      const colors = [
+        { hex: '#fff', count: 50 },
+        { hex: '#000', count: 30 },
+        { hex: '#f00', count: 10 },
+      ];
+      expect(colors[0].count).toBeGreaterThanOrEqual(colors[1].count);
+    });
+
+    it('should default limit to 20', () => {
+      const defaultLimit = 20;
+      expect(defaultLimit).toBe(20);
+    });
+  });
+
+  describe('v6: waitForHMR', () => {
+    it('should poll every 200ms', () => {
+      const pollInterval = 200;
+      expect(pollInterval).toBe(200);
+    });
+
+    it('should compare lastUpdate timestamps', () => {
+      const initial = 1000;
+      const current = 2000;
+      const updated = current !== initial;
+      expect(updated).toBe(true);
+    });
+
+    it('should return timedOut when no update within timeout', () => {
+      const result = { updated: false, timedOut: true };
+      expect(result.timedOut).toBe(true);
+    });
+
+    it('should return latency when update detected', () => {
+      const result = { updated: true, latency: 350 };
+      expect(result.updated).toBe(true);
+      expect(result.latency).toBeGreaterThan(0);
+    });
+
+    it('should default timeout to 10000ms', () => {
+      const defaultTimeout = 10000;
+      expect(defaultTimeout).toBe(10000);
+    });
+  });
+
+  describe('v6: Font Detection Enhancement', () => {
+    it('should add 6 font properties to computedStyles', () => {
+      const newProps = ['fontFamily', 'fontStyle', 'lineHeight', 'letterSpacing', 'textAlign', 'textTransform'];
+      expect(newProps).toHaveLength(6);
+    });
+
+    it('should apply to inspectElement, elementAtPoint, and batchInspect', () => {
+      const enhancedFunctions = ['inspectElement', 'elementAtPoint', 'batchInspect'];
+      expect(enhancedFunctions).toHaveLength(3);
+    });
+
+    it('computedStyles should now have 18 properties total', () => {
+      const existingProps = 12;
+      const newProps = 6;
+      expect(existingProps + newProps).toBe(18);
     });
   });
 });

@@ -43,10 +43,16 @@ describe('WebviewClient', () => {
       getStyleDiff: 'visioncraft_style_diff',
       getComponentTree: 'visioncraft_get_component_tree',
       auditAccessibility: 'visioncraft_audit_accessibility',
+      // v6 additions
+      measureElement: 'visioncraft_measure_element',
+      measureSpacing: 'visioncraft_measure_spacing',
+      getComputedLayout: 'visioncraft_get_computed_layout',
+      getPalette: 'visioncraft_get_palette',
+      waitForHMR: 'visioncraft_wait_for_hmr',
     };
 
-    it('should map all 25 methods to tool names', () => {
-      expect(Object.keys(expectedMappings)).toHaveLength(25);
+    it('should map all 30 methods to tool names', () => {
+      expect(Object.keys(expectedMappings)).toHaveLength(30);
     });
 
     for (const [method, expectedTool] of Object.entries(expectedMappings)) {
@@ -345,6 +351,55 @@ describe('WebviewClient', () => {
       const c = new WebviewClient('http://localhost:9999');
       await c.disconnect();
       expect(c.isConnected()).toBe(false);
+    });
+  });
+
+  // ====== V6 Argument Mapping ======
+
+  describe('Argument Mapping: v6 measureElement', () => {
+    it('should map selectorA and selectorB', () => {
+      const result = mapArgsToToolArgs('measureElement', ['#header', '#content']);
+      expect(result.selectorA).toBe('#header');
+      expect(result.selectorB).toBe('#content');
+    });
+  });
+
+  describe('Argument Mapping: v6 measureSpacing', () => {
+    it('should map selector', () => {
+      const result = mapArgsToToolArgs('measureSpacing', ['.card']);
+      expect(result.selector).toBe('.card');
+    });
+  });
+
+  describe('Argument Mapping: v6 getComputedLayout', () => {
+    it('should map selector', () => {
+      const result = mapArgsToToolArgs('getComputedLayout', ['.container']);
+      expect(result.selector).toBe('.container');
+    });
+  });
+
+  describe('Argument Mapping: v6 getPalette', () => {
+    it('should map selector and limit', () => {
+      const result = mapArgsToToolArgs('getPalette', ['#main', 10]);
+      expect(result.selector).toBe('#main');
+      expect(result.limit).toBe(10);
+    });
+
+    it('should default limit to 20', () => {
+      const result = mapArgsToToolArgs('getPalette', []);
+      expect(result.limit).toBe(20);
+    });
+  });
+
+  describe('Argument Mapping: v6 waitForHMR', () => {
+    it('should map timeout', () => {
+      const result = mapArgsToToolArgs('waitForHMR', [5000]);
+      expect(result.timeout).toBe(5000);
+    });
+
+    it('should default timeout to 10000', () => {
+      const result = mapArgsToToolArgs('waitForHMR', []);
+      expect(result.timeout).toBe(10000);
     });
   });
 });

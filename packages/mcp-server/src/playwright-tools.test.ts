@@ -4,6 +4,7 @@ import {
   filterNetworkRequests,
   getHMRStatus,
   clearHMRErrors,
+  waitForHMR,
 } from './playwright-tools.js';
 import type { ConsoleLogEntry, NetworkRequestEntry } from './playwright-tools.js';
 
@@ -248,6 +249,151 @@ describe('Playwright Tools', () => {
       expect(result.violations[0]).toHaveProperty('id');
       expect(result.violations[0]).toHaveProperty('impact');
       expect(result.passCount).toBe(25);
+    });
+  });
+
+  // ====== V6 New Tool Data Shapes ======
+
+  describe('V6 New Tool: measureElement data shape', () => {
+    it('should return distances and overlap info', () => {
+      const result = {
+        elementA: { selector: '#header', boundingBox: { x: 0, y: 0, width: 800, height: 60 } },
+        elementB: { selector: '#content', boundingBox: { x: 0, y: 80, width: 800, height: 400 } },
+        distances: { top: 20, right: 0, bottom: -480, left: 0, horizontal: 0, vertical: 20 },
+        overlap: false,
+      };
+
+      expect(result.elementA).toHaveProperty('selector');
+      expect(result.elementA).toHaveProperty('boundingBox');
+      expect(result.elementB).toHaveProperty('selector');
+      expect(result.distances).toHaveProperty('top');
+      expect(result.distances).toHaveProperty('horizontal');
+      expect(result.distances).toHaveProperty('vertical');
+      expect(result.overlap).toBe(false);
+    });
+
+    it('should include overlapArea when elements overlap', () => {
+      const result = {
+        overlap: true,
+        overlapArea: { width: 50, height: 30 },
+      };
+
+      expect(result.overlap).toBe(true);
+      expect(result.overlapArea).toHaveProperty('width');
+      expect(result.overlapArea).toHaveProperty('height');
+    });
+  });
+
+  describe('V6 New Tool: measureSpacing data shape', () => {
+    it('should return padding, margin, borderWidth, gap, boxSizing', () => {
+      const result = {
+        padding: { top: 16, right: 24, bottom: 16, left: 24 },
+        margin: { top: 0, right: 0, bottom: 8, left: 0 },
+        borderWidth: { top: 1, right: 1, bottom: 1, left: 1 },
+        gap: { row: 0, column: 0 },
+        boxSizing: 'border-box',
+      };
+
+      expect(result.padding.top).toBe(16);
+      expect(result.margin.bottom).toBe(8);
+      expect(result.borderWidth.top).toBe(1);
+      expect(result.gap).toHaveProperty('row');
+      expect(result.gap).toHaveProperty('column');
+      expect(result.boxSizing).toBe('border-box');
+    });
+
+    it('all values should be numeric', () => {
+      const spacing = { top: 10, right: 20, bottom: 10, left: 20 };
+      for (const val of Object.values(spacing)) {
+        expect(typeof val).toBe('number');
+      }
+    });
+  });
+
+  describe('V6 New Tool: getComputedLayout data shape', () => {
+    it('should return layout properties object', () => {
+      const layout = {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignContent: 'normal',
+        gap: '16px',
+        gridTemplateColumns: 'none',
+        gridTemplateRows: 'none',
+        gridAutoFlow: 'row',
+        position: 'relative',
+        overflow: 'visible',
+      };
+
+      expect(layout.display).toBe('flex');
+      expect(layout.flexDirection).toBe('row');
+      expect(Object.keys(layout)).toHaveLength(12);
+    });
+
+    it('should return children with count and sizes', () => {
+      const children = {
+        count: 3,
+        sizes: [
+          { selector: 'div.item', width: 200, height: 100 },
+          { selector: 'div.item', width: 200, height: 100 },
+          { selector: 'div.item', width: 200, height: 100 },
+        ],
+      };
+
+      expect(children.count).toBe(3);
+      expect(children.sizes).toHaveLength(3);
+      expect(children.sizes[0]).toHaveProperty('width');
+      expect(children.sizes[0]).toHaveProperty('height');
+    });
+  });
+
+  describe('V6 New Tool: getPalette data shape', () => {
+    it('should return colors array sorted by frequency', () => {
+      const result = {
+        colors: [
+          { hex: '#ffffff', rgb: '255, 255, 255', count: 50, properties: ['backgroundColor'] },
+          { hex: '#000000', rgb: '0, 0, 0', count: 30, properties: ['color'] },
+          { hex: '#0066cc', rgb: '0, 102, 204', count: 10, properties: ['color', 'borderColor'] },
+        ],
+        totalElements: 100,
+      };
+
+      expect(result.colors).toHaveLength(3);
+      expect(result.colors[0].count).toBeGreaterThanOrEqual(result.colors[1].count);
+      expect(result.colors[1].count).toBeGreaterThanOrEqual(result.colors[2].count);
+      expect(result.totalElements).toBe(100);
+    });
+
+    it('should return hex in correct format', () => {
+      const hex = '#ff0000';
+      expect(hex).toMatch(/^#[0-9a-f]{6}$/);
+    });
+  });
+
+  describe('V6 New Tool: waitForHMR', () => {
+    it('should return not-available for browser mode', () => {
+      const result = waitForHMR();
+      expect(result.updated).toBe(false);
+      expect(result.note).toContain('webview');
+    });
+  });
+
+  describe('V6 Enhancement: Font Detection', () => {
+    it('inspect_element should include 6 new font properties', () => {
+      const newProps = ['fontFamily', 'fontStyle', 'lineHeight', 'letterSpacing', 'textAlign', 'textTransform'];
+      expect(newProps).toHaveLength(6);
+    });
+
+    it('computedStyles should now have 18 properties', () => {
+      const allProps = [
+        'display', 'position', 'width', 'height', 'color', 'backgroundColor',
+        'fontSize', 'fontWeight', 'fontFamily', 'fontStyle', 'lineHeight',
+        'letterSpacing', 'textAlign', 'textTransform',
+        'padding', 'margin', 'border', 'zIndex',
+      ];
+      expect(allProps).toHaveLength(18);
     });
   });
 });

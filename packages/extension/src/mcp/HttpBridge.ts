@@ -361,6 +361,34 @@ export class HttpBridge {
           );
           break;
 
+        case 'visioncraft_measure_element':
+          result = await webviewBridge.measureElement(
+            args.selectorA as string,
+            args.selectorB as string
+          );
+          break;
+
+        case 'visioncraft_measure_spacing':
+          result = await webviewBridge.measureSpacing(args.selector as string);
+          break;
+
+        case 'visioncraft_get_computed_layout':
+          result = await webviewBridge.getComputedLayout(args.selector as string);
+          break;
+
+        case 'visioncraft_get_palette':
+          result = await webviewBridge.getPalette(
+            args.selector as string | undefined,
+            (args.limit as number) || 20
+          );
+          break;
+
+        case 'visioncraft_wait_for_hmr':
+          result = await webviewBridge.waitForHMR(
+            (args.timeout as number) || 10000
+          );
+          break;
+
         default:
           throw new Error(`Unknown tool: ${toolName}`);
       }

@@ -16,6 +16,7 @@ import * as playwrightTools from './playwright-tools.js';
 import type { ConsoleLogEntry, NetworkRequestEntry } from './playwright-tools.js';
 import type { Page } from 'playwright-core';
 import { z } from 'zod';
+import * as fs from 'fs';
 
 // Visual diff imports (lazy-loaded)
 let pixelmatch: any = null;
@@ -392,6 +393,10 @@ const tools: Tool[] = [
           default: 30,
           minimum: 0,
           maximum: 255
+        },
+        selector: {
+          type: 'string',
+          description: 'CSS selector to scope the diff to a specific element. When provided, both baseline and current screenshots are cropped to the element bounding box before comparison.'
         }
       },
       required: []
@@ -493,6 +498,137 @@ const tools: Tool[] = [
       },
       required: []
     }
+  },
+  // v6 new tools
+  {
+    name: 'visioncraft_measure_element',
+    description: 'Measure the distance between two elements. Returns gap distances (top, right, bottom, left, horizontal, vertical) and overlap detection. Replaces manual bounding-box math from two inspect_element calls.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selectorA: {
+          type: 'string',
+          description: 'CSS selector for the first element'
+        },
+        selectorB: {
+          type: 'string',
+          description: 'CSS selector for the second element'
+        }
+      },
+      required: ['selectorA', 'selectorB']
+    }
+  },
+  {
+    name: 'visioncraft_measure_spacing',
+    description: 'Get the padding, margin, border-width, and gap of an element as clean numeric pixel values. More precise than get_css_source which returns shorthand CSS text.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selector: {
+          type: 'string',
+          description: 'CSS selector for the element'
+        }
+      },
+      required: ['selector']
+    }
+  },
+  {
+    name: 'visioncraft_get_computed_layout',
+    description: 'Get flex/grid layout properties and children sizes for a container element. Returns display, flexDirection, justifyContent, alignItems, gap, gridTemplateColumns, and child element dimensions.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selector: {
+          type: 'string',
+          description: 'CSS selector for the container element'
+        }
+      },
+      required: ['selector']
+    }
+  },
+  {
+    name: 'visioncraft_diff_against_reference',
+    description: 'Compare the current page (or a specific element) against a reference PNG image file. Returns similarity percentage, changed pixel count, and a visual diff image. Use this to compare rendered output against a design mockup or Figma export.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        referencePath: {
+          type: 'string',
+          description: 'Absolute path to the reference PNG image file'
+        },
+        selector: {
+          type: 'string',
+          description: 'CSS selector to crop the current screenshot to before comparison'
+        },
+        tolerance: {
+          type: 'number',
+          description: 'Pixel difference threshold 0-255. Lower = more sensitive (default: 30)',
+          default: 30,
+          minimum: 0,
+          maximum: 255
+        }
+      },
+      required: ['referencePath']
+    }
+  },
+  {
+    name: 'visioncraft_get_palette',
+    description: 'Extract the color palette from the page or a specific element. Returns colors sorted by frequency with hex values, RGB, occurrence count, and which CSS properties use each color.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selector: {
+          type: 'string',
+          description: 'CSS selector to scope palette extraction (default: entire page)'
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of colors to return (default: 20)',
+          default: 20
+        }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'visioncraft_snapshot',
+    description: 'Capture a screenshot, inspect elements, and optionally run accessibility audit in a single call. Replaces 4-6 individual tool calls with one request. Returns screenshot image, element inspection results, and optional audit.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selectors: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'CSS selectors of elements to inspect alongside the screenshot'
+        },
+        screenshot: {
+          type: 'boolean',
+          description: 'Whether to capture a screenshot (default: true)',
+          default: true
+        },
+        audit: {
+          type: 'boolean',
+          description: 'Whether to run accessibility audit (default: false)',
+          default: false
+        }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'visioncraft_wait_for_hmr',
+    description: 'Wait for a Hot Module Replacement update to complete before taking screenshots or inspecting elements. Polls HMR status until a new update is detected or timeout is reached.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        timeout: {
+          type: 'number',
+          description: 'Maximum wait time in milliseconds (default: 10000)',
+          default: 10000
+        }
+      },
+      required: []
+    }
   }
 ];
 
@@ -536,6 +672,10 @@ class VisionCraftMCPServer {
         console.error(`[MCP] Running in webview mode with bridge at ${bridgeUrl}`);
         this.webviewClient = new WebviewClient(bridgeUrl);
         this.currentMode = 'webview';
+        // Fire-and-forget bridge health check
+        this.webviewClient.connect().catch((err) => {
+          console.error('[MCP] Initial bridge health check failed (will retry on first tool call):', err instanceof Error ? err.message : String(err));
+        });
       }
     } else {
       console.error('[MCP] Running in external browser mode (Playwright)');
@@ -669,6 +809,27 @@ class VisionCraftMCPServer {
     console.error('[MCP] Playwright event listeners attached for console/network capture');
   }
 
+  /**
+   * Try executing via webview bridge; if it fails, fall back to Playwright browser.
+   * Keeps currentMode as 'webview' so next call tries bridge again (extension may restart).
+   */
+  private async tryWebviewWithFallback<T>(
+    bridgeFn: () => Promise<T>,
+    playwrightFn: (page: Page) => Promise<T>
+  ): Promise<T> {
+    try {
+      return await bridgeFn();
+    } catch (bridgeError) {
+      console.error('[MCP] Webview bridge call failed, falling back to Playwright:', bridgeError instanceof Error ? bridgeError.message : String(bridgeError));
+      const browser = await this.ensureBrowserClient();
+      const page = browser.page;
+      if (!page) {
+        throw new Error('Fallback failed: no Playwright page available. Original error: ' + (bridgeError instanceof Error ? bridgeError.message : String(bridgeError)));
+      }
+      return await playwrightFn(page);
+    }
+  }
+
   private setupErrorHandling(): void {
     this.server.onerror = (error) => {
       console.error('[MCP Error]', error);
@@ -708,6 +869,15 @@ class VisionCraftMCPServer {
       const { name, arguments: args } = request.params;
 
       try {
+        // Lazy reconnect: if webview mode but not connected, try to connect
+        if (this.currentMode === 'webview' && this.webviewClient && !this.webviewClient.isConnected()) {
+          try {
+            await this.webviewClient.connect();
+          } catch {
+            // Will try bridge anyway; callBridge has its own retry logic
+          }
+        }
+
         const client = this.getClient(args?.url as string);
 
         switch (name) {
@@ -1046,10 +1216,22 @@ class VisionCraftMCPServer {
             }
 
             const threshold = (args?.threshold as number) || 30;
+            const diffSelector = args?.selector as string | undefined;
 
-            // Take a new screenshot
+            // Take a new screenshot (optionally scoped to element)
             let newBuffer: Buffer;
-            if (this.currentMode === 'webview' && this.webviewClient) {
+            if (diffSelector) {
+              // Element-scoped diff
+              if (this.currentMode === 'webview' && this.webviewClient) {
+                const dataUrl = await client.callBridge('screenshot', 'png', 100, diffSelector);
+                const base64Match = (dataUrl as string).match(/^data:image\/\w+;base64,(.+)$/);
+                const base64 = base64Match ? base64Match[1] : dataUrl;
+                newBuffer = Buffer.from(base64 as string, 'base64');
+              } else {
+                const page = this.getPlaywrightPage();
+                newBuffer = await page.locator(diffSelector).screenshot({ type: 'png' });
+              }
+            } else if (this.currentMode === 'webview' && this.webviewClient) {
               const dataUrl = await client.callBridge('screenshot', 'png', 100);
               const base64Match = (dataUrl as string).match(/^data:image\/\w+;base64,(.+)$/);
               const base64 = base64Match ? base64Match[1] : dataUrl;
@@ -1096,6 +1278,7 @@ class VisionCraftMCPServer {
 
             const totalPixels = width * height;
             const changedPercent = ((numDiffPixels / totalPixels) * 100).toFixed(2);
+            const similarityPercent = parseFloat((100 - parseFloat(changedPercent)).toFixed(2));
 
             // Encode diff image as PNG
             const diffPng = new PNG({ width, height });
@@ -1111,6 +1294,7 @@ class VisionCraftMCPServer {
                     changedPixels: numDiffPixels,
                     totalPixels,
                     changedPercent: parseFloat(changedPercent),
+                    similarityPercent,
                     dimensions: { width, height },
                   }, null, 2),
                 },
@@ -1125,25 +1309,36 @@ class VisionCraftMCPServer {
 
           case 'visioncraft_navigate': {
             const url = args?.url as string;
+            const previousMode = this.currentMode;
 
             if (this.isLocalUrl(url) && this.webviewClient) {
               // Local URL: use webview mode
-              this.currentMode = 'webview';
-              await this.webviewClient.callBridge('navigate', url);
-              return {
-                content: [{ type: 'text', text: `Navigated to ${url}` }],
-              };
+              try {
+                await this.webviewClient.callBridge('navigate', url);
+                this.currentMode = 'webview';
+                return {
+                  content: [{ type: 'text', text: `Navigated to ${url}` }],
+                };
+              } catch (error) {
+                this.currentMode = previousMode;
+                throw error;
+              }
             } else {
               // External URL: switch to browser mode
-              this.currentMode = 'browser';
-              const browser = await this.ensureBrowserClient();
-              await browser.navigate(url);
-              // Clear stale captures from previous page
-              this.consoleLogs = [];
-              this.networkRequests = [];
-              return {
-                content: [{ type: 'text', text: `Navigated to ${url} (browser mode)` }],
-              };
+              try {
+                const browser = await this.ensureBrowserClient();
+                await browser.navigate(url);
+                this.currentMode = 'browser';
+                // Clear stale captures from previous page
+                this.consoleLogs = [];
+                this.networkRequests = [];
+                return {
+                  content: [{ type: 'text', text: `Navigated to ${url} (browser mode)` }],
+                };
+              } catch (error) {
+                this.currentMode = previousMode;
+                throw error;
+              }
             }
           }
 
@@ -1197,6 +1392,229 @@ class VisionCraftMCPServer {
               return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
             }
             const result = await client.callBridge('auditAccessibility', selector, tags);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+          }
+
+          // v6 new tool handlers
+
+          case 'visioncraft_measure_element': {
+            const selectorA = args?.selectorA as string;
+            const selectorB = args?.selectorB as string;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.measureElement(this.getPlaywrightPage(), selectorA, selectorB);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
+            const result = await client.callBridge('measureElement', selectorA, selectorB);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+          }
+
+          case 'visioncraft_measure_spacing': {
+            const selector = args?.selector as string;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.measureSpacing(this.getPlaywrightPage(), selector);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
+            const result = await client.callBridge('measureSpacing', selector);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+          }
+
+          case 'visioncraft_get_computed_layout': {
+            const selector = args?.selector as string;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.getComputedLayout(this.getPlaywrightPage(), selector);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
+            const result = await client.callBridge('getComputedLayout', selector);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+          }
+
+          case 'visioncraft_diff_against_reference': {
+            const referencePath = args?.referencePath as string;
+            const refSelector = args?.selector as string | undefined;
+            const tolerance = (args?.tolerance as number) || 30;
+
+            // Read reference PNG
+            if (!fs.existsSync(referencePath)) {
+              throw new Error(`Reference file not found: ${referencePath}`);
+            }
+            const refBuffer = fs.readFileSync(referencePath);
+
+            // Take current screenshot (optionally scoped to element)
+            let currentBuffer: Buffer;
+            if (refSelector) {
+              if (this.currentMode === 'webview' && this.webviewClient) {
+                const dataUrl = await client.callBridge('screenshot', 'png', 100, refSelector);
+                const base64Match = (dataUrl as string).match(/^data:image\/\w+;base64,(.+)$/);
+                const base64 = base64Match ? base64Match[1] : dataUrl;
+                currentBuffer = Buffer.from(base64 as string, 'base64');
+              } else {
+                const page = this.getPlaywrightPage();
+                currentBuffer = await page.locator(refSelector).screenshot({ type: 'png' });
+              }
+            } else if (this.currentMode === 'webview' && this.webviewClient) {
+              const dataUrl = await client.callBridge('screenshot', 'png', 100);
+              const base64Match = (dataUrl as string).match(/^data:image\/\w+;base64,(.+)$/);
+              const base64 = base64Match ? base64Match[1] : dataUrl;
+              currentBuffer = Buffer.from(base64 as string, 'base64');
+            } else {
+              const page = this.getPlaywrightPage();
+              currentBuffer = await page.screenshot({ type: 'png', fullPage: true });
+            }
+
+            // Load pixelmatch deps
+            await loadDiffDeps();
+
+            const refPng = PNG.sync.read(refBuffer);
+            const curPng = PNG.sync.read(currentBuffer);
+
+            const width = Math.max(refPng.width, curPng.width);
+            const height = Math.max(refPng.height, curPng.height);
+
+            const padImage = (img: any, w: number, h: number) => {
+              if (img.width === w && img.height === h) return img.data;
+              const padded = Buffer.alloc(w * h * 4, 0);
+              for (let y = 0; y < img.height; y++) {
+                for (let x = 0; x < img.width; x++) {
+                  const srcIdx = (y * img.width + x) * 4;
+                  const dstIdx = (y * w + x) * 4;
+                  padded[dstIdx] = img.data[srcIdx];
+                  padded[dstIdx + 1] = img.data[srcIdx + 1];
+                  padded[dstIdx + 2] = img.data[srcIdx + 2];
+                  padded[dstIdx + 3] = img.data[srcIdx + 3];
+                }
+              }
+              return padded;
+            };
+
+            const refData = padImage(refPng, width, height);
+            const curData = padImage(curPng, width, height);
+
+            const diffData = Buffer.alloc(width * height * 4);
+            const numDiffPixels = pixelmatch(refData, curData, diffData, width, height, {
+              threshold: tolerance / 255,
+            });
+
+            const totalPixels = width * height;
+            const changedPercent = ((numDiffPixels / totalPixels) * 100).toFixed(2);
+            const similarityPercent = parseFloat((100 - parseFloat(changedPercent)).toFixed(2));
+
+            const diffPng = new PNG({ width, height });
+            diffPng.data = diffData;
+            const diffBuffer = PNG.sync.write(diffPng);
+            const diffBase64 = diffBuffer.toString('base64');
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify({
+                    similarityPercent,
+                    changedPixels: numDiffPixels,
+                    totalPixels,
+                    changedPercent: parseFloat(changedPercent),
+                    dimensions: { width, height },
+                    referencePath,
+                  }, null, 2),
+                },
+                {
+                  type: 'image',
+                  data: diffBase64,
+                  mimeType: 'image/png',
+                },
+              ],
+            };
+          }
+
+          case 'visioncraft_get_palette': {
+            const selector = args?.selector as string | undefined;
+            const limit = (args?.limit as number) || 20;
+            if (this.currentMode === 'browser') {
+              const result = await playwrightTools.getPalette(this.getPlaywrightPage(), selector, limit);
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
+            const result = await client.callBridge('getPalette', selector, limit);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+          }
+
+          case 'visioncraft_snapshot': {
+            const selectors = args?.selectors as string[] | undefined;
+            const includeScreenshot = args?.screenshot !== false;
+            const includeAudit = (args?.audit as boolean) || false;
+
+            const results: any = {};
+
+            // Run operations in parallel
+            const promises: Promise<void>[] = [];
+
+            if (includeScreenshot) {
+              promises.push((async () => {
+                if (this.currentMode === 'webview' && this.webviewClient) {
+                  const dataUrl = await client.callBridge('screenshot', 'jpeg', 80);
+                  results.screenshot = dataUrl;
+                } else {
+                  const page = this.getPlaywrightPage();
+                  const buf = await page.screenshot({ type: 'jpeg', quality: 80, fullPage: true });
+                  results.screenshot = `data:image/jpeg;base64,${buf.toString('base64')}`;
+                }
+              })());
+            }
+
+            if (selectors && selectors.length > 0) {
+              promises.push((async () => {
+                const elements: any[] = [];
+                for (const sel of selectors) {
+                  if (this.currentMode === 'browser') {
+                    elements.push(await playwrightTools.inspectElement(this.getPlaywrightPage(), sel));
+                  } else {
+                    elements.push(await client.callBridge('inspectElement', sel));
+                  }
+                }
+                results.elements = elements;
+              })());
+            }
+
+            if (includeAudit) {
+              promises.push((async () => {
+                if (this.currentMode === 'browser') {
+                  results.audit = await playwrightTools.auditAccessibility(this.getPlaywrightPage());
+                } else {
+                  results.audit = await client.callBridge('auditAccessibility');
+                }
+              })());
+            }
+
+            await Promise.all(promises);
+
+            const content: any[] = [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  elements: results.elements || [],
+                  audit: results.audit || null,
+                }, null, 2),
+              },
+            ];
+
+            if (results.screenshot) {
+              const base64Match = (results.screenshot as string).match(/^data:image\/\w+;base64,(.+)$/);
+              const base64 = base64Match ? base64Match[1] : results.screenshot;
+              content.push({
+                type: 'image',
+                data: base64,
+                mimeType: 'image/jpeg',
+              });
+            }
+
+            return { content };
+          }
+
+          case 'visioncraft_wait_for_hmr': {
+            const timeout = (args?.timeout as number) || 10000;
+            if (this.currentMode === 'browser') {
+              const result = playwrightTools.waitForHMR();
+              return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+            }
+            const result = await client.callBridge('waitForHMR', timeout);
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 

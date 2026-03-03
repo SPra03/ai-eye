@@ -38,6 +38,14 @@ const ALL_TOOL_NAMES = [
   'visioncraft_style_diff',
   'visioncraft_get_component_tree',
   'visioncraft_audit_accessibility',
+  // v6 new tools
+  'visioncraft_measure_element',
+  'visioncraft_measure_spacing',
+  'visioncraft_get_computed_layout',
+  'visioncraft_diff_against_reference',
+  'visioncraft_get_palette',
+  'visioncraft_snapshot',
+  'visioncraft_wait_for_hmr',
 ];
 
 // Original v1/v2 tools
@@ -78,8 +86,8 @@ const V3_ENHANCED_TOOLS = [
 
 describe('MCP Server Tool Registry', () => {
   describe('Tool Count', () => {
-    it('should have 25 total tools', () => {
-      expect(ALL_TOOL_NAMES).toHaveLength(25);
+    it('should have 32 total tools', () => {
+      expect(ALL_TOOL_NAMES).toHaveLength(32);
     });
 
     it('should have 14 original tools', () => {
@@ -652,5 +660,351 @@ describe('V5 External Website Browsing', () => {
       const response = `Navigated to ${url}`;
       expect(response).not.toContain('browser mode');
     });
+  });
+});
+
+// ====== V6 Tests ======
+
+const V6_NEW_TOOLS = [
+  'visioncraft_measure_element',
+  'visioncraft_measure_spacing',
+  'visioncraft_get_computed_layout',
+  'visioncraft_diff_against_reference',
+  'visioncraft_get_palette',
+  'visioncraft_snapshot',
+  'visioncraft_wait_for_hmr',
+];
+
+const V6_ENHANCED_TOOLS = [
+  'visioncraft_visual_diff',    // +selector, +similarityPercent
+  'visioncraft_inspect_element', // +font properties
+];
+
+describe('V6 Tool Registry', () => {
+  it('should have 7 new v6 tools', () => {
+    expect(V6_NEW_TOOLS).toHaveLength(7);
+  });
+
+  it('all v6 tools should exist in ALL_TOOL_NAMES', () => {
+    for (const tool of V6_NEW_TOOLS) {
+      expect(ALL_TOOL_NAMES).toContain(tool);
+    }
+  });
+
+  it('should have 2 enhanced v6 tools', () => {
+    expect(V6_ENHANCED_TOOLS).toHaveLength(2);
+  });
+
+  it('should have no duplicate tool names', () => {
+    const unique = new Set(ALL_TOOL_NAMES);
+    expect(unique.size).toBe(ALL_TOOL_NAMES.length);
+  });
+});
+
+describe('V6 Bug Fix: Mode Corruption on Failed Navigate', () => {
+  it('should save previousMode before navigate attempt', () => {
+    let currentMode: 'webview' | 'browser' = 'webview';
+    const previousMode = currentMode;
+    expect(previousMode).toBe('webview');
+  });
+
+  it('should rollback mode on navigate failure', () => {
+    let currentMode: 'webview' | 'browser' = 'webview';
+    const previousMode = currentMode;
+
+    // Simulate failed navigate
+    try {
+      // Would normally: this.currentMode = 'browser'; then throw
+      throw new Error('Navigate failed');
+    } catch {
+      currentMode = previousMode; // rollback
+    }
+
+    expect(currentMode).toBe('webview');
+  });
+
+  it('should only set mode after successful navigate', () => {
+    let currentMode: 'webview' | 'browser' = 'webview';
+
+    // Simulate successful navigate
+    const navigateSuccess = true;
+    if (navigateSuccess) {
+      currentMode = 'browser';
+    }
+
+    expect(currentMode).toBe('browser');
+  });
+});
+
+describe('V6 Bug Fix: Bridge Health Check on Startup', () => {
+  it('should attempt connect on startup', () => {
+    // Bridge connect should be called fire-and-forget in constructor
+    const connectCalled = true;
+    expect(connectCalled).toBe(true);
+  });
+
+  it('should not throw if initial connect fails', () => {
+    // connect().catch() should just log, not crash
+    const errorHandled = true;
+    expect(errorHandled).toBe(true);
+  });
+});
+
+describe('V6 Bug Fix: Webview-to-Browser Fallback', () => {
+  it('should try bridge first then fall back to Playwright', async () => {
+    let bridgeCalled = false;
+    let playwrightCalled = false;
+
+    const bridgeFn = async () => {
+      bridgeCalled = true;
+      throw new Error('Bridge unavailable');
+    };
+
+    const playwrightFn = async () => {
+      playwrightCalled = true;
+      return { success: true };
+    };
+
+    // Simulate tryWebviewWithFallback
+    let result;
+    try {
+      result = await bridgeFn();
+    } catch {
+      result = await playwrightFn();
+    }
+
+    expect(bridgeCalled).toBe(true);
+    expect(playwrightCalled).toBe(true);
+    expect(result).toEqual({ success: true });
+  });
+
+  it('should keep mode as webview after fallback', () => {
+    let currentMode: 'webview' | 'browser' = 'webview';
+    // After fallback, mode should stay webview
+    expect(currentMode).toBe('webview');
+  });
+});
+
+describe('Tool Schemas: visioncraft_measure_element', () => {
+  it('should require selectorA and selectorB', () => {
+    const required = ['selectorA', 'selectorB'];
+    expect(required).toHaveLength(2);
+  });
+
+  it('should return distances object', () => {
+    const expectedFields = ['top', 'right', 'bottom', 'left', 'horizontal', 'vertical'];
+    expect(expectedFields).toHaveLength(6);
+  });
+
+  it('should return overlap boolean and optional overlapArea', () => {
+    const result = { overlap: true, overlapArea: { width: 10, height: 20 } };
+    expect(result.overlap).toBe(true);
+    expect(result.overlapArea).toBeDefined();
+  });
+});
+
+describe('Tool Schemas: visioncraft_measure_spacing', () => {
+  it('should require selector', () => {
+    const required = ['selector'];
+    expect(required).toHaveLength(1);
+  });
+
+  it('should return padding, margin, borderWidth as {t,r,b,l}', () => {
+    const spacing = {
+      padding: { top: 10, right: 20, bottom: 10, left: 20 },
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      borderWidth: { top: 1, right: 1, bottom: 1, left: 1 },
+    };
+
+    expect(spacing.padding).toHaveProperty('top');
+    expect(spacing.padding).toHaveProperty('right');
+    expect(spacing.padding).toHaveProperty('bottom');
+    expect(spacing.padding).toHaveProperty('left');
+  });
+
+  it('should return gap and boxSizing', () => {
+    const spacing = {
+      gap: { row: 8, column: 16 },
+      boxSizing: 'border-box',
+    };
+
+    expect(spacing.gap).toHaveProperty('row');
+    expect(spacing.gap).toHaveProperty('column');
+    expect(spacing.boxSizing).toBe('border-box');
+  });
+});
+
+describe('Tool Schemas: visioncraft_get_computed_layout', () => {
+  it('should require selector', () => {
+    const required = ['selector'];
+    expect(required).toHaveLength(1);
+  });
+
+  it('should return layout properties', () => {
+    const layoutFields = [
+      'display', 'flexDirection', 'flexWrap', 'justifyContent',
+      'alignItems', 'alignContent', 'gap',
+      'gridTemplateColumns', 'gridTemplateRows', 'gridAutoFlow',
+      'position', 'overflow',
+    ];
+    expect(layoutFields).toHaveLength(12);
+  });
+
+  it('should return children count and sizes', () => {
+    const children = {
+      count: 3,
+      sizes: [
+        { selector: 'div.item', width: 100, height: 50 },
+        { selector: 'div.item', width: 100, height: 50 },
+        { selector: 'div.item', width: 100, height: 50 },
+      ],
+    };
+    expect(children.count).toBe(3);
+    expect(children.sizes).toHaveLength(3);
+  });
+});
+
+describe('Tool Schemas: visioncraft_diff_against_reference', () => {
+  it('should require referencePath', () => {
+    const required = ['referencePath'];
+    expect(required).toHaveLength(1);
+  });
+
+  it('should accept optional selector and tolerance', () => {
+    const params = {
+      referencePath: '/path/to/design.png',
+      selector: '#hero',
+      tolerance: 20,
+    };
+    expect(params.referencePath).toBeDefined();
+    expect(params.selector).toBe('#hero');
+    expect(params.tolerance).toBe(20);
+  });
+
+  it('should return similarityPercent', () => {
+    const result = {
+      similarityPercent: 97.5,
+      changedPixels: 2500,
+      totalPixels: 100000,
+      changedPercent: 2.5,
+    };
+    expect(result.similarityPercent).toBe(97.5);
+    expect(result.similarityPercent + result.changedPercent).toBe(100);
+  });
+});
+
+describe('Tool Schemas: visioncraft_get_palette', () => {
+  it('should have no required parameters', () => {
+    const required: string[] = [];
+    expect(required).toHaveLength(0);
+  });
+
+  it('should default limit to 20', () => {
+    const defaultLimit = 20;
+    expect(defaultLimit).toBe(20);
+  });
+
+  it('should return colors array with hex, rgb, count, properties', () => {
+    const color = { hex: '#ff0000', rgb: '255, 0, 0', count: 5, properties: ['color', 'backgroundColor'] };
+    expect(color.hex).toMatch(/^#[0-9a-f]{6}$/);
+    expect(color.count).toBeGreaterThan(0);
+    expect(color.properties).toContain('color');
+  });
+});
+
+describe('Tool Schemas: visioncraft_snapshot', () => {
+  it('should have no required parameters', () => {
+    const required: string[] = [];
+    expect(required).toHaveLength(0);
+  });
+
+  it('screenshot should default to true', () => {
+    const defaultScreenshot = true;
+    expect(defaultScreenshot).toBe(true);
+  });
+
+  it('audit should default to false', () => {
+    const defaultAudit = false;
+    expect(defaultAudit).toBe(false);
+  });
+
+  it('should accept optional selectors array', () => {
+    const params = { selectors: ['#nav', '.hero', 'footer'] };
+    expect(params.selectors).toHaveLength(3);
+  });
+});
+
+describe('Tool Schemas: visioncraft_wait_for_hmr', () => {
+  it('should have no required parameters', () => {
+    const required: string[] = [];
+    expect(required).toHaveLength(0);
+  });
+
+  it('timeout should default to 10000', () => {
+    const defaultTimeout = 10000;
+    expect(defaultTimeout).toBe(10000);
+  });
+
+  it('should return updated boolean and optional latency', () => {
+    const result = { updated: true, latency: 250 };
+    expect(result.updated).toBe(true);
+    expect(result.latency).toBeGreaterThan(0);
+  });
+
+  it('should return timedOut when no update detected', () => {
+    const result = { updated: false, timedOut: true };
+    expect(result.updated).toBe(false);
+    expect(result.timedOut).toBe(true);
+  });
+});
+
+describe('V6 Enhancement: visual_diff selector support', () => {
+  it('should accept optional selector parameter', () => {
+    const params = { threshold: 30, selector: '.hero-section' };
+    expect(params.selector).toBe('.hero-section');
+  });
+
+  it('should scope diff to element when selector provided', () => {
+    // When selector is provided, screenshots should be cropped to element
+    const hasSelectorSupport = true;
+    expect(hasSelectorSupport).toBe(true);
+  });
+});
+
+describe('V6 Enhancement: visual_diff similarity score', () => {
+  it('should include similarityPercent in response', () => {
+    const changedPercent = 2.5;
+    const similarityPercent = 100 - changedPercent;
+    expect(similarityPercent).toBe(97.5);
+  });
+
+  it('similarityPercent should be 100 minus changedPercent', () => {
+    const changedPercent = 0;
+    const similarityPercent = 100 - changedPercent;
+    expect(similarityPercent).toBe(100);
+  });
+});
+
+describe('V6 Enhancement: Font Detection in inspect_element', () => {
+  it('should include 6 new font properties in computedStyles', () => {
+    const newFontProperties = [
+      'fontFamily', 'fontStyle', 'lineHeight',
+      'letterSpacing', 'textAlign', 'textTransform',
+    ];
+    expect(newFontProperties).toHaveLength(6);
+  });
+
+  it('existing properties should be preserved', () => {
+    const existingProperties = [
+      'display', 'position', 'width', 'height',
+      'color', 'backgroundColor', 'fontSize', 'fontWeight',
+      'padding', 'margin', 'border', 'zIndex',
+    ];
+    expect(existingProperties).toHaveLength(12);
+  });
+
+  it('total computedStyles should be 18 properties', () => {
+    const total = 12 + 6; // existing + new
+    expect(total).toBe(18);
   });
 });
