@@ -8,6 +8,10 @@
         "VISIONCRAFT_BRIDGE_URL": "http://localhost:18420",
         "VISIONCRAFT_URL": "http://localhost:5175"
       }
+    },
+    "macos": {
+      "command": "node",
+      "args": ["packages/macos-mcp-server/dist/index.js"]
     }
   }
 }

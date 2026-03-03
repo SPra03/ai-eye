@@ -1,0 +1,43 @@
+{
+  "name": "@visioncraft/macos-mcp-server",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for macOS screen automation - gives AI agents visual access to native apps via Accessibility framework",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "visioncraft-macos-mcp": "./dist/index.js"
+  },
+  "author": "VisionCraft Team",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:swift": "cd swift-helper && swift build -c release && mkdir -p ../dist/bin && cp .build/release/visioncraft-macos-helper ../dist/bin/",
+    "build:ts": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --target=node18 --format=esm --sourcemap --banner:js=\"#!/usr/bin/env node\" --external:pixelmatch --external:pngjs --minify",
+    "build": "pnpm build:swift && pnpm build:ts",
+    "dev": "pnpm build:ts --watch",
+    "clean": "rm -rf dist && rm -rf swift-helper/.build",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js",
+    "postinstall": "cd swift-helper && swift build -c release && mkdir -p ../dist/bin && cp .build/release/visioncraft-macos-helper ../dist/bin/ || echo 'Swift build failed - macOS with Xcode Command Line Tools required'"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "pixelmatch": "^6.0.0",
+    "pngjs": "^7.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.7.0",
+    "@types/pngjs": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "os": ["darwin"]
+}

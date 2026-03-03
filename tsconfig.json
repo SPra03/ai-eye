@@ -22,6 +22,7 @@
   "references": [
     { "path": "./packages/extension" },
     { "path": "./packages/mcp-server" },
+    { "path": "./packages/macos-mcp-server" },
     { "path": "./packages/babel-plugin" },
     { "path": "./packages/vite-plugin" },
     { "path": "./packages/bridge" }
