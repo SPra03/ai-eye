@@ -748,7 +748,7 @@ When reporting issues, include:
 
 ### Where to Get Help
 
-- **GitHub Issues**: [https://github.com/your-username/visioncraft/issues](https://github.com/your-username/visioncraft/issues)
+- **GitHub Issues**: [https://github.com/SPra03/ai-eye/issues](https://github.com/SPra03/ai-eye/issues)
 - **Documentation**: See `docs/` folder
 - **API Reference**: `docs/API.md`
 - **AI Usage Guide**: `docs/AI-USAGE.md`

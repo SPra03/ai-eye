@@ -46,14 +46,14 @@ This project adheres to a code of conduct. By participating, you are expected to
 2. Clone your fork locally:
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/visioncraft.git
-cd visioncraft
+git clone https://github.com/YOUR-USERNAME/ai-eye.git
+cd ai-eye
 ```
 
 3. Add upstream remote:
 
 ```bash
-git remote add upstream https://github.com/original-owner/visioncraft.git
+git remote add upstream https://github.com/SPra03/ai-eye.git
 ```
 
 ---
@@ -581,8 +581,8 @@ Create release on GitHub with:
 
 ## Getting Help
 
-- **Questions**: Open a [Discussion](https://github.com/your-username/visioncraft/discussions)
-- **Bugs**: Open an [Issue](https://github.com/your-username/visioncraft/issues)
+- **Questions**: Open a [Discussion](https://github.com/SPra03/ai-eye/discussions)
+- **Bugs**: Open an [Issue](https://github.com/SPra03/ai-eye/issues)
 - **Security**: Email security@visioncraft.dev (do not open public issue)
 
 ---

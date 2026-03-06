@@ -198,7 +198,7 @@ export class CDPClient {
     console.error('[CDP] Launching new browser via Playwright...');
 
     this.browser = await chromium.launch({
-      headless: false,
+      headless: this.config.headless ?? false,
       timeout: this.config.timeout,
       args: [
         '--disable-extensions',

@@ -1,7 +1,10 @@
 {
   "name": "@visioncraft/bridge",
   "version": "1.0.0",
+  "private": true,
   "description": "Browser bridge script for VisionCraft",
+  "author": "VisionCraft Team",
+  "license": "MIT",
   "main": "./dist/visioncraft-bridge.js",
   "scripts": {
     "build": "esbuild src/visioncraft-bridge.ts --bundle --outfile=dist/visioncraft-bridge.js --format=esm --platform=browser --target=es2020 --minify --sourcemap",

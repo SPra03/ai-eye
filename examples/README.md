@@ -604,7 +604,7 @@ After trying the examples:
 
 - **Documentation:** [docs/](../docs/)
 - **Troubleshooting:** [docs/TROUBLESHOOTING.md](../docs/TROUBLESHOOTING.md)
-- **Issues:** [GitHub Issues](https://github.com/your-username/visioncraft/issues)
+- **Issues:** [GitHub Issues](https://github.com/SPra03/ai-eye/issues)
 
 ---
 

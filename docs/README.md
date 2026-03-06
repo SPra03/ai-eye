@@ -391,7 +391,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 Found an error? Have a suggestion? Please:
 
-- **Report issues:** [GitHub Issues](https://github.com/your-username/visioncraft/issues)
+- **Report issues:** [GitHub Issues](https://github.com/SPra03/ai-eye/issues)
 - **Suggest improvements:** Pull requests welcome
 - **Ask questions:** GitHub Discussions
 

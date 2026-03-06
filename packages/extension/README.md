@@ -71,8 +71,8 @@ The extension automatically exposes VisionCraft's MCP server to AI agents:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/visioncraft.git
-   cd visioncraft
+   git clone https://github.com/SPra03/ai-eye.git
+   cd ai-eye
    ```
 
 2. **Install dependencies:**
@@ -511,7 +511,7 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for development guidelines.
 ## Support
 
 - **Documentation:** [docs/](../../docs/)
-- **Issues:** [GitHub Issues](https://github.com/your-username/visioncraft/issues)
+- **Issues:** [GitHub Issues](https://github.com/SPra03/ai-eye/issues)
 - **Troubleshooting:** [docs/TROUBLESHOOTING.md](../../docs/TROUBLESHOOTING.md)
 - **AI Usage Guide:** [docs/AI-USAGE.md](../../docs/AI-USAGE.md)
 

@@ -1,10 +1,11 @@
 /**
- * Playwright-native tool implementations for browser mode (external websites).
+ * Playwright-native tool implementations for browser mode.
  * Each function accepts a Playwright Page and returns the same data shapes
  * as the bridge methods, using page.evaluate() with vanilla JS.
  *
- * These are used when the VisionCraft bridge script is NOT injected
- * (i.e., when browsing external websites, not a local dev server).
+ * Source mapping: When the @visioncraft/vite-plugin is active, elements have
+ * data-vc-source, data-vc-line, data-vc-col attributes. These functions read
+ * those attributes (walking up to the nearest source-mapped ancestor if needed).
  */
 
 import type { Page } from 'playwright-core';
@@ -32,12 +33,18 @@ export async function inspectElement(page: Page, selector: string) {
       if (cls) generatedSelector += `.${cls}`;
     }
 
+    // Walk up to find nearest source-mapped ancestor
+    let sourceEl: Element | null = el;
+    while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+      sourceEl = sourceEl.parentElement;
+    }
+
     return {
       tagName: el.tagName.toLowerCase(),
       selector: generatedSelector,
-      sourceFile: null,
-      sourceLine: null,
-      sourceCol: null,
+      sourceFile: sourceEl?.getAttribute('data-vc-source') || null,
+      sourceLine: sourceEl?.getAttribute('data-vc-line') || null,
+      sourceCol: sourceEl?.getAttribute('data-vc-col') || null,
       boundingBox: {
         x: Math.round(rect.x),
         y: Math.round(rect.y),
@@ -86,12 +93,18 @@ export async function elementAtPoint(page: Page, x: number, y: number) {
       if (cls) selector += `.${cls}`;
     }
 
+    // Walk up to find nearest source-mapped ancestor
+    let sourceEl: Element | null = el;
+    while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+      sourceEl = sourceEl.parentElement;
+    }
+
     return {
       tagName: el.tagName.toLowerCase(),
       selector,
-      sourceFile: null,
-      sourceLine: null,
-      sourceCol: null,
+      sourceFile: sourceEl?.getAttribute('data-vc-source') || null,
+      sourceLine: sourceEl?.getAttribute('data-vc-line') || null,
+      sourceCol: sourceEl?.getAttribute('data-vc-col') || null,
       boundingBox: {
         x: Math.round(rect.x),
         y: Math.round(rect.y),
@@ -151,12 +164,18 @@ export async function batchInspect(
           if (cls) selector += `.${cls}`;
         }
 
+        // Walk up to find nearest source-mapped ancestor
+        let sourceEl: Element | null = el;
+        while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+          sourceEl = sourceEl.parentElement;
+        }
+
         const result: any = {
           tagName: el.tagName.toLowerCase(),
           selector,
-          sourceFile: null,
-          sourceLine: null,
-          sourceCol: null,
+          sourceFile: sourceEl?.getAttribute('data-vc-source') || null,
+          sourceLine: sourceEl?.getAttribute('data-vc-line') || null,
+          sourceCol: sourceEl?.getAttribute('data-vc-col') || null,
           boundingBox: {
             x: Math.round(rect.x),
             y: Math.round(rect.y),
@@ -282,6 +301,12 @@ export async function findElements(
           if (cls) selector += `.${cls}`;
         }
 
+        // Walk up to find nearest source-mapped ancestor
+        let sourceEl: Element | null = el;
+        while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+          sourceEl = sourceEl.parentElement;
+        }
+
         results.push({
           tagName: el.tagName.toLowerCase(),
           selector,
@@ -292,9 +317,9 @@ export async function findElements(
             width: Math.round(rect.width),
             height: Math.round(rect.height),
           },
-          sourceFile: null,
-          sourceLine: null,
-          sourceCol: null,
+          sourceFile: sourceEl?.getAttribute('data-vc-source') || null,
+          sourceLine: sourceEl?.getAttribute('data-vc-line') || null,
+          sourceCol: sourceEl?.getAttribute('data-vc-col') || null,
         });
       }
 
@@ -316,6 +341,9 @@ export async function getStructure(page: Page, maxDepth: number = 5) {
         tag: el.tagName.toLowerCase(),
         selector,
       };
+
+      const source = el.getAttribute('data-vc-source');
+      if (source) node.source = source;
 
       if (el.id) node.id = el.id;
       if (el.className && typeof el.className === 'string') {
@@ -568,13 +596,39 @@ export async function styleDiff(
 
 // ====== CSS Source Mapping (graceful degradation) ======
 
-export async function getSource(_page: Page, _selector: string) {
-  return {
-    error:
-      'Source file mapping is not available for external websites. ' +
-      'Source mapping requires the @visioncraft/vite-plugin to inject ' +
-      'data-vc-source attributes during development builds.',
-  };
+export async function getSource(page: Page, selector: string) {
+  return await page.evaluate((sel: string) => {
+    const el = document.querySelector(sel);
+    if (!el) return { error: `Element not found: ${sel}` };
+
+    // Walk up to find nearest source-mapped ancestor
+    let sourceEl: Element | null = el;
+    while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+      sourceEl = sourceEl.parentElement;
+    }
+
+    const file = sourceEl?.getAttribute('data-vc-source') || null;
+    const line = sourceEl?.getAttribute('data-vc-line') || null;
+    const col = sourceEl?.getAttribute('data-vc-col') || null;
+
+    if (!file) {
+      return {
+        error:
+          'No source mapping found for this element. ' +
+          'Source mapping requires the @visioncraft/vite-plugin to inject ' +
+          'data-vc-source attributes during development builds.',
+      };
+    }
+
+    const lineNum = parseInt(line!, 10);
+    const colNum = parseInt(col!, 10);
+
+    return {
+      file,
+      line: isNaN(lineNum) ? null : lineNum,
+      column: isNaN(colNum) ? null : colNum,
+    };
+  }, selector);
 }
 
 // ====== Monitoring ======

@@ -35,7 +35,7 @@ export class WebviewClient {
         throw new Error(`Bridge health check failed: ${response.status}`);
       }
       const data = await response.json();
-      console.log(`[WebviewClient] Connected to bridge at port ${data.port}`);
+      console.error(`[WebviewClient] Connected to bridge at port ${data.port}`);
       this._isConnected = true;
     } catch (error) {
       console.error('[WebviewClient] Failed to connect to bridge:', error);

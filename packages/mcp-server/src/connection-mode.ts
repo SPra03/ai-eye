@@ -64,6 +64,11 @@ export interface ConnectionConfig {
    * Skip bridge availability check (for external sites where bridge won't exist)
    */
   skipBridgeCheck?: boolean;
+
+  /**
+   * Run browser in headless mode (no visible window)
+   */
+  headless?: boolean;
 }
 
 export interface ConnectionResult {

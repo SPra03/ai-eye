@@ -94,8 +94,8 @@ _(Coming soon to VS Code Marketplace)_
 For now, install from source:
 
 ```bash
-git clone https://github.com/your-username/visioncraft.git
-cd visioncraft
+git clone https://github.com/SPra03/ai-eye.git
+cd ai-eye
 npm install -g pnpm  # or use: npx pnpm
 pnpm install
 pnpm build
@@ -371,8 +371,8 @@ See [examples/README.md](examples/README.md) for more examples and framework gui
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/visioncraft.git
-cd visioncraft
+git clone https://github.com/SPra03/ai-eye.git
+cd ai-eye
 
 # Install dependencies
 npm install -g pnpm  # or use: npx pnpm
@@ -577,8 +577,8 @@ VisionCraft builds on amazing open-source projects:
 ## 📞 Support & Community
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/your-username/visioncraft/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/visioncraft/discussions)
+- **Issues**: [GitHub Issues](https://github.com/SPra03/ai-eye/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/SPra03/ai-eye/discussions)
 
 ---
 

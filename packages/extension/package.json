@@ -4,6 +4,24 @@
   "description": "AI-native visual development for VS Code",
   "version": "1.0.0",
   "publisher": "visioncraft",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SPra03/ai-eye.git",
+    "directory": "packages/extension"
+  },
+  "homepage": "https://github.com/SPra03/ai-eye#readme",
+  "bugs": {
+    "url": "https://github.com/SPra03/ai-eye/issues"
+  },
+  "keywords": [
+    "visioncraft",
+    "ai",
+    "visual",
+    "preview",
+    "mcp",
+    "source-mapping"
+  ],
   "engines": {
     "vscode": "^1.96.0",
     "node": ">=18.0.0"
@@ -93,16 +111,19 @@
     "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --external:playwright-core --format=cjs --platform=node --target=node18 --sourcemap",
     "dev": "pnpm build --watch",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "package": "vsce package --no-dependencies",
+    "vsce:publish": "vsce publish"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@visioncraft/bridge": "workspace:*",
-    "@visioncraft/mcp-server": "workspace:*",
+    "aieye": "workspace:*",
     "playwright-core": "^1.41.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.96.0",
+    "@vscode/vsce": "^3.7.1",
     "esbuild": "^0.20.0",
     "typescript": "^5.7.0"
   }

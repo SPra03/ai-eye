@@ -693,7 +693,9 @@ class VisionCraftMCPServer {
     if (this.currentMode === 'webview' && this.webviewClient) {
       return this.webviewClient;
     }
-    return getBrowserClient(url);
+    return getBrowserClient(url, {
+      headless: process.env.VISIONCRAFT_HEADLESS === 'true',
+    });
   }
 
   /**
@@ -724,6 +726,7 @@ class VisionCraftMCPServer {
         mode: 'playwright-launch' as any,
         enableFallback: false,
         skipBridgeCheck: true,
+        headless: process.env.VISIONCRAFT_HEADLESS === 'true',
       });
     }
     await this.browserClient.ensureConnected();

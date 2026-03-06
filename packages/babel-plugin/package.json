@@ -4,16 +4,23 @@
   "description": "Babel plugin for VisionCraft source mapping - automatically injects source location attributes into JSX elements",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
   "author": "VisionCraft Team",
   "license": "MIT",
-  "homepage": "https://github.com/your-username/visioncraft#readme",
+  "homepage": "https://github.com/SPra03/ai-eye#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/visioncraft.git",
+    "url": "https://github.com/SPra03/ai-eye.git",
     "directory": "packages/babel-plugin"
   },
   "bugs": {
-    "url": "https://github.com/your-username/visioncraft/issues"
+    "url": "https://github.com/SPra03/ai-eye/issues"
   },
   "keywords": [
     "babel",

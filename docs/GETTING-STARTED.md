@@ -181,8 +181,8 @@ From the VisionCraft repository:
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/visioncraft.git
-cd visioncraft
+git clone https://github.com/SPra03/ai-eye.git
+cd ai-eye
 
 # Install dependencies
 npx pnpm install
@@ -586,8 +586,8 @@ VISIONCRAFT_TIMEOUT=30000
 
 ## Getting Help
 
-- **GitHub Issues**: https://github.com/your-username/visioncraft/issues
-- **Discussions**: https://github.com/your-username/visioncraft/discussions
+- **GitHub Issues**: https://github.com/SPra03/ai-eye/issues
+- **Discussions**: https://github.com/SPra03/ai-eye/discussions
 - **Discord**: (Coming soon)
 
 ---

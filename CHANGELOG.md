@@ -323,11 +323,11 @@ MIT License - See [LICENSE](./LICENSE) file for details
 
 ## Links
 
-- **Repository**: https://github.com/your-username/visioncraft
-- **Issues**: https://github.com/your-username/visioncraft/issues
-- **Discussions**: https://github.com/your-username/visioncraft/discussions
-- **Documentation**: https://github.com/your-username/visioncraft/tree/main/docs
+- **Repository**: https://github.com/SPra03/ai-eye
+- **Issues**: https://github.com/SPra03/ai-eye/issues
+- **Discussions**: https://github.com/SPra03/ai-eye/discussions
+- **Documentation**: https://github.com/SPra03/ai-eye/tree/main/docs
 
 ---
 
-_For older releases and development snapshots, see the [releases page](https://github.com/your-username/visioncraft/releases)._
+_For older releases and development snapshots, see the [releases page](https://github.com/SPra03/ai-eye/releases)._
