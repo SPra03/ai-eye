@@ -237,7 +237,7 @@ export class CDPClient {
   }
 
   /**
-   * Check if VisionCraft bridge is available
+   * Check if AI Eye bridge is available
    */
   private async checkBridgeAvailability(): Promise<void> {
     if (!this.page) {
@@ -247,15 +247,15 @@ export class CDPClient {
     try {
       // Wait for bridge with short timeout
       await this.page.waitForFunction(
-        () => (window as any).__VISIONCRAFT__?.ready === true,
+        () => (window as any).__AIEYE__?.ready === true,
         { timeout: 5000 }
       );
 
       this.hasBridge = true;
-      console.error('[CDP] VisionCraft bridge detected');
+      console.error('[CDP] AI Eye bridge detected');
     } catch (error) {
       this.hasBridge = false;
-      console.error('[CDP] VisionCraft bridge not available, using CDP-only mode');
+      console.error('[CDP] AI Eye bridge not available, using CDP-only mode');
 
       // Switch to CDP-only mode if bridge not available
       if (this.connectionMode !== ConnectionMode.CDP_ONLY) {
@@ -276,21 +276,21 @@ export class CDPClient {
   }
 
   /**
-   * Call VisionCraft bridge method (only if bridge available)
+   * Call AI Eye bridge method (only if bridge available)
    */
   async callBridge<T>(method: string, ...args: any[]): Promise<T> {
     if (!this.hasBridge) {
       throw new Error(
-        'VisionCraft bridge not available in CDP-only mode. ' +
-        'Ensure the @visioncraft/vite-plugin is installed and the dev server is running.'
+        'AI Eye bridge not available in CDP-only mode. ' +
+        'Ensure the @ai-eye/vite-plugin is installed and the dev server is running.'
       );
     }
 
     return await this.evaluate((data) => {
-      const bridge = (window as any).__VISIONCRAFT__;
+      const bridge = (window as any).__AIEYE__;
       if (!bridge) {
         throw new Error(
-          'VisionCraft bridge not available. ' +
+          'AI Eye bridge not available. ' +
           'The bridge script may not have loaded. Check the browser console for errors.'
         );
       }

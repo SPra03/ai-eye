@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(),
-    visionCraft({
+    aiEye({
       root: __dirname,
       enabled: true,
       enableHMR: true,

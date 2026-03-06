@@ -1,5 +1,5 @@
 /**
- * Webview Client for VisionCraft
+ * Webview Client for AI Eye
  *
  * Instead of launching Playwright browser, this client communicates with
  * the VS Code extension via HTTP bridge to use the embedded webview.
@@ -73,7 +73,7 @@ export class WebviewClient {
   }
 
   /**
-   * Call a method on the VisionCraft bridge in the webview
+   * Call a method on the AI Eye bridge in the webview
    * This forwards the call through the HTTP bridge to the embedded MCP server
    */
   async callBridge(method: string, ...args: any[]): Promise<any> {
@@ -94,7 +94,7 @@ export class WebviewClient {
           body: JSON.stringify({
             method: 'tools/call',
             params: {
-              // Map the method name to the corresponding VisionCraft tool
+              // Map the method name to the corresponding AI Eye tool
               name: this.mapMethodToTool(method),
               arguments: this.mapArgsToToolArgs(method, args),
             },
@@ -135,40 +135,40 @@ export class WebviewClient {
   }
 
   /**
-   * Map browser-client method names to VisionCraft tool names
+   * Map browser-client method names to AI Eye tool names
    */
   private mapMethodToTool(method: string): string {
     const methodMap: Record<string, string> = {
-      'screenshot': 'visioncraft_screenshot',
-      'elementAtPoint': 'visioncraft_element_at_point',
-      'batchInspect': 'visioncraft_batch_inspect',
-      'inspectElement': 'visioncraft_inspect_element',
-      'getElementSource': 'visioncraft_get_source',
-      'clickElement': 'visioncraft_click',
-      'typeText': 'visioncraft_type',
-      'scrollTo': 'visioncraft_scroll',
-      'hoverElement': 'visioncraft_hover',
-      'findElements': 'visioncraft_find_elements',
-      'getPageStructure': 'visioncraft_get_structure',
-      'getCSSSource': 'visioncraft_get_css_source',
-      'setViewport': 'visioncraft_set_viewport',
-      'getConsoleLogs': 'visioncraft_get_console_logs',
-      'clearConsoleLogs': 'visioncraft_clear_console_logs',
-      'getNetworkRequests': 'visioncraft_get_network_requests',
-      'clearNetworkRequests': 'visioncraft_clear_network_requests',
-      'getHMRStatus': 'visioncraft_get_hmr_status',
-      'clearHMRErrors': 'visioncraft_clear_hmr_errors',
-      'getCurrentUrl': 'visioncraft_get_current_url',
-      'visualDiff': 'visioncraft_visual_diff',
-      'navigate': 'visioncraft_navigate',
-      'getStyleDiff': 'visioncraft_style_diff',
-      'getComponentTree': 'visioncraft_get_component_tree',
-      'auditAccessibility': 'visioncraft_audit_accessibility',
-      'measureElement': 'visioncraft_measure_element',
-      'measureSpacing': 'visioncraft_measure_spacing',
-      'getComputedLayout': 'visioncraft_get_computed_layout',
-      'getPalette': 'visioncraft_get_palette',
-      'waitForHMR': 'visioncraft_wait_for_hmr',
+      'screenshot': 'aieye_screenshot',
+      'elementAtPoint': 'aieye_element_at_point',
+      'batchInspect': 'aieye_batch_inspect',
+      'inspectElement': 'aieye_inspect_element',
+      'getElementSource': 'aieye_get_source',
+      'clickElement': 'aieye_click',
+      'typeText': 'aieye_type',
+      'scrollTo': 'aieye_scroll',
+      'hoverElement': 'aieye_hover',
+      'findElements': 'aieye_find_elements',
+      'getPageStructure': 'aieye_get_structure',
+      'getCSSSource': 'aieye_get_css_source',
+      'setViewport': 'aieye_set_viewport',
+      'getConsoleLogs': 'aieye_get_console_logs',
+      'clearConsoleLogs': 'aieye_clear_console_logs',
+      'getNetworkRequests': 'aieye_get_network_requests',
+      'clearNetworkRequests': 'aieye_clear_network_requests',
+      'getHMRStatus': 'aieye_get_hmr_status',
+      'clearHMRErrors': 'aieye_clear_hmr_errors',
+      'getCurrentUrl': 'aieye_get_current_url',
+      'visualDiff': 'aieye_visual_diff',
+      'navigate': 'aieye_navigate',
+      'getStyleDiff': 'aieye_style_diff',
+      'getComponentTree': 'aieye_get_component_tree',
+      'auditAccessibility': 'aieye_audit_accessibility',
+      'measureElement': 'aieye_measure_element',
+      'measureSpacing': 'aieye_measure_spacing',
+      'getComputedLayout': 'aieye_get_computed_layout',
+      'getPalette': 'aieye_get_palette',
+      'waitForHMR': 'aieye_wait_for_hmr',
     };
 
     return methodMap[method] || method;

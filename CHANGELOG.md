@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Features
-- **Babel Plugin** (`@visioncraft/babel-plugin`)
+- **Babel Plugin** (`@ai-eye/babel-plugin`)
   - Automatic JSX source mapping attribute injection
   - Configurable attribute prefix
   - Support for React, JSX, and TSX files
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Custom root directory support
   - Windows path compatibility
 
-- **Vite Plugin** (`@visioncraft/vite-plugin`)
+- **Vite Plugin** (`@ai-eye/vite-plugin`)
   - Integrated Babel transformation for source mapping
   - Virtual module system for bridge injection
   - HMR status tracking and broadcasting
@@ -38,8 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Multi-framework support (React, Vue, Svelte)
   - Configurable file patterns (include/exclude)
 
-- **Bridge Script** (`@visioncraft/bridge`)
-  - Browser-side API exposed as `window.__VISIONCRAFT__`
+- **Bridge Script** (`@ai-eye/bridge`)
+  - Browser-side API exposed as `window.__AIEYE__`
   - Element inspection with source location lookup
   - Page structure traversal with source mapping
   - Element interaction (click, type, scroll)
@@ -49,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - HMR status tracking
   - Automatic injection via Vite plugin
 
-- **MCP Server** (`@visioncraft/mcp-server`)
+- **MCP Server** (`aieye`)
   - 14 tools for AI agent interaction
   - Three connection modes:
     - **CDP Connect** (~10MB RAM, <100ms startup)
@@ -61,20 +61,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Claude Desktop integration
 
 #### MCP Tools
-1. `visioncraft_screenshot` - Page screenshot capture
-2. `visioncraft_inspect_element` - Detailed element inspection
-3. `visioncraft_get_source` - Source location lookup
-4. `visioncraft_click` - Element clicking
-5. `visioncraft_type` - Text input
-6. `visioncraft_scroll` - Page scrolling
-7. `visioncraft_find_elements` - Element search (text/role/CSS)
-8. `visioncraft_get_structure` - DOM tree with source mapping
-9. `visioncraft_get_console_logs` - Console log retrieval
-10. `visioncraft_clear_console_logs` - Log clearing
-11. `visioncraft_get_hmr_status` - HMR status and errors
-12. `visioncraft_clear_hmr_errors` - HMR error clearing
-13. `visioncraft_navigate` - URL navigation
-14. `visioncraft_get_current_url` - Current URL retrieval
+1. `aieye_screenshot` - Page screenshot capture
+2. `aieye_inspect_element` - Detailed element inspection
+3. `aieye_get_source` - Source location lookup
+4. `aieye_click` - Element clicking
+5. `aieye_type` - Text input
+6. `aieye_scroll` - Page scrolling
+7. `aieye_find_elements` - Element search (text/role/CSS)
+8. `aieye_get_structure` - DOM tree with source mapping
+9. `aieye_get_console_logs` - Console log retrieval
+10. `aieye_clear_console_logs` - Log clearing
+11. `aieye_get_hmr_status` - HMR status and errors
+12. `aieye_clear_hmr_errors` - HMR error clearing
+13. `aieye_navigate` - URL navigation
+14. `aieye_get_current_url` - Current URL retrieval
 
 #### Testing
 - **Unit Tests** (90/90 passing)
@@ -294,8 +294,8 @@ This is the initial stable release. If you were using development versions:
 ```json
 {
   "devDependencies": {
-    "@visioncraft/babel-plugin": "^1.0.0",
-    "@visioncraft/vite-plugin": "^1.0.0"
+    "@ai-eye/babel-plugin": "^1.0.0",
+    "@ai-eye/vite-plugin": "^1.0.0"
   }
 }
 ```
@@ -310,7 +310,7 @@ This is the initial stable release. If you were using development versions:
 
 ## Contributors
 
-- Initial development by VisionCraft Team
+- Initial development by AI Eye Team
 - Special thanks to all early testers and feedback providers
 
 ---

@@ -1,12 +1,12 @@
-# VisionCraft React + Vite Example
+# AI Eye React + Vite Example
 
-This example demonstrates VisionCraft's source mapping capabilities with a React + Vite application.
+This example demonstrates AI Eye's source mapping capabilities with a React + Vite application.
 
 ## What's Inside
 
 - ⚛️ React 18 with TypeScript
 - ⚡ Vite for fast development
-- 🎨 VisionCraft source mapping plugin
+- 🎨 AI Eye source mapping plugin
 - 🔥 Hot Module Replacement (HMR)
 
 ## Quick Start
@@ -26,11 +26,11 @@ npx pnpm dev
 
 Server will start at `http://localhost:5173`
 
-### 3. Open VisionCraft Preview
+### 3. Open AI Eye Preview
 
 In VS Code:
 1. Press `F5` (Extension Development Host)
-2. Run: **VisionCraft: Open Live Preview**
+2. Run: **AI Eye: Open Live Preview**
 3. You should see the React app in the preview!
 
 ## Verify Source Mapping
@@ -41,16 +41,16 @@ In VS Code:
 2. Right-click any element → **Inspect**
 3. Look for these attributes in the HTML:
    ```html
-   data-vc-source="src/App.tsx"
-   data-vc-line="42"
-   data-vc-col="6"
+   data-ae-source="src/App.tsx"
+   data-ae-line="42"
+   data-ae-col="6"
    ```
 
-### Method 2: VisionCraft Preview
+### Method 2: AI Eye Preview
 
 1. Open preview in VS Code
 2. In the preview, right-click element → **Inspect Element**
-3. Check the Elements panel for `data-vc-*` attributes
+3. Check the Elements panel for `data-ae-*` attributes
 
 ### Method 3: Console Verification
 
@@ -58,16 +58,16 @@ Open browser console and run:
 
 ```javascript
 // Find all elements with source mapping
-const mapped = document.querySelectorAll('[data-vc-source]');
+const mapped = document.querySelectorAll('[data-ae-source]');
 console.log(`Found ${mapped.length} source-mapped elements`);
 
 // Show first element's source location
 const first = mapped[0];
 console.log({
   element: first.tagName,
-  source: first.getAttribute('data-vc-source'),
-  line: first.getAttribute('data-vc-line'),
-  col: first.getAttribute('data-vc-col'),
+  source: first.getAttribute('data-ae-source'),
+  line: first.getAttribute('data-ae-line'),
+  col: first.getAttribute('data-ae-col'),
 });
 ```
 
@@ -83,21 +83,21 @@ console.log({
 
 ### All Elements
 - Every `<div>`, `<button>`, `<input>`, etc. should have:
-  - `data-vc-source="src/App.tsx"`
-  - `data-vc-line="XX"`
-  - `data-vc-col="XX"`
+  - `data-ae-source="src/App.tsx"`
+  - `data-ae-line="XX"`
+  - `data-ae-col="XX"`
 
 ## How It Works
 
 ### 1. Vite Config (`vite.config.ts`)
 
 ```ts
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(),
-    visionCraft({
+    aiEye({
       root: __dirname,
       enabled: true,
     }),
@@ -117,9 +117,9 @@ export default defineConfig({
 **After:**
 ```jsx
 <button
-  data-vc-source="src/App.tsx"
-  data-vc-line="28"
-  data-vc-col="12"
+  data-ae-source="src/App.tsx"
+  data-ae-line="28"
+  data-ae-col="12"
   onClick={() => setCount(count + 1)}
 >
   Increment
@@ -130,25 +130,25 @@ export default defineConfig({
 
 When you edit `src/App.tsx`:
 1. Vite detects file change
-2. VisionCraft plugin broadcasts `vc:hmr-update` event
+2. AI Eye plugin broadcasts `ae:hmr-update` event
 3. React Fast Refresh updates the component
 4. Source attributes are preserved
 5. Preview updates in <200ms!
 
 ## Troubleshooting
 
-### No `data-vc-*` Attributes
+### No `data-ae-*` Attributes
 
 **Check 1: Plugin is enabled**
 ```ts
 // vite.config.ts
-visionCraft({ enabled: true })
+aiEye({ enabled: true })
 ```
 
 **Check 2: Dev server is running**
 ```bash
 npx pnpm dev
-# Should see: ✨ VisionCraft: Source mapping enabled
+# Should see: ✨ AI Eye: Source mapping enabled
 ```
 
 **Check 3: File is processed**
@@ -157,7 +157,7 @@ npx pnpm dev
 
 **Check 4: View source**
 - Right-click → View Page Source
-- Search for `data-vc-source`
+- Search for `data-ae-source`
 - Should appear in HTML
 
 ### HMR Not Working
@@ -167,9 +167,9 @@ npx pnpm dev
 - Look for `[vite] connected`
 - If missing, check firewall/ports
 
-**Check 2: VisionCraft events**
-- Console should show custom `vc:*` events
-- Edit a file and watch for `vc:hmr-update`
+**Check 2: AI Eye events**
+- Console should show custom `ae:*` events
+- Edit a file and watch for `ae:hmr-update`
 
 **Check 3: React Fast Refresh**
 - Edit a component
@@ -182,7 +182,7 @@ Source mapping adds ~100 bytes per element to HTML size.
 
 **Optimization:**
 ```ts
-visionCraft({
+aiEye({
   enabled: process.env.NODE_ENV === 'development',
 })
 ```
@@ -213,7 +213,7 @@ Once Phase 5 is implemented, AI agents can:
 react-vite-app/
 ├── index.html           # HTML entry point
 ├── package.json         # Dependencies
-├── vite.config.ts       # Vite + VisionCraft config
+├── vite.config.ts       # Vite + AI Eye config
 ├── tsconfig.json        # TypeScript config
 └── src/
     ├── main.tsx         # React entry point
@@ -226,5 +226,5 @@ react-vite-app/
 
 - [Vite Documentation](https://vitejs.dev)
 - [React Documentation](https://react.dev)
-- [VisionCraft Architecture](../../VisionCraft_Architecture.docx)
+- [AI Eye Architecture](../../AIEye_Architecture.docx)
 - [Implementation Plan](../../plan.md)

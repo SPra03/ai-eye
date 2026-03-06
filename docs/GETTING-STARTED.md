@@ -1,6 +1,6 @@
-# Getting Started with VisionCraft
+# Getting Started with AI Eye
 
-This guide will help you set up VisionCraft and integrate it with your AI workflow.
+This guide will help you set up AI Eye and integrate it with your AI workflow.
 
 ## Table of Contents
 
@@ -17,19 +17,19 @@ This guide will help you set up VisionCraft and integrate it with your AI workfl
 
 ```bash
 # 1. Install packages
-npm install --save-dev @visioncraft/vite-plugin @visioncraft/babel-plugin
+npm install --save-dev @ai-eye/vite-plugin @ai-eye/babel-plugin
 
 # 2. Configure Vite
 # vite.config.js
-import visionCraftVitePlugin from '@visioncraft/vite-plugin';
+import aiEyeVitePlugin from '@ai-eye/vite-plugin';
 
 export default defineConfig({
-  plugins: [visionCraftVitePlugin()]
+  plugins: [aiEyeVitePlugin()]
 });
 
 # 3. Import bridge in your app
 # main.tsx
-import '@visioncraft/bridge';
+import '@ai-eye/bridge';
 
 # 4. Start your dev server
 npm run dev
@@ -53,13 +53,13 @@ npm run dev
 #### For Vite Projects (Recommended)
 
 ```bash
-npm install --save-dev @visioncraft/vite-plugin
+npm install --save-dev @ai-eye/vite-plugin
 ```
 
 #### For Non-Vite Projects (Babel)
 
 ```bash
-npm install --save-dev @visioncraft/babel-plugin
+npm install --save-dev @ai-eye/babel-plugin
 ```
 
 #### For AI Integration
@@ -75,7 +75,7 @@ The MCP server is included in the monorepo. No separate installation needed.
 #### 1. Install Plugin
 
 ```bash
-npm install --save-dev @visioncraft/vite-plugin
+npm install --save-dev @ai-eye/vite-plugin
 ```
 
 #### 2. Configure Vite
@@ -84,15 +84,15 @@ npm install --save-dev @visioncraft/vite-plugin
 // vite.config.js or vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import visionCraftVitePlugin from '@visioncraft/vite-plugin';
+import aiEyeVitePlugin from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(),
-    visionCraftVitePlugin({
+    aiEyeVitePlugin({
       enabled: true,          // Enable in development
       enableHMR: true,        // Track HMR status
-      attributePrefix: 'data-vc'  // Attribute prefix
+      attributePrefix: 'data-ae'  // Attribute prefix
     })
   ]
 });
@@ -105,7 +105,7 @@ export default defineConfig({
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import '@visioncraft/bridge';  // ← Add this line
+import '@ai-eye/bridge';  // ← Add this line
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -125,7 +125,7 @@ npm run dev
 Open browser console and run:
 
 ```javascript
-console.log(window.__VISIONCRAFT__);
+console.log(window.__AIEYE__);
 // Should show: { version: '1.0.0', ready: true, ... }
 ```
 
@@ -136,7 +136,7 @@ console.log(window.__VISIONCRAFT__);
 #### 1. Install Plugin
 
 ```bash
-npm install --save-dev @visioncraft/babel-plugin
+npm install --save-dev @ai-eye/babel-plugin
 ```
 
 #### 2. Configure Babel
@@ -146,10 +146,10 @@ npm install --save-dev @visioncraft/babel-plugin
 module.exports = {
   presets: ['@babel/preset-react'],
   plugins: [
-    ['@visioncraft/babel-plugin', {
+    ['@ai-eye/babel-plugin', {
       enabled: process.env.NODE_ENV === 'development',
       root: __dirname,
-      attributePrefix: 'data-vc'
+      attributePrefix: 'data-ae'
     }]
   ]
 };
@@ -161,14 +161,14 @@ Manually add the bridge script to your HTML:
 
 ```html
 <!-- public/index.html -->
-<script src="/path/to/visioncraft-bridge.js"></script>
+<script src="/path/to/aieye-bridge.js"></script>
 ```
 
 Or bundle it with your app:
 
 ```javascript
 // src/index.js
-import '@visioncraft/bridge';
+import '@ai-eye/bridge';
 ```
 
 ---
@@ -177,7 +177,7 @@ import '@visioncraft/bridge';
 
 ### 1. Build MCP Server
 
-From the VisionCraft repository:
+From the AI Eye repository:
 
 ```bash
 # Clone repository
@@ -200,14 +200,14 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "visioncraft": {
+    "aieye": {
       "command": "node",
       "args": [
-        "/absolute/path/to/visioncraft/packages/mcp-server/dist/index.js"
+        "/absolute/path/to/ai-eye/packages/mcp-server/dist/index.js"
       ],
       "env": {
-        "VISIONCRAFT_URL": "http://localhost:5173",
-        "VISIONCRAFT_MODE": "playwright-launch"
+        "AIEYE_URL": "http://localhost:5173",
+        "AIEYE_MODE": "playwright-launch"
       }
     }
   }
@@ -221,14 +221,14 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "visioncraft": {
+    "aieye": {
       "command": "node",
       "args": [
-        "C:\\absolute\\path\\to\\visioncraft\\packages\\mcp-server\\dist\\index.js"
+        "C:\\absolute\\path\\to\\ai-eye\\packages\\mcp-server\\dist\\index.js"
       ],
       "env": {
-        "VISIONCRAFT_URL": "http://localhost:5173",
-        "VISIONCRAFT_MODE": "playwright-launch"
+        "AIEYE_URL": "http://localhost:5173",
+        "AIEYE_MODE": "playwright-launch"
       }
     }
   }
@@ -247,13 +247,13 @@ In Claude Desktop, ask:
 Can you take a screenshot of my app at localhost:5173?
 ```
 
-Claude should respond with a screenshot using the `visioncraft_screenshot` tool.
+Claude should respond with a screenshot using the `aieye_screenshot` tool.
 
 ---
 
 ## Connection Modes
 
-VisionCraft supports three connection modes:
+AI Eye supports three connection modes:
 
 ### Mode 1: Playwright Launch (Default)
 
@@ -262,8 +262,8 @@ VisionCraft supports three connection modes:
 ```json
 {
   "env": {
-    "VISIONCRAFT_MODE": "playwright-launch",
-    "VISIONCRAFT_URL": "http://localhost:5173"
+    "AIEYE_MODE": "playwright-launch",
+    "AIEYE_URL": "http://localhost:5173"
   }
 }
 ```
@@ -287,10 +287,10 @@ VisionCraft supports three connection modes:
 ```json
 {
   "env": {
-    "VISIONCRAFT_MODE": "cdp-connect",
-    "VISIONCRAFT_CDP_HOST": "localhost",
-    "VISIONCRAFT_CDP_PORT": "9222",
-    "VISIONCRAFT_URL": "http://localhost:5173"
+    "AIEYE_MODE": "cdp-connect",
+    "AIEYE_CDP_HOST": "localhost",
+    "AIEYE_CDP_PORT": "9222",
+    "AIEYE_URL": "http://localhost:5173"
   }
 }
 ```
@@ -340,9 +340,9 @@ google-chrome \
 ```json
 {
   "env": {
-    "VISIONCRAFT_MODE": "cdp-connect",
-    "VISIONCRAFT_ENABLE_FALLBACK": "true",
-    "VISIONCRAFT_URL": "http://localhost:5173"
+    "AIEYE_MODE": "cdp-connect",
+    "AIEYE_ENABLE_FALLBACK": "true",
+    "AIEYE_URL": "http://localhost:5173"
   }
 }
 ```
@@ -364,7 +364,7 @@ Ask Claude:
 Inspect the submit button on my app
 ```
 
-Claude will use `visioncraft_inspect_element` to get:
+Claude will use `aieye_inspect_element` to get:
 - Element type and attributes
 - Computed styles and bounding box
 - **Source location** (file:line:col)
@@ -377,7 +377,7 @@ Ask Claude:
 Where is the login button defined in my source code?
 ```
 
-Claude will use `visioncraft_get_source` to return:
+Claude will use `aieye_get_source` to return:
 
 ```
 src/components/LoginForm.tsx:42:8
@@ -391,7 +391,7 @@ Ask Claude:
 Click the "Add to Cart" button
 ```
 
-Claude will use `visioncraft_click` to interact with the element.
+Claude will use `aieye_click` to interact with the element.
 
 ### 4. Check HMR Status
 
@@ -401,7 +401,7 @@ Ask Claude:
 What's the HMR status? Any errors?
 ```
 
-Claude will use `visioncraft_get_hmr_status` to show:
+Claude will use `aieye_get_hmr_status` to show:
 - Connection status
 - Update count
 - Average latency
@@ -418,10 +418,10 @@ Claude will use `visioncraft_get_hmr_status` to show:
 The submit button looks misaligned. Can you inspect it and tell me where it's defined?
 ```
 
-**Claude** (using VisionCraft):
-1. `visioncraft_screenshot` - Takes screenshot
-2. `visioncraft_inspect_element('#submit-btn')` - Gets styles
-3. `visioncraft_get_source('#submit-btn')` - Gets source location
+**Claude** (using AI Eye):
+1. `aieye_screenshot` - Takes screenshot
+2. `aieye_inspect_element('#submit-btn')` - Gets styles
+3. `aieye_get_source('#submit-btn')` - Gets source location
 
 **Response**:
 ```
@@ -440,7 +440,7 @@ Find all buttons on the page and show me their source locations
 ```
 
 **Claude**:
-1. `visioncraft_find_elements('button', 'css')` - Finds all buttons
+1. `aieye_find_elements('button', 'css')` - Finds all buttons
 
 **Response**:
 ```
@@ -463,10 +463,10 @@ then click submit
 ```
 
 **Claude**:
-1. `visioncraft_type('#username', 'test@example.com')`
-2. `visioncraft_type('#password', 'test123')`
-3. `visioncraft_click('#submit-btn')`
-4. `visioncraft_screenshot` - Verifies result
+1. `aieye_type('#username', 'test@example.com')`
+2. `aieye_type('#password', 'test123')`
+3. `aieye_click('#submit-btn')`
+4. `aieye_screenshot` - Verifies result
 
 ---
 
@@ -475,7 +475,7 @@ then click submit
 ### Vite Plugin Options
 
 ```typescript
-interface VisionCraftVitePluginOptions {
+interface AI EyeVitePluginOptions {
   // Enable/disable plugin
   enabled?: boolean;  // Default: true in dev, false in prod
 
@@ -483,7 +483,7 @@ interface VisionCraftVitePluginOptions {
   enableHMR?: boolean;  // Default: true
 
   // Attribute prefix
-  attributePrefix?: string;  // Default: 'data-vc'
+  attributePrefix?: string;  // Default: 'data-ae'
 
   // Project root
   root?: string;  // Default: vite config root
@@ -497,7 +497,7 @@ interface VisionCraftVitePluginOptions {
 ### Babel Plugin Options
 
 ```typescript
-interface VisionCraftBabelPluginOptions {
+interface AI EyeBabelPluginOptions {
   // Enable/disable plugin
   enabled?: boolean;  // Default: true
 
@@ -505,7 +505,7 @@ interface VisionCraftBabelPluginOptions {
   root?: string;  // Default: process.cwd()
 
   // Attribute prefix
-  attributePrefix?: string;  // Default: 'data-vc'
+  attributePrefix?: string;  // Default: 'data-ae'
 }
 ```
 
@@ -513,20 +513,20 @@ interface VisionCraftBabelPluginOptions {
 
 ```bash
 # Target URL (required)
-VISIONCRAFT_URL=http://localhost:5173
+AIEYE_URL=http://localhost:5173
 
 # Connection mode
-VISIONCRAFT_MODE=playwright-launch  # or "cdp-connect" or "cdp-only"
+AIEYE_MODE=playwright-launch  # or "cdp-connect" or "cdp-only"
 
 # CDP settings (for cdp-connect mode)
-VISIONCRAFT_CDP_HOST=localhost
-VISIONCRAFT_CDP_PORT=9222
+AIEYE_CDP_HOST=localhost
+AIEYE_CDP_PORT=9222
 
 # Enable fallback
-VISIONCRAFT_ENABLE_FALLBACK=true
+AIEYE_ENABLE_FALLBACK=true
 
 # Timeout (milliseconds)
-VISIONCRAFT_TIMEOUT=30000
+AIEYE_TIMEOUT=30000
 ```
 
 ---
@@ -535,17 +535,17 @@ VISIONCRAFT_TIMEOUT=30000
 
 ### Bridge Not Found
 
-**Problem**: `window.__VISIONCRAFT__ is undefined`
+**Problem**: `window.__AIEYE__ is undefined`
 
 **Solutions**:
-1. Verify bridge import: `import '@visioncraft/bridge';`
+1. Verify bridge import: `import '@ai-eye/bridge';`
 2. Check Vite plugin is installed and configured
 3. Restart dev server
 4. Check browser console for errors
 
 ### MCP Server Not Connecting
 
-**Problem**: Claude says "No VisionCraft tools available"
+**Problem**: Claude says "No AI Eye tools available"
 
 **Solutions**:
 1. Verify `claude_desktop_config.json` path is absolute
@@ -598,13 +598,13 @@ VISIONCRAFT_TIMEOUT=30000
 
 ```bash
 # Install Vite plugin
-npm install --save-dev @visioncraft/vite-plugin
+npm install --save-dev @ai-eye/vite-plugin
 
 # Build MCP server
-cd visioncraft && npx pnpm build
+cd ai-eye && npx pnpm build
 
 # Start dev server with debugging
-VISIONCRAFT_MODE=cdp-connect npm run dev
+AIEYE_MODE=cdp-connect npm run dev
 
 # Run tests
 npx vitest
@@ -619,11 +619,11 @@ npx vitest
 
 ### Essential Tools (from Claude)
 
-- `visioncraft_screenshot` - Visual feedback
-- `visioncraft_inspect_element` - Element details
-- `visioncraft_get_source` - Source location
-- `visioncraft_click` - Interaction
-- `visioncraft_get_hmr_status` - Development status
+- `aieye_screenshot` - Visual feedback
+- `aieye_inspect_element` - Element details
+- `aieye_get_source` - Source location
+- `aieye_click` - Interaction
+- `aieye_get_hmr_status` - Development status
 
 ---
 

@@ -1,9 +1,9 @@
 {
-  "name": "visioncraft-extension",
-  "displayName": "VisionCraft",
+  "name": "ai-eye-extension",
+  "displayName": "AI Eye",
   "description": "AI-native visual development for VS Code",
   "version": "1.0.0",
-  "publisher": "visioncraft",
+  "publisher": "aieye",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
     "url": "https://github.com/SPra03/ai-eye/issues"
   },
   "keywords": [
-    "visioncraft",
+    "ai-eye",
     "ai",
     "visual",
     "preview",
@@ -34,46 +34,46 @@
   "main": "./dist/extension.js",
   "activationEvents": [
     "onStartupFinished",
-    "onCommand:visioncraft.openPreview",
-    "onCommand:visioncraft.testScreenshot",
-    "onCommand:visioncraft.runV2Tests"
+    "onCommand:aieye.openPreview",
+    "onCommand:aieye.testScreenshot",
+    "onCommand:aieye.runV2Tests"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "visioncraft.openPreview",
-        "title": "VisionCraft: Open Live Preview"
+        "command": "aieye.openPreview",
+        "title": "AI Eye: Open Live Preview"
       },
       {
-        "command": "visioncraft.startServer",
-        "title": "VisionCraft: Start MCP Server"
+        "command": "aieye.startServer",
+        "title": "AI Eye: Start MCP Server"
       },
       {
-        "command": "visioncraft.reloadPreview",
-        "title": "VisionCraft: Reload Preview"
+        "command": "aieye.reloadPreview",
+        "title": "AI Eye: Reload Preview"
       },
       {
-        "command": "visioncraft.toggleCDP",
-        "title": "VisionCraft: Toggle CDP Mode"
+        "command": "aieye.toggleCDP",
+        "title": "AI Eye: Toggle CDP Mode"
       },
       {
-        "command": "visioncraft.testScreenshot",
-        "title": "VisionCraft: Test Screenshot (v2)"
+        "command": "aieye.testScreenshot",
+        "title": "AI Eye: Test Screenshot (v2)"
       },
       {
-        "command": "visioncraft.runV2Tests",
-        "title": "VisionCraft: Run V2 Comprehensive Tests"
+        "command": "aieye.runV2Tests",
+        "title": "AI Eye: Run V2 Comprehensive Tests"
       }
     ],
     "configuration": {
-      "title": "VisionCraft",
+      "title": "AI Eye",
       "properties": {
-        "visioncraft.devServerUrl": {
+        "aieye.devServerUrl": {
           "type": "string",
           "default": "http://localhost:5175",
           "description": "URL of the running dev server"
         },
-        "visioncraft.framework": {
+        "aieye.framework": {
           "type": "string",
           "enum": [
             "auto",
@@ -85,14 +85,14 @@
           "default": "auto",
           "description": "Framework detection mode"
         },
-        "visioncraft.screenshotQuality": {
+        "aieye.screenshotQuality": {
           "type": "number",
           "default": 80,
           "minimum": 30,
           "maximum": 100,
           "description": "JPEG quality for screenshots (30-100)"
         },
-        "visioncraft.enableCDP": {
+        "aieye.enableCDP": {
           "type": "boolean",
           "default": false,
           "description": "Enable CDP fallback for advanced features"
@@ -101,8 +101,8 @@
     },
     "mcpServerDefinitionProviders": [
       {
-        "id": "visioncraft",
-        "label": "VisionCraft Live Preview Tools",
+        "id": "aieye",
+        "label": "AI Eye Live Preview Tools",
         "description": "AI-native visual development tools for inspecting, interacting with, and debugging web UIs directly in VS Code"
       }
     ]
@@ -117,7 +117,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "@visioncraft/bridge": "workspace:*",
+    "@ai-eye/bridge": "workspace:*",
     "aieye": "workspace:*",
     "playwright-core": "^1.41.0"
   },

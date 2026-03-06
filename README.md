@@ -1,4 +1,4 @@
-# VisionCraft
+# AI Eye
 
 > **AI-native visual development for VS Code**
 > Bridge the gap between UI and code with live preview, source mapping, and AI agent integration
@@ -9,9 +9,9 @@
 
 ---
 
-## What is VisionCraft?
+## What is AI Eye?
 
-VisionCraft is an **AI-native visual development extension** for VS Code that enables both human developers and AI agents to:
+AI Eye is an **AI-native visual development extension** for VS Code that enables both human developers and AI agents to:
 
 - 👁️ **See your UI** - Live preview panel embedded in VS Code
 - 🎯 **Navigate visually** - Click elements → jump to source code
@@ -65,18 +65,18 @@ VisionCraft is an **AI-native visual development extension** for VS Code that en
 
 ### For AI Agents
 
-VisionCraft provides **14 MCP tools** for AI agents (Claude, Copilot, etc.):
+AI Eye provides **14 MCP tools** for AI agents (Claude, Copilot, etc.):
 
-- `visioncraft_screenshot` - Capture page screenshots
-- `visioncraft_inspect_element` - Get element details + source location
-- `visioncraft_get_source` - Find where code is defined
-- `visioncraft_get_structure` - Get component hierarchy
-- `visioncraft_find_elements` - Search by text/role/selector
-- `visioncraft_click` - Interact with buttons
-- `visioncraft_type` - Fill forms
-- `visioncraft_scroll` - Access elements below fold
-- `visioncraft_get_console_logs` - Debug errors
-- `visioncraft_get_hmr_status` - Check build status
+- `aieye_screenshot` - Capture page screenshots
+- `aieye_inspect_element` - Get element details + source location
+- `aieye_get_source` - Find where code is defined
+- `aieye_get_structure` - Get component hierarchy
+- `aieye_find_elements` - Search by text/role/selector
+- `aieye_click` - Interact with buttons
+- `aieye_type` - Fill forms
+- `aieye_scroll` - Access elements below fold
+- `aieye_get_console_logs` - Debug errors
+- `aieye_get_hmr_status` - Check build status
 - _...and 4 more_
 
 See [docs/AI-USAGE.md](docs/AI-USAGE.md) for complete AI agent guide.
@@ -108,16 +108,16 @@ Open in VS Code and press `F5` to launch Extension Development Host.
 For Vite projects (React, Vue, Svelte):
 
 ```bash
-npm install @visioncraft/vite-plugin --save-dev
+npm install @ai-eye/vite-plugin --save-dev
 ```
 
 ```typescript
 // vite.config.ts
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    visionCraft(),
+    aiEye(),
   ],
 });
 ```
@@ -125,7 +125,7 @@ export default defineConfig({
 For Create React App:
 
 ```bash
-npm install @visioncraft/babel-plugin react-app-rewired customize-cra --save-dev
+npm install @ai-eye/babel-plugin react-app-rewired customize-cra --save-dev
 ```
 
 See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) for detailed setup.
@@ -137,11 +137,11 @@ npm run dev
 # Dev server running at http://localhost:5173
 ```
 
-**4. Open VisionCraft Preview**
+**4. Open AI Eye Preview**
 
 In VS Code:
 - Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
-- Type: "VisionCraft: Open Live Preview"
+- Type: "AI Eye: Open Live Preview"
 - Click elements to navigate to source code!
 
 ### For AI Agents
@@ -153,23 +153,23 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "visioncraft": {
+    "aieye": {
       "command": "node",
-      "args": ["/path/to/visioncraft/packages/mcp-server/dist/index.js"],
+      "args": ["/path/to/ai-eye/packages/mcp-server/dist/index.js"],
       "env": {
-        "VISIONCRAFT_URL": "http://localhost:5173"
+        "AIEYE_URL": "http://localhost:5173"
       }
     }
   }
 }
 ```
 
-**2. Use VisionCraft Tools**
+**2. Use AI Eye Tools**
 
 ```
 You: "Take a screenshot of my app and tell me what you see"
 
-Claude: [Uses visioncraft_screenshot]
+Claude: [Uses aieye_screenshot]
         "I can see a login form with two input fields and a submit button.
          The button is defined at src/LoginForm.tsx:45.
          Would you like me to inspect it further?"
@@ -197,11 +197,11 @@ See [docs/AI-USAGE.md](docs/AI-USAGE.md) for comprehensive guide.
 - [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues
 
 ### Package Documentation
-- [@visioncraft/extension](packages/extension/README.md) - VS Code extension
-- [@visioncraft/mcp-server](packages/mcp-server/README.md) - MCP server
-- [@visioncraft/vite-plugin](packages/vite-plugin/README.md) - Vite plugin
-- [@visioncraft/babel-plugin](packages/babel-plugin/README.md) - Babel plugin
-- [@visioncraft/bridge](packages/bridge/README.md) - Browser bridge
+- [@ai-eye/extension](packages/extension/README.md) - VS Code extension
+- [aieye](packages/mcp-server/README.md) - MCP server
+- [@ai-eye/vite-plugin](packages/vite-plugin/README.md) - Vite plugin
+- [@ai-eye/babel-plugin](packages/babel-plugin/README.md) - Babel plugin
+- [@ai-eye/bridge](packages/bridge/README.md) - Browser bridge
 
 ---
 
@@ -209,7 +209,7 @@ See [docs/AI-USAGE.md](docs/AI-USAGE.md) for comprehensive guide.
 
 ### Visual Debugging
 
-**Before VisionCraft:**
+**Before AI Eye:**
 ```
 1. See bug in browser
 2. Search codebase for component
@@ -218,9 +218,9 @@ See [docs/AI-USAGE.md](docs/AI-USAGE.md) for comprehensive guide.
 5. Find the right element
 ```
 
-**With VisionCraft:**
+**With AI Eye:**
 ```
-1. See bug in VisionCraft preview
+1. See bug in AI Eye preview
 2. Click element
 3. VS Code opens exact file and line
 4. Fix bug
@@ -254,7 +254,7 @@ Navigate unfamiliar codebases visually:
 
 ## 🏗️ Architecture
 
-VisionCraft has two modes: **v1 (External Browser)** and **v2 (Embedded Webview)**.
+AI Eye has two modes: **v1 (External Browser)** and **v2 (Embedded Webview)**.
 
 ### v2 Architecture (Recommended - Faster & Integrated)
 
@@ -262,7 +262,7 @@ VisionCraft has two modes: **v1 (External Browser)** and **v2 (Embedded Webview)
 ┌─────────────────────────────────────────────────────────┐
 │           VS Code                                       │
 │  ┌──────────────────────────────────────────────────┐   │
-│  │  VisionCraft Extension                           │   │
+│  │  AI Eye Extension                           │   │
 │  │  ┌────────────────┐  ┌────────────────────────┐  │   │
 │  │  │  Webview       │  │  Embedded MCP Server   │  │   │
 │  │  │  Bridge        │←→│  (Extension Host)      │  │   │
@@ -272,7 +272,7 @@ VisionCraft has two modes: **v1 (External Browser)** and **v2 (Embedded Webview)
 │  │  │  Webview Panel (iframe)       │          │    │   │
 │  │  │  ┌────────────────────────────┼────────┐ │    │   │
 │  │  │  │  Your App                  │        │ │    │   │
-│  │  │  │  + VisionCraft Bridge      │        │ │    │   │
+│  │  │  │  + AI Eye Bridge      │        │ │    │   │
 │  │  │  │    (postMessage protocol)  │        │ │    │   │
 │  │  │  └────────────────────────────┼────────┘ │    │   │
 │  │  └───────────────────────────────┘          │    │   │
@@ -295,7 +295,7 @@ VisionCraft has two modes: **v1 (External Browser)** and **v2 (Embedded Webview)
 ┌─────────────────────────────────────────┐
 │           VS Code                       │
 │  ┌──────────────────────────────────┐   │
-│  │  VisionCraft Extension           │   │
+│  │  AI Eye Extension           │   │
 │  │  - Live Preview Panel            │   │
 │  │  - Source Navigation             │   │
 │  └──────────────────────────────────┘   │
@@ -313,7 +313,7 @@ VisionCraft has two modes: **v1 (External Browser)** and **v2 (Embedded Webview)
 │    External Chromium Browser            │
 │  ┌──────────────────────────────────┐   │
 │  │  Your App                        │   │
-│  │  + VisionCraft Bridge            │   │
+│  │  + AI Eye Bridge            │   │
 │  │    (injected by plugin)          │   │
 │  └──────────────────────────────────┘   │
 └─────────────────────────────────────────┘
@@ -350,7 +350,7 @@ npm install
 npm run dev
 ```
 
-Then open VisionCraft preview and click around!
+Then open AI Eye preview and click around!
 
 ### Test Preview
 
@@ -392,15 +392,15 @@ pnpm dev
 pnpm test
 
 # Run specific package tests
-pnpm --filter @visioncraft/vite-plugin test
-pnpm --filter @visioncraft/babel-plugin test
-pnpm --filter @visioncraft/bridge test
+pnpm --filter @ai-eye/vite-plugin test
+pnpm --filter @ai-eye/babel-plugin test
+pnpm --filter @ai-eye/bridge test
 ```
 
 ### Project Structure
 
 ```
-visioncraft/
+ai-eye/
 ├── packages/
 │   ├── extension/        # VS Code extension
 │   ├── mcp-server/      # MCP server for AI agents
@@ -441,31 +441,31 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| `visioncraft.devServerUrl` | Dev server URL | `http://localhost:5175` |
-| `visioncraft.framework` | Framework detection | `auto` |
-| `visioncraft.screenshotQuality` | Screenshot quality (30-100) | `80` |
-| `visioncraft.enableCDP` | Enable CDP mode (v1 only) | `false` |
+| `aieye.devServerUrl` | Dev server URL | `http://localhost:5175` |
+| `aieye.framework` | Framework detection | `auto` |
+| `aieye.screenshotQuality` | Screenshot quality (30-100) | `80` |
+| `aieye.enableCDP` | Enable CDP mode (v1 only) | `false` |
 
 **Note:** v2 uses the embedded webview by default. v1 (external browser) is still available for advanced use cases.
 
 ### Vite Plugin Options
 
 ```typescript
-visionCraft({
+aiEye({
   enabled: true,              // Enable source mapping
   enableHMR: true,           // Track HMR updates
   root: __dirname,           // Project root
   include: /\.(jsx|tsx|vue|svelte)$/,  // Files to process
   exclude: /node_modules/,   // Files to exclude
-  attributePrefix: 'data-vc' // Attribute prefix
+  attributePrefix: 'data-ae' // Attribute prefix
 })
 ```
 
 ### MCP Server Environment Variables
 
 ```bash
-VISIONCRAFT_URL=http://localhost:5173  # Dev server URL
-VISIONCRAFT_MODE=playwright-launch     # Connection mode
+AIEYE_URL=http://localhost:5173  # Dev server URL
+AIEYE_MODE=playwright-launch     # Connection mode
 ```
 
 See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) for complete configuration guide.
@@ -502,7 +502,7 @@ See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) for framework-specific se
 → See [docs/TROUBLESHOOTING.md#mcp-server-issues](docs/TROUBLESHOOTING.md#mcp-server-issues)
 
 **"Element not found"**
-→ Use `visioncraft_find_elements` to search
+→ Use `aieye_find_elements` to search
 → Take screenshot to see what's actually there
 → See [docs/TROUBLESHOOTING.md#error-messages-explained](docs/TROUBLESHOOTING.md#error-messages-explained)
 
@@ -556,7 +556,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## 📜 License
 
-MIT © 2026 VisionCraft Team
+MIT © 2026 AI Eye Team
 
 See [LICENSE](LICENSE) for details.
 
@@ -564,7 +564,7 @@ See [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
-VisionCraft builds on amazing open-source projects:
+AI Eye builds on amazing open-source projects:
 
 - [VS Code Extension API](https://code.visualstudio.com/api)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
@@ -584,7 +584,7 @@ VisionCraft builds on amazing open-source projects:
 
 ## 🌟 Star History
 
-If you find VisionCraft useful, please consider giving it a star on GitHub! ⭐
+If you find AI Eye useful, please consider giving it a star on GitHub! ⭐
 
 ---
 

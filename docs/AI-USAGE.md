@@ -1,14 +1,14 @@
-# VisionCraft for AI Agents
+# AI Eye for AI Agents
 
-**A Guide for AI Coding Assistants Using VisionCraft**
+**A Guide for AI Coding Assistants Using AI Eye**
 
-This document explains how AI agents (like Claude, ChatGPT with plugins, or other MCP-compatible AI) should interact with VisionCraft to help developers build and debug web applications visually.
+This document explains how AI agents (like Claude, ChatGPT with plugins, or other MCP-compatible AI) should interact with AI Eye to help developers build and debug web applications visually.
 
 ---
 
-## What is VisionCraft?
+## What is AI Eye?
 
-VisionCraft gives you (the AI) the ability to:
+AI Eye gives you (the AI) the ability to:
 - **See** the user's web application through screenshots
 - **Inspect** UI elements to find their source code location
 - **Interact** with the application (click, type, scroll)
@@ -21,16 +21,16 @@ You get 14 tools via the Model Context Protocol (MCP) to perform these actions.
 
 ## Quick Start for AI Agents
 
-### When to Use VisionCraft
+### When to Use AI Eye
 
-Use VisionCraft tools when the user asks about:
+Use AI Eye tools when the user asks about:
 - ✅ Visual issues ("button is misaligned", "wrong color", "layout broken")
 - ✅ UI behavior ("click doesn't work", "form won't submit")
 - ✅ Responsive design ("check mobile view")
 - ✅ Component location ("where is this defined?")
 - ✅ Frontend debugging ("console errors", "HMR issues")
 
-Don't use VisionCraft for:
+Don't use AI Eye for:
 - ❌ Backend/API code (no visual output)
 - ❌ Build configuration (unless it affects the UI)
 - ❌ Pure logic/algorithms (no UI component)
@@ -52,7 +52,7 @@ Don't use VisionCraft for:
 
 ### 📸 Visual Tools
 
-#### `visioncraft_screenshot`
+#### `aieye_screenshot`
 **Purpose**: Capture what the user sees in their browser
 
 **When to use**:
@@ -72,12 +72,12 @@ Don't use VisionCraft for:
 ```
 User: "The login button doesn't look right"
 You: Let me take a screenshot to see...
-→ Call visioncraft_screenshot
+→ Call aieye_screenshot
 → Analyze the image
 You: "I can see the button. It appears to have incorrect padding..."
 ```
 
-#### `visioncraft_navigate`
+#### `aieye_navigate`
 **Purpose**: Change which page/URL you're viewing
 
 **When to use**:
@@ -95,15 +95,15 @@ You: "I can see the button. It appears to have incorrect padding..."
 **Example**:
 ```
 User: "Check the dashboard page"
-You: → Call visioncraft_navigate with url="http://localhost:3000/dashboard"
-     → Call visioncraft_screenshot to see it
+You: → Call aieye_navigate with url="http://localhost:3000/dashboard"
+     → Call aieye_screenshot to see it
 ```
 
 ---
 
 ### 🔍 Inspection Tools
 
-#### `visioncraft_inspect_element`
+#### `aieye_inspect_element`
 **Purpose**: Get detailed information about a specific UI element
 
 **When to use**:
@@ -128,7 +128,7 @@ You: → Call visioncraft_navigate with url="http://localhost:3000/dashboard"
 **Example**:
 ```
 You: Let me inspect that button...
-→ Call visioncraft_inspect_element with selector="button.login-btn"
+→ Call aieye_inspect_element with selector="button.login-btn"
 Response: {
   "tag": "button",
   "source": { "file": "src/Login.tsx", "line": "45", "col": "12" },
@@ -138,7 +138,7 @@ Response: {
 You: "The button is at src/Login.tsx:45. The padding is too small..."
 ```
 
-#### `visioncraft_get_source`
+#### `aieye_get_source`
 **Purpose**: Quickly get just the source location of an element
 
 **When to use**:
@@ -161,7 +161,7 @@ You: "The button is at src/Login.tsx:45. The padding is too small..."
 }
 ```
 
-#### `visioncraft_get_structure`
+#### `aieye_get_structure`
 **Purpose**: Get the DOM tree with source mappings
 
 **When to use**:
@@ -181,7 +181,7 @@ You: "The button is at src/Login.tsx:45. The padding is too small..."
 **Example**:
 ```
 You: Let me understand the page structure...
-→ Call visioncraft_get_structure with maxDepth=3
+→ Call aieye_get_structure with maxDepth=3
 Response: {
   "tag": "div",
   "source": "src/App.tsx",
@@ -192,7 +192,7 @@ Response: {
 }
 ```
 
-#### `visioncraft_find_elements`
+#### `aieye_find_elements`
 **Purpose**: Search for elements by text, role, or CSS
 
 **When to use**:
@@ -217,7 +217,7 @@ Response: {
 ```
 User: "The submit button is broken"
 You: Let me find the submit button...
-→ Call visioncraft_find_elements with query="Submit", mode="text"
+→ Call aieye_find_elements with query="Submit", mode="text"
 Response: [
   { "selector": "button#submit-btn", "source": "src/Form.tsx", "text": "Submit Form" }
 ]
@@ -228,7 +228,7 @@ You: "Found it at src/Form.tsx..."
 
 ### 🖱️ Interaction Tools
 
-#### `visioncraft_click`
+#### `aieye_click`
 **Purpose**: Click an element (button, link, etc.)
 
 **When to use**:
@@ -247,12 +247,12 @@ You: "Found it at src/Form.tsx..."
 ```
 User: "Does the button work now?"
 You: Let me test it...
-→ Call visioncraft_click with selector="button#submit-btn"
-→ Call visioncraft_get_console_logs to check for errors
+→ Call aieye_click with selector="button#submit-btn"
+→ Call aieye_get_console_logs to check for errors
 You: "Button works! No errors in console."
 ```
 
-#### `visioncraft_type`
+#### `aieye_type`
 **Purpose**: Type text into an input field
 
 **When to use**:
@@ -271,12 +271,12 @@ You: "Button works! No errors in console."
 **Example**:
 ```
 You: Let me test the form validation...
-→ Call visioncraft_type with selector="input#email", text="invalid"
-→ Call visioncraft_click on submit button
+→ Call aieye_type with selector="input#email", text="invalid"
+→ Call aieye_click on submit button
 → Check for validation errors
 ```
 
-#### `visioncraft_scroll`
+#### `aieye_scroll`
 **Purpose**: Scroll the page
 
 **When to use**:
@@ -296,7 +296,7 @@ You: Let me test the form validation...
 
 ### 🐛 Debugging Tools
 
-#### `visioncraft_get_console_logs`
+#### `aieye_get_console_logs`
 **Purpose**: Read browser console messages (errors, warnings, logs)
 
 **When to use**:
@@ -317,14 +317,14 @@ You: Let me test the form validation...
 **Example**:
 ```
 User: "The form won't submit"
-You: → Call visioncraft_get_console_logs with level="error"
+You: → Call aieye_get_console_logs with level="error"
 Response: [
   { "level": "error", "message": "TypeError: Cannot read property 'email' of undefined", "timestamp": 1234567890 }
 ]
 You: "I see a TypeError. The issue is that the form data isn't being read correctly..."
 ```
 
-#### `visioncraft_clear_console_logs`
+#### `aieye_clear_console_logs`
 **Purpose**: Clear the console log buffer
 
 **When to use**:
@@ -333,7 +333,7 @@ You: "I see a TypeError. The issue is that the form data isn't being read correc
 
 **Parameters**: None
 
-#### `visioncraft_get_hmr_status`
+#### `aieye_get_hmr_status`
 **Purpose**: Check Hot Module Replacement status and errors
 
 **When to use**:
@@ -352,7 +352,7 @@ You: "I see a TypeError. The issue is that the form data isn't being read correc
 **Example**:
 ```
 User: "My changes aren't showing up"
-You: → Call visioncraft_get_hmr_status
+You: → Call aieye_get_hmr_status
 Response: {
   "connected": false,
   "errors": [{"message": "Failed to reload /src/App.tsx"}]
@@ -360,7 +360,7 @@ Response: {
 You: "HMR is disconnected. Try restarting the dev server..."
 ```
 
-#### `visioncraft_clear_hmr_errors`
+#### `aieye_clear_hmr_errors`
 **Purpose**: Clear HMR error history
 
 **When to use**:
@@ -369,7 +369,7 @@ You: "HMR is disconnected. Try restarting the dev server..."
 
 **Parameters**: None
 
-#### `visioncraft_get_current_url`
+#### `aieye_get_current_url`
 **Purpose**: Check which page you're currently viewing
 
 **When to use**:
@@ -395,10 +395,10 @@ User: "The button is in the wrong place"
 
 ### 2. Use Source Mapping to Edit the Right Files
 
-VisionCraft tells you exactly where each element comes from:
+AI Eye tells you exactly where each element comes from:
 
 ```
-→ visioncraft_inspect_element returns:
+→ aieye_inspect_element returns:
   { "source": { "file": "src/components/Button.tsx", "line": "45" } }
 
 → Now you know to edit src/components/Button.tsx:45
@@ -410,7 +410,7 @@ After editing code, confirm it worked:
 
 ```
 1. Make the fix
-2. Wait for HMR to reload (check visioncraft_get_hmr_status)
+2. Wait for HMR to reload (check aieye_get_hmr_status)
 3. Take screenshot to verify
 4. Check console for new errors
 ```
@@ -431,12 +431,12 @@ Tools work together:
 
 ```
 // Find + Inspect + Fix workflow
-1. visioncraft_find_elements (query="Sign Up", mode="text")
+1. aieye_find_elements (query="Sign Up", mode="text")
    → Get selector
-2. visioncraft_inspect_element (selector from step 1)
+2. aieye_inspect_element (selector from step 1)
    → Get source location
 3. Read/Edit the source file
-4. visioncraft_screenshot
+4. aieye_screenshot
    → Verify fix
 ```
 
@@ -461,11 +461,11 @@ Response: { "error": "Element not found: button.missing" }
 User: "The header logo is too big"
 
 Step 1: See the current state
-→ visioncraft_screenshot
+→ aieye_screenshot
 
 Step 2: Inspect the logo element
-→ visioncraft_find_elements(query="logo", mode="css")
-→ visioncraft_inspect_element(selector=".logo")
+→ aieye_find_elements(query="logo", mode="css")
+→ aieye_inspect_element(selector=".logo")
 Response: source = "src/Header.tsx:12"
 
 Step 3: Check current styles
@@ -479,7 +479,7 @@ Step 5: Edit the source
 → Change width to "150px", height to "60px"
 
 Step 6: Verify the fix
-→ visioncraft_screenshot
+→ aieye_screenshot
 → Check that logo is now appropriately sized
 ```
 
@@ -489,20 +489,20 @@ Step 6: Verify the fix
 User: "The form won't submit"
 
 Step 1: Understand the current state
-→ visioncraft_screenshot
-→ visioncraft_get_console_logs(level="error")
+→ aieye_screenshot
+→ aieye_get_console_logs(level="error")
 
 Step 2: Test the interaction
-→ visioncraft_find_elements(query="submit", mode="text")
-→ visioncraft_type(selector="input#email", text="test@test.com")
-→ visioncraft_click(selector="button[type='submit']")
+→ aieye_find_elements(query="submit", mode="text")
+→ aieye_type(selector="input#email", text="test@test.com")
+→ aieye_click(selector="button[type='submit']")
 
 Step 3: Check what happened
-→ visioncraft_get_console_logs(level="error")
+→ aieye_get_console_logs(level="error")
 Response: [{ message: "Uncaught TypeError: validate is not a function" }]
 
 Step 4: Locate and fix
-→ visioncraft_inspect_element(selector="form")
+→ aieye_inspect_element(selector="form")
 Response: source = "src/ContactForm.tsx:34"
 → Read src/ContactForm.tsx
 → Fix the validate function call
@@ -514,20 +514,20 @@ Response: source = "src/ContactForm.tsx:34"
 User: "Check how it looks on mobile"
 
 Step 1: Navigate if needed
-→ visioncraft_navigate(url="http://localhost:3000")
+→ aieye_navigate(url="http://localhost:3000")
 
 Step 2: Capture current desktop view
-→ visioncraft_screenshot
+→ aieye_screenshot
 
 Step 3: User should resize browser or use dev tools
 "Please resize your browser to mobile width (375px) or use Chrome DevTools
 mobile emulation, then let me know when ready"
 
 Step 4: Capture mobile view
-→ visioncraft_screenshot
+→ aieye_screenshot
 
 Step 5: Inspect problematic elements
-→ visioncraft_inspect_element(selector=".nav-menu")
+→ aieye_inspect_element(selector=".nav-menu")
 → Check if elements are visible, properly positioned
 ```
 
@@ -558,12 +558,12 @@ Step 5: Inspect problematic elements
 Response: { "error": "Source mapping not available for this element" }
 
 Possible causes:
-- VisionCraft plugin not configured
+- AI Eye plugin not configured
 - Element is from external library
 - Production build (source maps disabled)
 
 ✅ Good response: "This element doesn't have source mapping. It may be from
-   a third-party library or the VisionCraft plugin might not be configured.
+   a third-party library or the AI Eye plugin might not be configured.
    Can you tell me which file this component should be in?"
 ```
 
@@ -610,11 +610,11 @@ Don't call tools unnecessarily:
 
 ```
 Need just the source location?
-❌ Don't use: visioncraft_inspect_element (returns lots of data)
-✅ Do use: visioncraft_get_source (faster, focused)
+❌ Don't use: aieye_inspect_element (returns lots of data)
+✅ Do use: aieye_get_source (faster, focused)
 
 Need to verify a visual change?
-✅ Use: visioncraft_screenshot (see the result)
+✅ Use: aieye_screenshot (see the result)
 ❌ Don't rely solely on: code inspection
 ```
 
@@ -644,23 +644,23 @@ Remember information from previous tool calls:
 // Test a complete user flow
 async function testCheckoutFlow() {
   // 1. Navigate to product page
-  await visioncraft_navigate({ url: "http://localhost:3000/product/123" });
+  await aieye_navigate({ url: "http://localhost:3000/product/123" });
 
   // 2. Add to cart
-  await visioncraft_click({ selector: "button.add-to-cart" });
+  await aieye_click({ selector: "button.add-to-cart" });
 
   // 3. Navigate to cart
-  await visioncraft_click({ selector: "a[href='/cart']" });
+  await aieye_click({ selector: "a[href='/cart']" });
 
   // 4. Verify cart contents
-  const screenshot = await visioncraft_screenshot({});
-  const logs = await visioncraft_get_console_logs({ level: "error" });
+  const screenshot = await aieye_screenshot({});
+  const logs = await aieye_get_console_logs({ level: "error" });
 
   // 5. Proceed to checkout
-  await visioncraft_click({ selector: "button.checkout" });
+  await aieye_click({ selector: "button.checkout" });
 
   // 6. Check for errors
-  const errors = await visioncraft_get_console_logs({ level: "error" });
+  const errors = await aieye_get_console_logs({ level: "error" });
 
   return { success: errors.length === 0, errors };
 }
@@ -672,12 +672,12 @@ async function testCheckoutFlow() {
 // Check accessibility of a page
 async function checkAccessibility() {
   // Get all interactive elements
-  const buttons = await visioncraft_find_elements({ query: "button", mode: "role" });
-  const links = await visioncraft_find_elements({ query: "link", mode: "role" });
+  const buttons = await aieye_find_elements({ query: "button", mode: "role" });
+  const links = await aieye_find_elements({ query: "link", mode: "role" });
 
   // Inspect each for accessibility attributes
   for (const element of [...buttons, ...links]) {
-    const details = await visioncraft_inspect_element({ selector: element.selector });
+    const details = await aieye_inspect_element({ selector: element.selector });
     // Check for aria-label, role, alt text, etc.
   }
 }
@@ -687,7 +687,7 @@ async function checkAccessibility() {
 
 ## Limitations and Constraints
 
-### What VisionCraft Cannot Do
+### What AI Eye Cannot Do
 
 1. **Cannot control the dev server** - You can't start/stop it
 2. **Cannot modify browser viewport** - User must resize
@@ -699,7 +699,7 @@ async function checkAccessibility() {
 
 ```
 User: "Start the dev server"
-❌ Can't: Use VisionCraft to start it
+❌ Can't: Use AI Eye to start it
 ✅ Can: Tell user: "Please run `npm run dev` in your terminal"
 
 User: "Check the API response"
@@ -711,17 +711,17 @@ User: "Check the API response"
 
 ## Integration with Your Workflow
 
-### Before Using VisionCraft
+### Before Using AI Eye
 
 1. Confirm the dev server is running
-2. Confirm VisionCraft is configured
+2. Confirm AI Eye is configured
 3. Get the URL from the user
 
 ### During Development
 
-1. Use VisionCraft for visual verification
+1. Use AI Eye for visual verification
 2. Edit code normally (you have file access)
-3. Use VisionCraft to verify changes
+3. Use AI Eye to verify changes
 
 ### After Changes
 
@@ -771,7 +771,7 @@ If you encounter issues or need clarification:
 
 ## Summary
 
-VisionCraft gives you AI superpowers for visual development:
+AI Eye gives you AI superpowers for visual development:
 
 1. **See** what users see
 2. **Understand** the UI structure and source code relationship

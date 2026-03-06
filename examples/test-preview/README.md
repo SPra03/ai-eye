@@ -1,6 +1,6 @@
-# VisionCraft Test Preview
+# AI Eye Test Preview
 
-A simple test page to verify VisionCraft's live preview functionality.
+A simple test page to verify AI Eye's live preview functionality.
 
 ## Quick Start
 
@@ -15,7 +15,7 @@ A simple test page to verify VisionCraft's live preview functionality.
 
 2. In VS Code:
    - Press `F5` to launch Extension Development Host
-   - Run command: **VisionCraft: Open Live Preview**
+   - Run command: **AI Eye: Open Live Preview**
    - If the server used a different port, update the URL in the preview
    - The test page should appear in the preview panel!
 

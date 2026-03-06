@@ -1,6 +1,6 @@
-# VisionCraft Troubleshooting Guide
+# AI Eye Troubleshooting Guide
 
-Common issues and solutions for VisionCraft users.
+Common issues and solutions for AI Eye users.
 
 ---
 
@@ -92,9 +92,9 @@ Error: Not connected to browser. Call connect() first or check if the browser is
    ```json
    {
      "mcpServers": {
-       "visioncraft": {
+       "aieye": {
          "env": {
-           "VISIONCRAFT_URL": "http://localhost:5173"  // ← Verify this
+           "AIEYE_URL": "http://localhost:5173"  // ← Verify this
          }
        }
      }
@@ -104,26 +104,26 @@ Error: Not connected to browser. Call connect() first or check if the browser is
 3. **Browser crashed:**
    Restart the MCP server (close and reopen Claude Desktop)
 
-### "VisionCraft bridge not available"
+### "AI Eye bridge not available"
 
 **Error:**
 ```
-VisionCraft bridge not available in CDP-only mode. Ensure @visioncraft/vite-plugin is installed and the dev server is running.
+AI Eye bridge not available in CDP-only mode. Ensure @ai-eye/vite-plugin is installed and the dev server is running.
 ```
 
 **Solutions:**
 
 1. **Install the Vite plugin:**
    ```bash
-   npm install @visioncraft/vite-plugin --save-dev
+   npm install @ai-eye/vite-plugin --save-dev
    ```
 
 2. **Configure it in vite.config.ts:**
    ```typescript
-   import visionCraft from '@visioncraft/vite-plugin';
+   import aiEye from '@ai-eye/vite-plugin';
 
    export default defineConfig({
-     plugins: [visionCraft()],
+     plugins: [aiEye()],
    });
    ```
 
@@ -145,9 +145,9 @@ Failed to start MCP server
    ```json
    {
      "mcpServers": {
-       "visioncraft": {
+       "aieye": {
          "command": "node",
-         "args": ["/FULL/PATH/TO/visioncraft/packages/mcp-server/dist/index.js"]
+         "args": ["/FULL/PATH/TO/ai-eye/packages/mcp-server/dist/index.js"]
        }
      }
    }
@@ -175,11 +175,11 @@ Browser page not available
 **Solutions:**
 
 1. **Navigate to a page first:**
-   Use `visioncraft_navigate` before taking screenshots
+   Use `aieye_navigate` before taking screenshots
 
 2. **Check browser connection:**
    ```
-   visioncraft_get_current_url
+   aieye_get_current_url
    ```
    If this fails, the browser isn't connected
 
@@ -194,13 +194,13 @@ Browser page not available
 
 **Symptoms:**
 - Commands not appearing in Command Palette
-- No "VisionCraft" in the list
+- No "AI Eye" in the list
 
 **Solutions:**
 
 1. **Build the extension:**
    ```bash
-   npx pnpm --filter @visioncraft/extension build
+   npx pnpm --filter @ai-eye/extension build
    ```
 
 2. **Check build output:**
@@ -250,17 +250,17 @@ Browser page not available
 
 **Error:**
 ```
-Command 'visioncraft.openPreview' not found
+Command 'aieye.openPreview' not found
 ```
 
 **Solutions:**
 
 1. **Check extension activated:**
-   Look for "VisionCraft extension activated" in Output panel
+   Look for "AI Eye extension activated" in Output panel
 
 2. **Verify commands registered:**
    - Press `Cmd+Shift+P`
-   - Type "VisionCraft"
+   - Type "AI Eye"
    - Should see 4 commands
 
 3. **Check package.json:**
@@ -273,7 +273,7 @@ Command 'visioncraft.openPreview' not found
 
 **Error:**
 ```
-Cannot find module '@visioncraft/bridge'
+Cannot find module '@ai-eye/bridge'
 ```
 
 **Solution:**
@@ -289,23 +289,23 @@ npx pnpm build
 ### Bridge Script Not Loading
 
 **Symptoms:**
-- No `data-vc-source` attributes on elements
-- `window.__VISIONCRAFT__` is undefined
+- No `data-ae-source` attributes on elements
+- `window.__AIEYE__` is undefined
 
 **Solutions:**
 
 1. **Verify plugin is installed and configured:**
    ```bash
-   npm list @visioncraft/vite-plugin
+   npm list @ai-eye/vite-plugin
    ```
 
 2. **Check vite.config.ts:**
    ```typescript
-   import visionCraft from '@visioncraft/vite-plugin';
+   import aiEye from '@ai-eye/vite-plugin';
 
    export default defineConfig({
      plugins: [
-       visionCraft(),  // ← Should be here
+       aiEye(),  // ← Should be here
      ],
    });
    ```
@@ -318,33 +318,33 @@ npx pnpm build
 
 5. **Verify bridge was built:**
    ```bash
-   ls packages/bridge/dist/visioncraft-bridge.js
+   ls packages/bridge/dist/aieye-bridge.js
    ```
 
 ### Source Mapping Not Working
 
-**Issue:** Elements don't have `data-vc-source` attributes
+**Issue:** Elements don't have `data-ae-source` attributes
 
 **Solutions:**
 
 1. **Check if files are being transformed:**
    Open Dev Tools → Elements tab
    Inspect an element
-   Look for `data-vc-source`, `data-vc-line`, `data-vc-col` attributes
+   Look for `data-ae-source`, `data-ae-line`, `data-ae-col` attributes
 
 2. **Verify file extensions match:**
    Default: `/(jsx|tsx|vue|svelte)$/`
 
    Customize if needed:
    ```typescript
-   visionCraft({
+   aiEye({
      include: /\.(jsx|tsx)$/,  // Only React
    })
    ```
 
 3. **Check if enabled in dev mode:**
    ```typescript
-   visionCraft({
+   aiEye({
      enabled: true,  // Force enable
    })
    ```
@@ -359,7 +359,7 @@ npx pnpm build
 
 1. **Check HMR status:**
    ```
-   visioncraft_get_hmr_status
+   aieye_get_hmr_status
    ```
 
 2. **Verify Vite config:**
@@ -373,7 +373,7 @@ npx pnpm build
 
 3. **Check for errors:**
    ```
-   visioncraft_get_hmr_status
+   aieye_get_hmr_status
    ```
    Look at the `errors` array
 
@@ -392,14 +392,14 @@ npx pnpm build
 
 1. **Verify plugin is installed:**
    ```bash
-   npm list @visioncraft/babel-plugin
+   npm list @ai-eye/babel-plugin
    ```
 
 2. **Check .babelrc or babel.config.js:**
    ```json
    {
      "plugins": [
-       "@visioncraft/babel-plugin"
+       "@ai-eye/babel-plugin"
      ]
    }
    ```
@@ -408,7 +408,7 @@ npx pnpm build
    ```json
    {
      "plugins": [
-       ["@visioncraft/babel-plugin", {
+       ["@ai-eye/babel-plugin", {
          "enabled": true
        }]
      ]
@@ -417,14 +417,14 @@ npx pnpm build
 
 ### Wrong File Paths in Attributes
 
-**Issue:** `data-vc-source` has incorrect paths
+**Issue:** `data-ae-source` has incorrect paths
 
 **Solution:**
 Set the `root` option:
 ```json
 {
   "plugins": [
-    ["@visioncraft/babel-plugin", {
+    ["@ai-eye/babel-plugin", {
       "root": "/absolute/path/to/project"
     }]
   ]
@@ -478,7 +478,7 @@ Failed to connect to CDP endpoint after 3 attempts
 
 1. **Check console for errors:**
    ```
-   visioncraft_get_console_logs
+   aieye_get_console_logs
    ```
 
 2. **Reduce memory usage:**
@@ -516,7 +516,7 @@ Failed to connect to CDP endpoint after 3 attempts
 
 **Error:**
 ```
-Source mapping not available for this element. Ensure @visioncraft/vite-plugin or @visioncraft/babel-plugin is configured.
+Source mapping not available for this element. Ensure @ai-eye/vite-plugin or @ai-eye/babel-plugin is configured.
 ```
 
 **Causes:**
@@ -570,9 +570,9 @@ MCP server process using >500MB RAM
    ```json
    {
      "mcpServers": {
-       "visioncraft": {
+       "aieye": {
          "env": {
-           "VISIONCRAFT_MODE": "cdp-connect"
+           "AIEYE_MODE": "cdp-connect"
          }
        }
      }
@@ -612,7 +612,7 @@ Changes take >3 seconds to appear
 
 1. **Check HMR latency:**
    ```
-   visioncraft_get_hmr_status
+   aieye_get_hmr_status
    ```
    Look at `averageLatency`
 
@@ -645,8 +645,8 @@ The CSS selector didn't match any element on the page
 
 **Solutions:**
 1. Take a screenshot to see what's actually there
-2. Use `visioncraft_find_elements` to search by text
-3. Use `visioncraft_get_structure` to see the DOM
+2. Use `aieye_find_elements` to search by text
+3. Use `aieye_get_structure` to see the DOM
 4. Verify the selector is correct
 
 ### "Invalid URL format"
@@ -693,7 +693,7 @@ Bridge method not found: unknownMethod. Available methods: inspectElement, click
 Tried to call a method that doesn't exist in the bridge API
 
 **Solution:**
-This is usually a bug in VisionCraft. Check the available methods in the error message and use one of those.
+This is usually a bug in AI Eye. Check the available methods in the error message and use one of those.
 
 ---
 
@@ -703,7 +703,7 @@ This is usually a bug in VisionCraft. Check the available methods in the error m
 
 Set environment variable:
 ```bash
-export DEBUG=visioncraft:*
+export DEBUG=aieye:*
 ```
 
 Then restart the MCP server.
@@ -718,9 +718,9 @@ node --version
 code --version
 
 # Check package versions
-npm list @visioncraft/vite-plugin
-npm list @visioncraft/babel-plugin
-npm list @visioncraft/mcp-server
+npm list @ai-eye/vite-plugin
+npm list @ai-eye/babel-plugin
+npm list aieye
 ```
 
 ### Collect Diagnostic Information
@@ -761,7 +761,7 @@ Run through this checklist to diagnose most issues:
 
 ```bash
 # 1. Check you're in the right directory
-pwd  # Should end with /visioncraft or your project name
+pwd  # Should end with /ai-eye or your project name
 
 # 2. Check Node version
 node --version  # Should be 18+
@@ -777,7 +777,7 @@ curl http://localhost:5173  # Should return HTML
 
 # 6. Check MCP server can start
 node packages/mcp-server/dist/index.js
-# Should show: [MCP] VisionCraft MCP Server running on stdio
+# Should show: [MCP] AI Eye MCP Server running on stdio
 
 # 7. Check browser can connect
 # (If using MCP server, it will auto-connect)

@@ -1,16 +1,16 @@
 import * as vscode from 'vscode';
-import { VisionCraftConfig } from '../types';
+import { AIEyeConfig } from '../types';
 
 /**
- * Manages VisionCraft configuration from VS Code settings
+ * Manages AI Eye configuration from VS Code settings
  */
 export class ConfigManager {
-  private static readonly SECTION = 'visioncraft';
+  private static readonly SECTION = 'aieye';
 
   /**
-   * Get the current VisionCraft configuration
+   * Get the current AI Eye configuration
    */
-  static getConfig(): VisionCraftConfig {
+  static getConfig(): AIEyeConfig {
     const config = vscode.workspace.getConfiguration(this.SECTION);
 
     return {
@@ -27,9 +27,9 @@ export class ConfigManager {
   /**
    * Update a configuration value
    */
-  static async updateConfig<K extends keyof VisionCraftConfig>(
+  static async updateConfig<K extends keyof AIEyeConfig>(
     key: K,
-    value: VisionCraftConfig[K],
+    value: AIEyeConfig[K],
     target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Workspace
   ): Promise<void> {
     const config = vscode.workspace.getConfiguration(this.SECTION);

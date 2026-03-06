@@ -1,6 +1,6 @@
-# VisionCraft API Reference
+# AI Eye API Reference
 
-Complete API documentation for all VisionCraft packages.
+Complete API documentation for all AI Eye packages.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ Complete API documentation for all VisionCraft packages.
 ### Installation
 
 ```bash
-npm install @visioncraft/babel-plugin --save-dev
+npm install @ai-eye/babel-plugin --save-dev
 ```
 
 ### Usage
@@ -25,10 +25,10 @@ npm install @visioncraft/babel-plugin --save-dev
 // babel.config.js
 module.exports = {
   plugins: [
-    ['@visioncraft/babel-plugin', {
+    ['@ai-eye/babel-plugin', {
       enabled: true,
       root: process.cwd(),
-      attributePrefix: 'data-vc'
+      attributePrefix: 'data-ae'
     }]
   ]
 };
@@ -42,7 +42,7 @@ module.exports = {
 - **Description**: Enable/disable the plugin
 
 ```javascript
-['@visioncraft/babel-plugin', { enabled: process.env.NODE_ENV === 'development' }]
+['@ai-eye/babel-plugin', { enabled: process.env.NODE_ENV === 'development' }]
 ```
 
 #### `root`
@@ -51,16 +51,16 @@ module.exports = {
 - **Description**: Project root directory for computing relative paths
 
 ```javascript
-['@visioncraft/babel-plugin', { root: '/path/to/project' }]
+['@ai-eye/babel-plugin', { root: '/path/to/project' }]
 ```
 
 #### `attributePrefix`
 - **Type**: `string`
-- **Default**: `'data-vc'`
+- **Default**: `'data-ae'`
 - **Description**: Prefix for injected attributes
 
 ```javascript
-['@visioncraft/babel-plugin', { attributePrefix: 'data-custom' }]
+['@ai-eye/babel-plugin', { attributePrefix: 'data-custom' }]
 // Generates: data-custom-source, data-custom-line, data-custom-col
 ```
 
@@ -78,7 +78,7 @@ function Button() {
 **Output**:
 ```jsx
 function Button() {
-  return <button data-vc-source="Button.tsx" data-vc-line="2" data-vc-col="9">Click me</button>;
+  return <button data-ae-source="Button.tsx" data-ae-line="2" data-ae-col="9">Click me</button>;
 }
 ```
 
@@ -99,7 +99,7 @@ function Button() {
 ### Installation
 
 ```bash
-npm install @visioncraft/vite-plugin --save-dev
+npm install @ai-eye/vite-plugin --save-dev
 ```
 
 ### Usage
@@ -107,14 +107,14 @@ npm install @visioncraft/vite-plugin --save-dev
 ```javascript
 // vite.config.js
 import { defineConfig } from 'vite';
-import visionCraftVitePlugin from '@visioncraft/vite-plugin';
+import aiEyeVitePlugin from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    visionCraftVitePlugin({
+    aiEyeVitePlugin({
       enabled: true,
       enableHMR: true,
-      attributePrefix: 'data-vc',
+      attributePrefix: 'data-ae',
       root: process.cwd()
     })
   ]
@@ -129,7 +129,7 @@ export default defineConfig({
 - **Description**: Enable/disable the plugin
 
 ```javascript
-visionCraftVitePlugin({ enabled: process.env.NODE_ENV === 'development' })
+aiEyeVitePlugin({ enabled: process.env.NODE_ENV === 'development' })
 ```
 
 #### `enableHMR`
@@ -139,7 +139,7 @@ visionCraftVitePlugin({ enabled: process.env.NODE_ENV === 'development' })
 
 #### `attributePrefix`
 - **Type**: `string`
-- **Default**: `'data-vc'`
+- **Default**: `'data-ae'`
 - **Description**: Prefix for source mapping attributes
 
 #### `root`
@@ -166,17 +166,17 @@ Delegates to Babel plugin for JSX transformation. Works with:
 - Vue (.vue)
 - Svelte (.svelte)
 
-#### 2. Virtual Module: `@visioncraft/bridge`
+#### 2. Virtual Module: `@ai-eye/bridge`
 
 The plugin provides a virtual module that injects the bridge script:
 
 ```javascript
-import '@visioncraft/bridge';
-// Bridge is now available at window.__VISIONCRAFT__
+import '@ai-eye/bridge';
+// Bridge is now available at window.__AIEYE__
 ```
 
 **How it works**:
-1. Plugin intercepts `import '@visioncraft/bridge'`
+1. Plugin intercepts `import '@ai-eye/bridge'`
 2. Loads bridge TypeScript source
 3. Transforms to JavaScript with esbuild
 4. Injects with `import.meta.hot` access
@@ -188,7 +188,7 @@ Automatically tracks HMR events when `enableHMR: true`:
 
 ```javascript
 // In your app
-const status = window.__VISIONCRAFT__.getHMRStatus();
+const status = window.__AIEYE__.getHMRStatus();
 console.log(status.connected); // true
 console.log(status.updates);   // Array of recent updates
 console.log(status.errors);    // Array of recent errors
@@ -201,14 +201,14 @@ In development mode, automatically injects the bridge script:
 ```html
 <!-- Automatically injected -->
 <script type="module">
-  import '@visioncraft/bridge';
+  import '@ai-eye/bridge';
 </script>
 ```
 
 ### Hooks Used
 
 - **`configResolved`**: Auto-detect development mode
-- **`resolveId`**: Intercept `@visioncraft/bridge` imports
+- **`resolveId`**: Intercept `@ai-eye/bridge` imports
 - **`load`**: Provide bridge script source
 - **`transform`**: Add source mapping attributes to JSX
 - **`transformIndexHtml`**: Inject bridge script tag
@@ -218,22 +218,22 @@ In development mode, automatically injects the bridge script:
 
 ## Bridge Script API
 
-The bridge script runs in the browser and provides the `window.__VISIONCRAFT__` API.
+The bridge script runs in the browser and provides the `window.__AIEYE__` API.
 
 ### Automatic Injection
 
 ```javascript
 // vite.config.js
-import visionCraftVitePlugin from '@visioncraft/vite-plugin';
+import aiEyeVitePlugin from '@ai-eye/vite-plugin';
 
 export default defineConfig({
-  plugins: [visionCraftVitePlugin()]
+  plugins: [aiEyeVitePlugin()]
 });
 ```
 
 ```javascript
 // main.tsx
-import '@visioncraft/bridge';
+import '@ai-eye/bridge';
 ```
 
 ### API Reference
@@ -284,7 +284,7 @@ interface ElementInspectionResult {
 
 **Example**:
 ```javascript
-const result = window.__VISIONCRAFT__.inspectElement('#submit-button');
+const result = window.__AIEYE__.inspectElement('#submit-button');
 console.log(result.sourceFile); // "src/components/Button.tsx"
 console.log(result.sourceLine); // "15"
 ```
@@ -305,7 +305,7 @@ interface SourceLocation {
 
 **Example**:
 ```javascript
-const source = window.__VISIONCRAFT__.getElementSource('.card');
+const source = window.__AIEYE__.getElementSource('.card');
 console.log(`${source.file}:${source.line}:${source.col}`);
 // "src/Card.tsx:42:8"
 ```
@@ -331,7 +331,7 @@ interface PageStructureNode {
 
 **Example**:
 ```javascript
-const structure = window.__VISIONCRAFT__.getPageStructure(3);
+const structure = window.__AIEYE__.getPageStructure(3);
 console.log(JSON.stringify(structure, null, 2));
 ```
 
@@ -360,13 +360,13 @@ interface ElementSearchResult {
 **Examples**:
 ```javascript
 // Find by CSS
-const buttons = window.__VISIONCRAFT__.findElements('button', 'css');
+const buttons = window.__AIEYE__.findElements('button', 'css');
 
 // Find by text
-const links = window.__VISIONCRAFT__.findElements('Learn more', 'text');
+const links = window.__AIEYE__.findElements('Learn more', 'text');
 
 // Find by role
-const navigation = window.__VISIONCRAFT__.findElements('navigation', 'role');
+const navigation = window.__AIEYE__.findElements('navigation', 'role');
 ```
 
 ---
@@ -388,7 +388,7 @@ interface ActionResult {
 
 **Example**:
 ```javascript
-const result = window.__VISIONCRAFT__.clickElement('#submit-btn');
+const result = window.__AIEYE__.clickElement('#submit-btn');
 if (result.success) {
   console.log('Clicked!');
 }
@@ -411,8 +411,8 @@ Type text into input/textarea element.
 
 **Example**:
 ```javascript
-window.__VISIONCRAFT__.typeText('#username', 'john.doe');
-window.__VISIONCRAFT__.typeText('#password', 'secret123');
+window.__AIEYE__.typeText('#username', 'john.doe');
+window.__AIEYE__.typeText('#password', 'secret123');
 ```
 
 ##### `scrollTo(x: number, y: number)`
@@ -428,10 +428,10 @@ Scroll the page.
 **Example**:
 ```javascript
 // Scroll to top
-window.__VISIONCRAFT__.scrollTo(0, 0);
+window.__AIEYE__.scrollTo(0, 0);
 
 // Scroll down 500px
-window.__VISIONCRAFT__.scrollTo(0, 500);
+window.__AIEYE__.scrollTo(0, 500);
 ```
 
 ---
@@ -463,13 +463,13 @@ Get captured console logs.
 **Example**:
 ```javascript
 // Get all logs
-const allLogs = window.__VISIONCRAFT__.getConsoleLogs();
+const allLogs = window.__AIEYE__.getConsoleLogs();
 
 // Get only errors
-const errors = window.__VISIONCRAFT__.getConsoleLogs('error');
+const errors = window.__AIEYE__.getConsoleLogs('error');
 
 // Get last 10 warnings
-const warnings = window.__VISIONCRAFT__.getConsoleLogs('warn', 10);
+const warnings = window.__AIEYE__.getConsoleLogs('warn', 10);
 ```
 
 ##### `clearConsoleLogs()`
@@ -478,7 +478,7 @@ Clear all captured logs.
 
 **Example**:
 ```javascript
-window.__VISIONCRAFT__.clearConsoleLogs();
+window.__AIEYE__.clearConsoleLogs();
 ```
 
 ---
@@ -513,7 +513,7 @@ interface HMRStatus {
 
 **Example**:
 ```javascript
-const status = window.__VISIONCRAFT__.getHMRStatus();
+const status = window.__AIEYE__.getHMRStatus();
 console.log(`Connected: ${status.connected}`);
 console.log(`Total updates: ${status.totalUpdates}`);
 console.log(`Average latency: ${status.averageLatency}ms`);
@@ -539,7 +539,7 @@ Capture page screenshot (requires html2canvas).
 
 **Example**:
 ```javascript
-const dataUrl = await window.__VISIONCRAFT__.captureScreenshot('png');
+const dataUrl = await window.__AIEYE__.captureScreenshot('png');
 const img = document.createElement('img');
 img.src = dataUrl;
 document.body.appendChild(img);
@@ -562,7 +562,7 @@ The MCP server connects to the browser using one of three modes:
 
 ### Tools Reference
 
-#### `visioncraft_screenshot`
+#### `aieye_screenshot`
 
 Capture page screenshot.
 
@@ -589,7 +589,7 @@ Capture page screenshot.
 
 ---
 
-#### `visioncraft_inspect_element`
+#### `aieye_inspect_element`
 
 Inspect element with source mapping.
 
@@ -614,7 +614,7 @@ Inspect element with source mapping.
 
 ---
 
-#### `visioncraft_get_source`
+#### `aieye_get_source`
 
 Get source location for element.
 
@@ -639,7 +639,7 @@ Get source location for element.
 
 ---
 
-#### `visioncraft_click`
+#### `aieye_click`
 
 Click element.
 
@@ -664,7 +664,7 @@ Click element.
 
 ---
 
-#### `visioncraft_type`
+#### `aieye_type`
 
 Type text into input.
 
@@ -690,7 +690,7 @@ Type text into input.
 
 ---
 
-#### `visioncraft_scroll`
+#### `aieye_scroll`
 
 Scroll page.
 
@@ -716,7 +716,7 @@ Scroll page.
 
 ---
 
-#### `visioncraft_find_elements`
+#### `aieye_find_elements`
 
 Search for elements.
 
@@ -742,7 +742,7 @@ Search for elements.
 
 ---
 
-#### `visioncraft_get_structure`
+#### `aieye_get_structure`
 
 Get page DOM structure.
 
@@ -767,7 +767,7 @@ Get page DOM structure.
 
 ---
 
-#### `visioncraft_get_console_logs`
+#### `aieye_get_console_logs`
 
 Get console logs.
 
@@ -793,7 +793,7 @@ Get console logs.
 
 ---
 
-#### `visioncraft_clear_console_logs`
+#### `aieye_clear_console_logs`
 
 Clear console logs.
 
@@ -813,7 +813,7 @@ Clear console logs.
 
 ---
 
-#### `visioncraft_get_hmr_status`
+#### `aieye_get_hmr_status`
 
 Get HMR status.
 
@@ -833,7 +833,7 @@ Get HMR status.
 
 ---
 
-#### `visioncraft_clear_hmr_errors`
+#### `aieye_clear_hmr_errors`
 
 Clear HMR errors.
 
@@ -853,7 +853,7 @@ Clear HMR errors.
 
 ---
 
-#### `visioncraft_navigate`
+#### `aieye_navigate`
 
 Navigate to URL.
 
@@ -878,7 +878,7 @@ Navigate to URL.
 
 ---
 
-#### `visioncraft_get_current_url`
+#### `aieye_get_current_url`
 
 Get current URL.
 
@@ -905,7 +905,7 @@ All APIs return errors in a consistent format:
 ### Bridge Script Errors
 
 ```javascript
-const result = window.__VISIONCRAFT__.inspectElement('#missing');
+const result = window.__AIEYE__.inspectElement('#missing');
 console.log(result.error); // "Element not found: #missing"
 ```
 
@@ -930,9 +930,9 @@ console.log(result.error); // "Element not found: #missing"
 Full TypeScript definitions are available in each package:
 
 ```typescript
-import type { VisionCraftBabelPluginOptions } from '@visioncraft/babel-plugin';
-import type { VisionCraftVitePluginOptions } from '@visioncraft/vite-plugin';
-import type { VisionCraftAPI } from '@visioncraft/bridge';
+import type { AIEyeBabelPluginOptions } from '@ai-eye/babel-plugin';
+import type { AIEyeVitePluginOptions } from '@ai-eye/vite-plugin';
+import type { AIEyeAPI } from '@ai-eye/bridge';
 ```
 
 ---

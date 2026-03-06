@@ -12,76 +12,76 @@ import { describe, it, expect } from 'vitest';
 // so we test the expected tool definitions as a contract.
 
 const ALL_TOOL_NAMES = [
-  'visioncraft_screenshot',
-  'visioncraft_element_at_point',
-  'visioncraft_inspect_element',
-  'visioncraft_get_source',
-  'visioncraft_click',
-  'visioncraft_type',
-  'visioncraft_scroll',
-  'visioncraft_batch_inspect',
-  'visioncraft_hover',
-  'visioncraft_find_elements',
-  'visioncraft_get_structure',
-  'visioncraft_get_css_source',
-  'visioncraft_set_viewport',
-  'visioncraft_get_console_logs',
-  'visioncraft_clear_console_logs',
-  'visioncraft_get_network_requests',
-  'visioncraft_clear_network_requests',
-  'visioncraft_get_hmr_status',
-  'visioncraft_clear_hmr_errors',
-  'visioncraft_visual_diff',
-  'visioncraft_navigate',
-  'visioncraft_get_current_url',
+  'aieye_screenshot',
+  'aieye_element_at_point',
+  'aieye_inspect_element',
+  'aieye_get_source',
+  'aieye_click',
+  'aieye_type',
+  'aieye_scroll',
+  'aieye_batch_inspect',
+  'aieye_hover',
+  'aieye_find_elements',
+  'aieye_get_structure',
+  'aieye_get_css_source',
+  'aieye_set_viewport',
+  'aieye_get_console_logs',
+  'aieye_clear_console_logs',
+  'aieye_get_network_requests',
+  'aieye_clear_network_requests',
+  'aieye_get_hmr_status',
+  'aieye_clear_hmr_errors',
+  'aieye_visual_diff',
+  'aieye_navigate',
+  'aieye_get_current_url',
   // v4 new tools
-  'visioncraft_style_diff',
-  'visioncraft_get_component_tree',
-  'visioncraft_audit_accessibility',
+  'aieye_style_diff',
+  'aieye_get_component_tree',
+  'aieye_audit_accessibility',
   // v6 new tools
-  'visioncraft_measure_element',
-  'visioncraft_measure_spacing',
-  'visioncraft_get_computed_layout',
-  'visioncraft_diff_against_reference',
-  'visioncraft_get_palette',
-  'visioncraft_snapshot',
-  'visioncraft_wait_for_hmr',
+  'aieye_measure_element',
+  'aieye_measure_spacing',
+  'aieye_get_computed_layout',
+  'aieye_diff_against_reference',
+  'aieye_get_palette',
+  'aieye_snapshot',
+  'aieye_wait_for_hmr',
 ];
 
 // Original v1/v2 tools
 const ORIGINAL_TOOLS = [
-  'visioncraft_screenshot',
-  'visioncraft_inspect_element',
-  'visioncraft_get_source',
-  'visioncraft_click',
-  'visioncraft_type',
-  'visioncraft_scroll',
-  'visioncraft_find_elements',
-  'visioncraft_get_structure',
-  'visioncraft_get_console_logs',
-  'visioncraft_clear_console_logs',
-  'visioncraft_get_hmr_status',
-  'visioncraft_clear_hmr_errors',
-  'visioncraft_navigate',
-  'visioncraft_get_current_url',
+  'aieye_screenshot',
+  'aieye_inspect_element',
+  'aieye_get_source',
+  'aieye_click',
+  'aieye_type',
+  'aieye_scroll',
+  'aieye_find_elements',
+  'aieye_get_structure',
+  'aieye_get_console_logs',
+  'aieye_clear_console_logs',
+  'aieye_get_hmr_status',
+  'aieye_clear_hmr_errors',
+  'aieye_navigate',
+  'aieye_get_current_url',
 ];
 
 // New v3 tools
 const V3_NEW_TOOLS = [
-  'visioncraft_element_at_point',
-  'visioncraft_batch_inspect',
-  'visioncraft_hover',
-  'visioncraft_set_viewport',
-  'visioncraft_get_network_requests',
-  'visioncraft_clear_network_requests',
-  'visioncraft_visual_diff',
-  'visioncraft_get_css_source',
+  'aieye_element_at_point',
+  'aieye_batch_inspect',
+  'aieye_hover',
+  'aieye_set_viewport',
+  'aieye_get_network_requests',
+  'aieye_clear_network_requests',
+  'aieye_visual_diff',
+  'aieye_get_css_source',
 ];
 
 // Enhanced tools (existing tools with new parameters)
 const V3_ENHANCED_TOOLS = [
-  'visioncraft_screenshot',   // +selector, +highlight, +highlightColor
-  'visioncraft_find_elements', // +includeSource
+  'aieye_screenshot',   // +selector, +highlight, +highlightColor
+  'aieye_find_elements', // +includeSource
 ];
 
 describe('MCP Server Tool Registry', () => {
@@ -121,9 +121,9 @@ describe('MCP Server Tool Registry', () => {
   });
 
   describe('Tool Naming Convention', () => {
-    it('all tools should be prefixed with visioncraft_', () => {
+    it('all tools should be prefixed with aieye_', () => {
       for (const name of ALL_TOOL_NAMES) {
-        expect(name.startsWith('visioncraft_')).toBe(true);
+        expect(name.startsWith('aieye_')).toBe(true);
       }
     });
 
@@ -134,7 +134,7 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_screenshot (enhanced)', () => {
+  describe('Tool Schemas: aieye_screenshot (enhanced)', () => {
     it('should have original params: format, quality', () => {
       const originalParams = ['format', 'quality'];
       expect(originalParams).toHaveLength(2);
@@ -174,7 +174,7 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_element_at_point', () => {
+  describe('Tool Schemas: aieye_element_at_point', () => {
     it('should require x and y parameters', () => {
       const required = ['x', 'y'];
       expect(required).toHaveLength(2);
@@ -187,7 +187,7 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_batch_inspect', () => {
+  describe('Tool Schemas: aieye_batch_inspect', () => {
     it('should accept optional selectors array', () => {
       const selectors = ['.btn', '#nav', 'h1'];
       expect(Array.isArray(selectors)).toBe(true);
@@ -217,7 +217,7 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_hover', () => {
+  describe('Tool Schemas: aieye_hover', () => {
     it('should require selector parameter', () => {
       const required = ['selector'];
       expect(required).toHaveLength(1);
@@ -229,7 +229,7 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_find_elements (enhanced)', () => {
+  describe('Tool Schemas: aieye_find_elements (enhanced)', () => {
     it('should have original params: query, mode', () => {
       const originalParams = ['query', 'mode'];
       expect(originalParams).toHaveLength(2);
@@ -251,7 +251,7 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_get_css_source', () => {
+  describe('Tool Schemas: aieye_get_css_source', () => {
     it('should require selector parameter', () => {
       const required = ['selector'];
       expect(required).toHaveLength(1);
@@ -263,7 +263,7 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_set_viewport', () => {
+  describe('Tool Schemas: aieye_set_viewport', () => {
     it('should accept width and height', () => {
       const params = { width: 1440, height: 900 };
       expect(params.width).toBe(1440);
@@ -299,7 +299,7 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_get_network_requests', () => {
+  describe('Tool Schemas: aieye_get_network_requests', () => {
     it('should accept optional filter object', () => {
       const filter = {
         urlPattern: '/api/',
@@ -325,14 +325,14 @@ describe('MCP Server Tool Registry', () => {
     });
   });
 
-  describe('Tool Schemas: visioncraft_clear_network_requests', () => {
+  describe('Tool Schemas: aieye_clear_network_requests', () => {
     it('should have no parameters', () => {
       const properties = {};
       expect(Object.keys(properties)).toHaveLength(0);
     });
   });
 
-  describe('Tool Schemas: visioncraft_visual_diff', () => {
+  describe('Tool Schemas: aieye_visual_diff', () => {
     it('should accept optional threshold parameter', () => {
       const defaultThreshold = 30;
       expect(defaultThreshold).toBe(30);
@@ -447,18 +447,18 @@ describe('MCP Server Viewport Presets', () => {
 });
 
 describe('MCP Server Dual Mode', () => {
-  it('should support webview mode via VISIONCRAFT_WEBVIEW_ENABLED env var', () => {
-    const envVar = 'VISIONCRAFT_WEBVIEW_ENABLED';
-    expect(envVar).toBe('VISIONCRAFT_WEBVIEW_ENABLED');
+  it('should support webview mode via AIEYE_WEBVIEW_ENABLED env var', () => {
+    const envVar = 'AIEYE_WEBVIEW_ENABLED';
+    expect(envVar).toBe('AIEYE_WEBVIEW_ENABLED');
   });
 
-  it('should support bridge URL via VISIONCRAFT_BRIDGE_URL env var', () => {
-    const envVar = 'VISIONCRAFT_BRIDGE_URL';
-    expect(envVar).toBe('VISIONCRAFT_BRIDGE_URL');
+  it('should support bridge URL via AIEYE_BRIDGE_URL env var', () => {
+    const envVar = 'AIEYE_BRIDGE_URL';
+    expect(envVar).toBe('AIEYE_BRIDGE_URL');
   });
 
   it('should default to external browser mode (Playwright)', () => {
-    const isWebviewMode = process.env.VISIONCRAFT_WEBVIEW_ENABLED === 'true';
+    const isWebviewMode = process.env.AIEYE_WEBVIEW_ENABLED === 'true';
     // In test environment, this should be false
     expect(isWebviewMode).toBe(false);
   });
@@ -489,9 +489,9 @@ describe('MCP Server Dual Mode', () => {
 
 // v4 new tools
 const V4_NEW_TOOLS = [
-  'visioncraft_style_diff',
-  'visioncraft_get_component_tree',
-  'visioncraft_audit_accessibility',
+  'aieye_style_diff',
+  'aieye_get_component_tree',
+  'aieye_audit_accessibility',
 ];
 
 describe('V4 Tool Registry', () => {
@@ -506,7 +506,7 @@ describe('V4 Tool Registry', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_style_diff', () => {
+describe('Tool Schemas: aieye_style_diff', () => {
   it('should require selector and action', () => {
     const required = ['selector', 'action'];
     expect(required).toHaveLength(2);
@@ -528,7 +528,7 @@ describe('Tool Schemas: visioncraft_style_diff', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_get_component_tree', () => {
+describe('Tool Schemas: aieye_get_component_tree', () => {
   it('should have no required parameters', () => {
     const required: string[] = [];
     expect(required).toHaveLength(0);
@@ -550,7 +550,7 @@ describe('Tool Schemas: visioncraft_get_component_tree', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_audit_accessibility', () => {
+describe('Tool Schemas: aieye_audit_accessibility', () => {
   it('should have no required parameters', () => {
     const required: string[] = [];
     expect(required).toHaveLength(0);
@@ -639,10 +639,10 @@ describe('V5 External Website Browsing', () => {
       expect(modes).toContain('browser');
     });
 
-    it('should start in webview mode when VISIONCRAFT_WEBVIEW_ENABLED is true', () => {
-      const isWebviewMode = process.env.VISIONCRAFT_WEBVIEW_ENABLED === 'true';
+    it('should start in webview mode when AIEYE_WEBVIEW_ENABLED is true', () => {
+      const isWebviewMode = process.env.AIEYE_WEBVIEW_ENABLED === 'true';
       const initialMode = isWebviewMode ? 'webview' : 'browser';
-      // In test environment, VISIONCRAFT_WEBVIEW_ENABLED is not set
+      // In test environment, AIEYE_WEBVIEW_ENABLED is not set
       expect(initialMode).toBe('browser');
     });
   });
@@ -666,18 +666,18 @@ describe('V5 External Website Browsing', () => {
 // ====== V6 Tests ======
 
 const V6_NEW_TOOLS = [
-  'visioncraft_measure_element',
-  'visioncraft_measure_spacing',
-  'visioncraft_get_computed_layout',
-  'visioncraft_diff_against_reference',
-  'visioncraft_get_palette',
-  'visioncraft_snapshot',
-  'visioncraft_wait_for_hmr',
+  'aieye_measure_element',
+  'aieye_measure_spacing',
+  'aieye_get_computed_layout',
+  'aieye_diff_against_reference',
+  'aieye_get_palette',
+  'aieye_snapshot',
+  'aieye_wait_for_hmr',
 ];
 
 const V6_ENHANCED_TOOLS = [
-  'visioncraft_visual_diff',    // +selector, +similarityPercent
-  'visioncraft_inspect_element', // +font properties
+  'aieye_visual_diff',    // +selector, +similarityPercent
+  'aieye_inspect_element', // +font properties
 ];
 
 describe('V6 Tool Registry', () => {
@@ -785,7 +785,7 @@ describe('V6 Bug Fix: Webview-to-Browser Fallback', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_measure_element', () => {
+describe('Tool Schemas: aieye_measure_element', () => {
   it('should require selectorA and selectorB', () => {
     const required = ['selectorA', 'selectorB'];
     expect(required).toHaveLength(2);
@@ -803,7 +803,7 @@ describe('Tool Schemas: visioncraft_measure_element', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_measure_spacing', () => {
+describe('Tool Schemas: aieye_measure_spacing', () => {
   it('should require selector', () => {
     const required = ['selector'];
     expect(required).toHaveLength(1);
@@ -834,7 +834,7 @@ describe('Tool Schemas: visioncraft_measure_spacing', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_get_computed_layout', () => {
+describe('Tool Schemas: aieye_get_computed_layout', () => {
   it('should require selector', () => {
     const required = ['selector'];
     expect(required).toHaveLength(1);
@@ -864,7 +864,7 @@ describe('Tool Schemas: visioncraft_get_computed_layout', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_diff_against_reference', () => {
+describe('Tool Schemas: aieye_diff_against_reference', () => {
   it('should require referencePath', () => {
     const required = ['referencePath'];
     expect(required).toHaveLength(1);
@@ -893,7 +893,7 @@ describe('Tool Schemas: visioncraft_diff_against_reference', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_get_palette', () => {
+describe('Tool Schemas: aieye_get_palette', () => {
   it('should have no required parameters', () => {
     const required: string[] = [];
     expect(required).toHaveLength(0);
@@ -912,7 +912,7 @@ describe('Tool Schemas: visioncraft_get_palette', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_snapshot', () => {
+describe('Tool Schemas: aieye_snapshot', () => {
   it('should have no required parameters', () => {
     const required: string[] = [];
     expect(required).toHaveLength(0);
@@ -934,7 +934,7 @@ describe('Tool Schemas: visioncraft_snapshot', () => {
   });
 });
 
-describe('Tool Schemas: visioncraft_wait_for_hmr', () => {
+describe('Tool Schemas: aieye_wait_for_hmr', () => {
   it('should have no required parameters', () => {
     const required: string[] = [];
     expect(required).toHaveLength(0);

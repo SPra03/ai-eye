@@ -7,7 +7,7 @@
   "bin": {
     "aieye": "./dist/index.js"
   },
-  "author": "VisionCraft Team",
+  "author": "AI Eye Team",
   "license": "MIT",
   "homepage": "https://github.com/SPra03/ai-eye#readme",
   "repository": {
@@ -27,7 +27,8 @@
     "browser-automation",
     "playwright",
     "cdp",
-    "visioncraft",
+    "ai-eye",
+    "aieye",
     "source-mapping",
     "developer-tools"
   ],

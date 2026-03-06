@@ -26,7 +26,7 @@ export class BridgeAutomation {
    */
   async isBridgeAvailable(): Promise<boolean> {
     try {
-      const result = await this.evaluate('typeof window.__VISIONCRAFT__ !== "undefined"', 1000);
+      const result = await this.evaluate('typeof window.__AIEYE__ !== "undefined"', 1000);
       return result === true;
     } catch {
       return false;
@@ -43,7 +43,7 @@ export class BridgeAutomation {
       throw new Error('Bridge script not available. Ensure Vite plugin is configured.');
     }
 
-    return this.evaluate(`window.__VISIONCRAFT__.inspectElement('${this.escapeSelector(selector)}')`);
+    return this.evaluate(`window.__AIEYE__.inspectElement('${this.escapeSelector(selector)}')`);
   }
 
   /**
@@ -56,7 +56,7 @@ export class BridgeAutomation {
       throw new Error('Bridge script not available. Ensure Vite plugin is configured.');
     }
 
-    return this.evaluate(`window.__VISIONCRAFT__.getPageStructure(${maxDepth})`);
+    return this.evaluate(`window.__AIEYE__.getPageStructure(${maxDepth})`);
   }
 
   /**
@@ -69,7 +69,7 @@ export class BridgeAutomation {
       throw new Error('Bridge script not available. Ensure Vite plugin is configured.');
     }
 
-    return this.evaluate(`window.__VISIONCRAFT__.clickElement('${this.escapeSelector(selector)}')`);
+    return this.evaluate(`window.__AIEYE__.clickElement('${this.escapeSelector(selector)}')`);
   }
 
   /**
@@ -82,7 +82,7 @@ export class BridgeAutomation {
       return [];
     }
 
-    return this.evaluate('window.__VISIONCRAFT__.consoleLogs');
+    return this.evaluate('window.__AIEYE__.consoleLogs');
   }
 
   /**
@@ -96,7 +96,7 @@ export class BridgeAutomation {
     }
 
     return this.evaluate(
-      `window.__VISIONCRAFT__.captureScreenshot('${format}', ${quality})`
+      `window.__AIEYE__.captureScreenshot('${format}', ${quality})`
     );
   }
 
@@ -111,7 +111,7 @@ export class BridgeAutomation {
     }
 
     return this.evaluate(
-      `window.__VISIONCRAFT__.findElements('${this.escapeString(query)}', '${mode}')`
+      `window.__AIEYE__.findElements('${this.escapeString(query)}', '${mode}')`
     );
   }
 
@@ -128,7 +128,7 @@ export class BridgeAutomation {
       };
     }
 
-    return this.evaluate('window.__VISIONCRAFT__.getHMRStatus()');
+    return this.evaluate('window.__AIEYE__.getHMRStatus()');
   }
 
   /**

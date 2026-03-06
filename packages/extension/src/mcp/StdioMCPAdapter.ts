@@ -1,7 +1,7 @@
 /**
  * STDIO MCP Adapter
  * Bridges STDIO communication (for Claude Code) to the EmbeddedMCPServer
- * This allows Claude Code to discover and use VisionCraft tools via VS Code extension API
+ * This allows Claude Code to discover and use AI Eye tools via VS Code extension API
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -14,7 +14,7 @@ import { EmbeddedMCPServer } from './EmbeddedMCPServer.js';
 
 /**
  * Adapts the EmbeddedMCPServer to communicate via STDIO
- * This enables Claude Code CLI to use VisionCraft tools
+ * This enables Claude Code CLI to use AI Eye tools
  */
 export class StdioMCPAdapter {
   private server: Server;
@@ -22,7 +22,7 @@ export class StdioMCPAdapter {
   constructor(private embeddedServer: EmbeddedMCPServer) {
     this.server = new Server(
       {
-        name: 'visioncraft-embedded',
+        name: 'aieye-embedded',
         version: '2.0.0',
       },
       {
@@ -80,6 +80,6 @@ export class StdioMCPAdapter {
   async start(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('[STDIO MCP Adapter] VisionCraft STDIO adapter running');
+    console.error('[STDIO MCP Adapter] AI Eye STDIO adapter running');
   }
 }

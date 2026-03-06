@@ -208,7 +208,7 @@ export class HttpBridge {
       let result: any;
 
       switch (toolName) {
-        case 'visioncraft_screenshot':
+        case 'aieye_screenshot':
           result = await webviewBridge.captureScreenshot(
             (args.format as 'jpeg' | 'png') || 'jpeg',
             (args.quality as number) || 80,
@@ -218,16 +218,16 @@ export class HttpBridge {
           );
           break;
 
-        case 'visioncraft_navigate':
+        case 'aieye_navigate':
           await webviewBridge.navigate(args.url as string);
           result = { success: true };
           break;
 
-        case 'visioncraft_get_current_url':
+        case 'aieye_get_current_url':
           result = await webviewBridge.getCurrentUrl();
           break;
 
-        case 'visioncraft_find_elements':
+        case 'aieye_find_elements':
           result = await webviewBridge.findElements(
             args.query as string,
             (args.mode as 'css' | 'xpath' | 'text') || 'css',
@@ -235,11 +235,11 @@ export class HttpBridge {
           );
           break;
 
-        case 'visioncraft_element_at_point':
+        case 'aieye_element_at_point':
           result = await webviewBridge.elementAtPoint(args.x as number, args.y as number);
           break;
 
-        case 'visioncraft_batch_inspect':
+        case 'aieye_batch_inspect':
           result = await webviewBridge.batchInspect(
             args.selectors as string[] | undefined,
             args.region as { x: number; y: number; width: number; height: number } | undefined,
@@ -247,26 +247,26 @@ export class HttpBridge {
           );
           break;
 
-        case 'visioncraft_inspect_element':
+        case 'aieye_inspect_element':
           result = await webviewBridge.inspectElement(args.selector as string);
           break;
 
-        case 'visioncraft_click':
+        case 'aieye_click':
           await webviewBridge.clickElement(args.selector as string);
           result = { success: true };
           break;
 
-        case 'visioncraft_type':
+        case 'aieye_type':
           await webviewBridge.typeText(args.selector as string, args.text as string);
           result = { success: true };
           break;
 
-        case 'visioncraft_hover':
+        case 'aieye_hover':
           await webviewBridge.hoverElement(args.selector as string);
           result = { success: true };
           break;
 
-        case 'visioncraft_set_viewport': {
+        case 'aieye_set_viewport': {
           const presets: Record<string, { width: number; height: number }> = {
             mobile: { width: 375, height: 812 },
             mobile_landscape: { width: 812, height: 375 },
@@ -287,57 +287,57 @@ export class HttpBridge {
           break;
         }
 
-        case 'visioncraft_scroll':
+        case 'aieye_scroll':
           await webviewBridge.scrollTo((args.x as number) || 0, (args.y as number) || 0);
           result = { success: true };
           break;
 
-        case 'visioncraft_get_source':
+        case 'aieye_get_source':
           result = await webviewBridge.getElementSource(args.selector as string);
           break;
 
-        case 'visioncraft_get_structure':
+        case 'aieye_get_structure':
           result = await webviewBridge.getPageStructure();
           break;
 
-        case 'visioncraft_get_css_source':
+        case 'aieye_get_css_source':
           result = await webviewBridge.getCSSSource(
             args.selector as string,
             args.properties as string[] | undefined
           );
           break;
 
-        case 'visioncraft_get_network_requests':
+        case 'aieye_get_network_requests':
           result = await webviewBridge.getNetworkRequests(
             args.filter as any,
             (args.limit as number) || 50
           );
           break;
 
-        case 'visioncraft_clear_network_requests':
+        case 'aieye_clear_network_requests':
           await webviewBridge.clearNetworkRequests();
           result = { success: true };
           break;
 
-        case 'visioncraft_get_console_logs':
+        case 'aieye_get_console_logs':
           result = await webviewBridge.getConsoleLogs();
           break;
 
-        case 'visioncraft_clear_console_logs':
+        case 'aieye_clear_console_logs':
           await webviewBridge.clearConsoleLogs();
           result = { success: true };
           break;
 
-        case 'visioncraft_get_hmr_status':
+        case 'aieye_get_hmr_status':
           result = await webviewBridge.getHMRStatus();
           break;
 
-        case 'visioncraft_clear_hmr_errors':
+        case 'aieye_clear_hmr_errors':
           await webviewBridge.clearHMRErrors();
           result = { success: true };
           break;
 
-        case 'visioncraft_style_diff':
+        case 'aieye_style_diff':
           result = await webviewBridge.getStyleDiff(
             args.selector as string,
             args.action as string,
@@ -346,7 +346,7 @@ export class HttpBridge {
           );
           break;
 
-        case 'visioncraft_get_component_tree':
+        case 'aieye_get_component_tree':
           result = await webviewBridge.getComponentTree(
             args.selector as string | undefined,
             (args.maxDepth as number) || 10,
@@ -354,36 +354,36 @@ export class HttpBridge {
           );
           break;
 
-        case 'visioncraft_audit_accessibility':
+        case 'aieye_audit_accessibility':
           result = await webviewBridge.auditAccessibility(
             args.selector as string | undefined,
             args.tags as string[] | undefined
           );
           break;
 
-        case 'visioncraft_measure_element':
+        case 'aieye_measure_element':
           result = await webviewBridge.measureElement(
             args.selectorA as string,
             args.selectorB as string
           );
           break;
 
-        case 'visioncraft_measure_spacing':
+        case 'aieye_measure_spacing':
           result = await webviewBridge.measureSpacing(args.selector as string);
           break;
 
-        case 'visioncraft_get_computed_layout':
+        case 'aieye_get_computed_layout':
           result = await webviewBridge.getComputedLayout(args.selector as string);
           break;
 
-        case 'visioncraft_get_palette':
+        case 'aieye_get_palette':
           result = await webviewBridge.getPalette(
             args.selector as string | undefined,
             (args.limit as number) || 20
           );
           break;
 
-        case 'visioncraft_wait_for_hmr':
+        case 'aieye_wait_for_hmr':
           result = await webviewBridge.waitForHMR(
             (args.timeout as number) || 10000
           );

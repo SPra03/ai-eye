@@ -1,6 +1,6 @@
-# VisionCraft Examples
+# AI Eye Examples
 
-Example projects demonstrating VisionCraft integration with different frameworks and setups.
+Example projects demonstrating AI Eye integration with different frameworks and setups.
 
 ---
 
@@ -10,24 +10,24 @@ Example projects demonstrating VisionCraft integration with different frameworks
 
 **Location:** `examples/react-vite-app/`
 
-A complete React application with VisionCraft integration, demonstrating:
+A complete React application with AI Eye integration, demonstrating:
 
 - Full source mapping for React components
 - Hot Module Replacement (HMR) tracking
 - TypeScript support
-- Best practices for VisionCraft configuration
+- Best practices for AI Eye configuration
 
 **Features:**
 - React 18 with TypeScript
 - Vite 5 build tool
-- VisionCraft Vite plugin integration
+- AI Eye Vite plugin integration
 - Source mapping for all JSX elements
 - HMR status tracking
 - Console log integration
 
 **Use this example when:**
 - Building a new React application
-- Learning VisionCraft with React
+- Learning AI Eye with React
 - Testing AI agent interactions with React components
 - Understanding source mapping in JSX
 
@@ -35,7 +35,7 @@ A complete React application with VisionCraft integration, demonstrating:
 
 **Location:** `examples/test-preview/`
 
-A simple HTML test page for verifying VisionCraft's live preview functionality.
+A simple HTML test page for verifying AI Eye's live preview functionality.
 
 **Features:**
 - Plain HTML/JavaScript (no framework)
@@ -44,9 +44,9 @@ A simple HTML test page for verifying VisionCraft's live preview functionality.
 - Port auto-detection
 
 **Use this example when:**
-- Testing VisionCraft installation
+- Testing AI Eye installation
 - Debugging preview panel issues
-- Understanding basic VisionCraft functionality
+- Understanding basic AI Eye functionality
 - Quick verification without framework complexity
 
 ---
@@ -69,7 +69,7 @@ npm run dev
 
 In VS Code:
 1. Press `F5` to launch Extension Development Host
-2. Run command: **VisionCraft: Open Live Preview**
+2. Run command: **AI Eye: Open Live Preview**
 3. Navigate to `http://localhost:5175`
 4. Click elements to jump to source code!
 
@@ -92,7 +92,7 @@ node server.js
 
 In VS Code:
 1. Press `F5` to launch Extension Development Host
-2. Run command: **VisionCraft: Open Live Preview**
+2. Run command: **AI Eye: Open Live Preview**
 3. Test page appears in preview panel
 
 **What to try:**
@@ -132,11 +132,11 @@ npm create vite@latest my-app -- --template vue-ts
 npm create vite@latest my-app -- --template svelte-ts
 ```
 
-### Step 2: Install VisionCraft
+### Step 2: Install AI Eye
 
 ```bash
 cd my-app
-npm install @visioncraft/vite-plugin --save-dev
+npm install @ai-eye/vite-plugin --save-dev
 ```
 
 ### Step 3: Configure Vite
@@ -146,12 +146,12 @@ Edit `vite.config.ts`:
 ```typescript
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react'; // or vue/svelte
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(), // or vue() / svelte()
-    visionCraft({
+    aiEye({
       enabled: true,
       enableHMR: true,
     }),
@@ -165,7 +165,7 @@ export default defineConfig({
 npm run dev
 ```
 
-### Step 5: Use VisionCraft
+### Step 5: Use AI Eye
 
 In VS Code:
 - Open live preview
@@ -181,12 +181,12 @@ In VS Code:
 ```typescript
 // vite.config.ts
 import react from '@vitejs/plugin-react';
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(),
-    visionCraft({
+    aiEye({
       enabled: true,
       include: /\.(jsx|tsx)$/,
     }),
@@ -205,12 +205,12 @@ export default defineConfig({
 ```typescript
 // vite.config.ts
 import vue from '@vitejs/plugin-vue';
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     vue(),
-    visionCraft({
+    aiEye({
       enabled: true,
       include: /\.vue$/,
     }),
@@ -228,12 +228,12 @@ export default defineConfig({
 ```typescript
 // vite.config.ts
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     svelte(),
-    visionCraft({
+    aiEye({
       enabled: true,
       include: /\.svelte$/,
     }),
@@ -264,9 +264,9 @@ export default defineConfig({
    > "Can you take a screenshot of the app and tell me what components are visible?"
 
 4. **AI will:**
-   - Take screenshot using `visioncraft_screenshot`
+   - Take screenshot using `aieye_screenshot`
    - Analyze the UI
-   - Use `visioncraft_get_structure` to see component tree
+   - Use `aieye_get_structure` to see component tree
    - Respond with component hierarchy and source locations
 
 ### Component Modification Test
@@ -276,8 +276,8 @@ export default defineConfig({
 
 2. **AI will:**
    - Take screenshot to see current state
-   - Use `visioncraft_find_elements` to find the button
-   - Use `visioncraft_get_source` to locate `src/App.tsx:15`
+   - Use `aieye_find_elements` to find the button
+   - Use `aieye_get_source` to locate `src/App.tsx:15`
    - Read the source file
    - Suggest or apply style improvements
    - Take screenshot to verify changes
@@ -291,7 +291,7 @@ export default defineConfig({
 
 3. **AI will:**
    - Take screenshot to see error state
-   - Use `visioncraft_get_console_logs` to read errors
+   - Use `aieye_get_console_logs` to read errors
    - Identify the error location
    - Fix the bug
    - Verify with console logs
@@ -365,10 +365,10 @@ export default defineConfig({
 ### Minimal Configuration
 
 ```typescript
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
-  plugins: [visionCraft()],
+  plugins: [aiEye()],
 });
 ```
 
@@ -377,17 +377,17 @@ Good for: Quick testing, default behavior
 ### Full Configuration
 
 ```typescript
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    visionCraft({
+    aiEye({
       enabled: true,
       include: /\.(jsx|tsx|vue|svelte)$/,
       exclude: /node_modules/,
       root: __dirname,
       enableHMR: true,
-      attributePrefix: 'data-vc',
+      attributePrefix: 'data-ae',
     }),
   ],
 });
@@ -398,11 +398,11 @@ Good for: Production apps, custom setups
 ### Conditional Configuration
 
 ```typescript
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig(({ mode }) => ({
   plugins: [
-    visionCraft({
+    aiEye({
       enabled: mode === 'development', // Only in dev
     }),
   ],
@@ -434,12 +434,12 @@ lsof -ti :5173
 **Check `vite.config.ts`:**
 ```typescript
 // ✅ Correct
-visionCraft({
+aiEye({
   enabled: true,
 })
 
 // ❌ Wrong
-visionCraft({
+aiEye({
   enabled: false, // Disabled!
 })
 ```
@@ -472,7 +472,7 @@ export default defineConfig({
     hmr: true, // Ensure enabled
   },
   plugins: [
-    visionCraft({
+    aiEye({
       enableHMR: true, // Track HMR
     }),
   ],
@@ -494,12 +494,12 @@ export default defineConfig({
 **Example startup for AI:**
 
 ```
-User: "Help me test VisionCraft"
+User: "Help me test AI Eye"
 
 AI: "Let me start the React example for you..."
 AI: [Runs: cd examples/react-vite-app && npm install && npm run dev]
-AI: [Uses: visioncraft_navigate to http://localhost:5175]
-AI: [Uses: visioncraft_screenshot to show the UI]
+AI: [Uses: aieye_navigate to http://localhost:5175]
+AI: [Uses: aieye_screenshot to show the UI]
 AI: "Here's the example app running! Would you like me to demonstrate
      any specific features like element inspection or component modification?"
 ```
@@ -516,7 +516,7 @@ AI agents can test themselves using examples:
 
 2. **Navigate:**
    ```
-   visioncraft_navigate: http://localhost:5175
+   aieye_navigate: http://localhost:5175
    ```
 
 3. **Verify tools work:**
@@ -534,26 +534,26 @@ AI agents can test themselves using examples:
 
 ### AI Workflow Example
 
-**User:** "Use the React example to show me what VisionCraft can do"
+**User:** "Use the React example to show me what AI Eye can do"
 
 **AI Response:**
 ```
 1. Starting the React example...
    [cd examples/react-vite-app && npm run dev]
 
-2. Opening in VisionCraft...
-   [visioncraft_navigate: http://localhost:5175]
+2. Opening in AI Eye...
+   [aieye_navigate: http://localhost:5175]
 
 3. Taking screenshot of current state...
-   [visioncraft_screenshot]
+   [aieye_screenshot]
 
    I can see:
    - A counter button (currently at 0)
-   - VisionCraft logo
+   - AI Eye logo
    - Interactive elements
 
 4. Let me inspect the counter button...
-   [visioncraft_inspect_element: button]
+   [aieye_inspect_element: button]
 
    Found at: src/App.tsx:15
 
@@ -585,7 +585,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 After trying the examples:
 
-1. **Integrate VisionCraft** into your own project
+1. **Integrate AI Eye** into your own project
 2. **Read the docs:**
    - [Getting Started](../docs/GETTING-STARTED.md)
    - [AI Usage Guide](../docs/AI-USAGE.md)
@@ -608,4 +608,4 @@ After trying the examples:
 
 ---
 
-**Happy coding with VisionCraft! 🚀**
+**Happy coding with AI Eye! 🚀**

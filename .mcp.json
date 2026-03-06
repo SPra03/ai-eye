@@ -1,12 +1,19 @@
 {
   "mcpServers": {
-    "visioncraft": {
+    "aieye": {
       "command": "node",
       "args": ["packages/mcp-server/dist/index.js"],
       "env": {
-        "VISIONCRAFT_WEBVIEW_ENABLED": "true",
-        "VISIONCRAFT_BRIDGE_URL": "http://localhost:18420",
-        "VISIONCRAFT_URL": "http://localhost:5175"
+        "AIEYE_WEBVIEW_ENABLED": "true",
+        "AIEYE_BRIDGE_URL": "http://localhost:18420",
+        "AIEYE_URL": "http://localhost:5175"
+      }
+    },
+    "aieye-playwright": {
+      "command": "node",
+      "args": ["packages/mcp-server/dist/index.js"],
+      "env": {
+        "AIEYE_URL": "http://localhost:5175"
       }
     },
     "macos": {

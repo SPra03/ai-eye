@@ -1,6 +1,6 @@
-# VisionCraft Documentation
+# AI Eye Documentation
 
-Complete guide to VisionCraft - the AI-native visual development tool for VS Code.
+Complete guide to AI Eye - the AI-native visual development tool for VS Code.
 
 ---
 
@@ -8,7 +8,7 @@ Complete guide to VisionCraft - the AI-native visual development tool for VS Cod
 
 ### For New Users
 
-Start here if you're new to VisionCraft:
+Start here if you're new to AI Eye:
 
 1. **[Getting Started](GETTING-STARTED.md)** - Installation and first steps
 2. **[Tool Reference](TOOL-REFERENCE.md)** - Quick reference for 14 MCP tools
@@ -16,7 +16,7 @@ Start here if you're new to VisionCraft:
 
 ### For AI Agents
 
-Essential reading for AI agents using VisionCraft:
+Essential reading for AI agents using AI Eye:
 
 1. **[AI Usage Guide](AI-USAGE.md)** - Complete guide for AI agents
 2. **[Tool Reference](TOOL-REFERENCE.md)** - Quick lookup for all tools
@@ -36,17 +36,17 @@ In-depth technical documentation:
 
 ### [Getting Started](GETTING-STARTED.md)
 
-**For:** First-time users, developers integrating VisionCraft
+**For:** First-time users, developers integrating AI Eye
 
 **Covers:**
-- What is VisionCraft?
+- What is AI Eye?
 - Installation (VS Code extension, MCP server, plugins)
 - Quick start guide
 - First workflow
 - Configuration basics
 
 **Read this when:**
-- Starting with VisionCraft
+- Starting with AI Eye
 - Setting up a new project
 - Installing for the first time
 
@@ -59,7 +59,7 @@ In-depth technical documentation:
 **For:** AI agents (Claude, Copilot, etc.), AI-assisted developers
 
 **Covers:**
-- What VisionCraft provides to AI agents
+- What AI Eye provides to AI agents
 - All 14 MCP tools with examples
 - Best practices for AI agents
 - Common workflows
@@ -68,9 +68,9 @@ In-depth technical documentation:
 - Advanced patterns
 
 **Read this when:**
-- You're an AI agent working with VisionCraft
+- You're an AI agent working with AI Eye
 - Building AI-powered development tools
-- Training AI models on VisionCraft usage
+- Training AI models on AI Eye usage
 - Understanding AI interaction patterns
 
 **Time to read:** 30 minutes (comprehensive)
@@ -164,10 +164,10 @@ In-depth technical documentation:
 
 ## 🚀 Quick Links by Use Case
 
-### "I want to install VisionCraft"
+### "I want to install AI Eye"
 → [Getting Started](GETTING-STARTED.md)
 
-### "I'm an AI agent using VisionCraft"
+### "I'm an AI agent using AI Eye"
 → [AI Usage Guide](AI-USAGE.md) + [Tool Reference](TOOL-REFERENCE.md)
 
 ### "Something isn't working"
@@ -180,7 +180,7 @@ In-depth technical documentation:
 → [Tool Reference](TOOL-REFERENCE.md#tool-selection-guide)
 
 ### "How do I take a screenshot?"
-→ [Tool Reference](TOOL-REFERENCE.md#visioncraft_screenshot)
+→ [Tool Reference](TOOL-REFERENCE.md#aieye_screenshot)
 
 ### "How do AI agents use this?"
 → [AI Usage Guide](AI-USAGE.md)
@@ -194,31 +194,31 @@ In-depth technical documentation:
 
 Each package has its own README with specific documentation:
 
-### **[@visioncraft/extension](../packages/extension/README.md)**
+### **[@ai-eye/extension](../packages/extension/README.md)**
 VS Code extension documentation
 - Commands and features
 - Configuration options
 - Development guide
 
-### **[@visioncraft/mcp-server](../packages/mcp-server/README.md)**
+### **[aieye](../packages/mcp-server/README.md)**
 MCP server documentation
 - Server setup
 - Connection modes
 - Tool implementation
 
-### **[@visioncraft/vite-plugin](../packages/vite-plugin/README.md)**
+### **[@ai-eye/vite-plugin](../packages/vite-plugin/README.md)**
 Vite plugin documentation
 - Plugin configuration
 - Source mapping
 - HMR tracking
 
-### **[@visioncraft/babel-plugin](../packages/babel-plugin/README.md)**
+### **[@ai-eye/babel-plugin](../packages/babel-plugin/README.md)**
 Babel plugin documentation
 - Babel configuration
 - JSX transformation
 - Non-Vite setups
 
-### **[@visioncraft/bridge](../packages/bridge/README.md)**
+### **[@ai-eye/bridge](../packages/bridge/README.md)**
 Browser bridge documentation
 - Bridge API
 - Source mapping format
@@ -248,7 +248,7 @@ Browser bridge documentation
 
 **Total time:** 45 minutes (comprehensive)
 
-### Path 3: Developer Integrating VisionCraft
+### Path 3: Developer Integrating AI Eye
 
 ```
 1. Getting Started       (15 min) - Overview
@@ -383,7 +383,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 - **Current:** v1.0.0
 - **Last Updated:** February 2026
-- **Maintained By:** VisionCraft Team
+- **Maintained By:** AI Eye Team
 
 ---
 
@@ -427,4 +427,4 @@ All documentation is licensed under MIT - See [LICENSE](../LICENSE)
 
 ---
 
-**Welcome to VisionCraft! Start with [Getting Started](GETTING-STARTED.md) 🚀**
+**Welcome to AI Eye! Start with [Getting Started](GETTING-STARTED.md) 🚀**

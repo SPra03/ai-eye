@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { fileURLToPath } from 'url';
 
-export interface VisionCraftVitePluginOptions {
+export interface AIEyeVitePluginOptions {
   /**
    * Root directory for relative path calculation
    * Defaults to process.cwd()
@@ -18,7 +18,7 @@ export interface VisionCraftVitePluginOptions {
   enabled?: boolean;
 
   /**
-   * Custom attribute prefix (default: 'data-vc')
+   * Custom attribute prefix (default: 'data-ae')
    */
   attributePrefix?: string;
 
@@ -40,20 +40,20 @@ export interface VisionCraftVitePluginOptions {
 }
 
 /**
- * Vite plugin for VisionCraft source mapping and HMR integration
+ * Vite plugin for AI Eye source mapping and HMR integration
  */
 // Virtual module ID for the bridge script
 // Add .ts extension so Vite knows to transform TypeScript
-const BRIDGE_MODULE_ID = '@visioncraft/bridge';
+const BRIDGE_MODULE_ID = '@ai-eye/bridge';
 const BRIDGE_MODULE_ID_RESOLVED = '\0' + BRIDGE_MODULE_ID + '.ts';
 
-export default function visionCraftVitePlugin(
-  options: VisionCraftVitePluginOptions = {}
+export default function aiEyeVitePlugin(
+  options: AIEyeVitePluginOptions = {}
 ): Plugin {
   const {
     root = process.cwd(),
     enabled,
-    attributePrefix = 'data-vc',
+    attributePrefix = 'data-ae',
     enableHMR = true,
     include = /\.(jsx|tsx|vue|svelte)$/,
     exclude = /node_modules/,
@@ -64,7 +64,7 @@ export default function visionCraftVitePlugin(
   let bridgeSource: string | null = null;
 
   return {
-    name: 'visioncraft-source-map',
+    name: 'aieye-source-map',
     enforce: 'pre', // Run before other plugins
 
     configResolved(config) {
@@ -78,21 +78,21 @@ export default function visionCraftVitePlugin(
         try {
           const __filename = fileURLToPath(import.meta.url);
           const __dirname = path.dirname(__filename);
-          const bridgePath = path.resolve(__dirname, '../../bridge/src/visioncraft-bridge.ts');
+          const bridgePath = path.resolve(__dirname, '../../bridge/src/aieye-bridge.ts');
 
           if (fs.existsSync(bridgePath)) {
             bridgeSource = fs.readFileSync(bridgePath, 'utf-8');
-            console.log('[VisionCraft] Loaded bridge source from:', bridgePath);
+            console.log('[AI Eye] Loaded bridge source from:', bridgePath);
           } else {
             console.warn(
-              '[VisionCraft] Bridge source not found at:', bridgePath,
+              '[AI Eye] Bridge source not found at:', bridgePath,
               '\nThis is expected if you installed via npm. The bridge will be loaded from node_modules.'
             );
           }
         } catch (error) {
           console.error(
-            '[VisionCraft] Failed to load bridge source:', error,
-            '\nPlease ensure @visioncraft/bridge is installed: npm install @visioncraft/bridge'
+            '[AI Eye] Failed to load bridge source:', error,
+            '\nPlease ensure @ai-eye/bridge is installed: npm install @ai-eye/bridge'
           );
         }
       }
@@ -100,7 +100,7 @@ export default function visionCraftVitePlugin(
 
     // Virtual module resolution
     resolveId(id) {
-      // Handle both @visioncraft/bridge and /@visioncraft/bridge
+      // Handle both @ai-eye/bridge and /@ai-eye/bridge
       if (id === BRIDGE_MODULE_ID || id === `/${BRIDGE_MODULE_ID}`) {
         return BRIDGE_MODULE_ID_RESOLVED;
       }
@@ -111,7 +111,7 @@ export default function visionCraftVitePlugin(
     async load(id) {
       if (id === BRIDGE_MODULE_ID_RESOLVED) {
         if (!bridgeSource) {
-          throw new Error('[VisionCraft] Bridge source not loaded');
+          throw new Error('[AI Eye] Bridge source not loaded');
         }
 
         // Transform TypeScript to JavaScript using esbuild
@@ -146,11 +146,11 @@ export default function visionCraftVitePlugin(
         connectionCount++;
         const connectionId = connectionCount;
 
-        console.log(`[VisionCraft HMR] Client ${connectionId} connected`);
+        console.log(`[AI Eye HMR] Client ${connectionId} connected`);
 
         server!.ws.send({
           type: 'custom',
-          event: 'vc:connected',
+          event: 'ae:connected',
           data: {
             timestamp: Date.now(),
             connectionId,
@@ -158,10 +158,10 @@ export default function visionCraftVitePlugin(
         });
 
         socket.on('close', () => {
-          console.log(`[VisionCraft HMR] Client ${connectionId} disconnected`);
+          console.log(`[AI Eye HMR] Client ${connectionId} disconnected`);
           server!.ws.send({
             type: 'custom',
-            event: 'vc:disconnected',
+            event: 'ae:disconnected',
             data: {
               timestamp: Date.now(),
               connectionId,
@@ -172,10 +172,10 @@ export default function visionCraftVitePlugin(
 
       // Capture and broadcast errors
       server.ws.on('error', (error) => {
-        console.error('[VisionCraft HMR] WebSocket error:', error);
+        console.error('[AI Eye HMR] WebSocket error:', error);
         server!.ws.send({
           type: 'custom',
-          event: 'vc:error',
+          event: 'ae:error',
           data: {
             timestamp: Date.now(),
             error: {
@@ -190,7 +190,7 @@ export default function visionCraftVitePlugin(
       server.httpServer?.once('listening', () => {
         const address = server!.httpServer!.address();
         const port = typeof address === 'object' ? address?.port : 0;
-        console.log('\n✨ VisionCraft: Source mapping enabled');
+        console.log('\n✨ AI Eye: Source mapping enabled');
         console.log(`🔥 HMR ready on port ${port}\n`);
       });
     },
@@ -211,12 +211,12 @@ export default function visionCraftVitePlugin(
         ? 'script'
         : 'other';
 
-      console.log(`[VisionCraft HMR] ${updateType} update: ${relPath} (${modules.length} modules)`);
+      console.log(`[AI Eye HMR] ${updateType} update: ${relPath} (${modules.length} modules)`);
 
-      // Broadcast detailed HMR update to VisionCraft
+      // Broadcast detailed HMR update to AI Eye
       server.ws.send({
         type: 'custom',
-        event: 'vc:hmr-update',
+        event: 'ae:hmr-update',
         data: {
           file: relPath,
           timestamp,
@@ -325,7 +325,7 @@ export default function visionCraftVitePlugin(
         };
       } catch (error) {
         console.error(
-          `[VisionCraft] Error processing ${id}:`, error,
+          `[AI Eye] Error processing ${id}:`, error,
           '\nThis file will be skipped for source mapping. Common causes:',
           '\n  - Invalid JSX/TSX syntax',
           '\n  - Unusual tag patterns',
@@ -338,13 +338,13 @@ export default function visionCraftVitePlugin(
 }
 
 /**
- * HMR-only plugin for tracking VisionCraft status
+ * HMR-only plugin for tracking AI Eye status
  * Use this if you don't want source mapping but want HMR integration
  */
-export function visionCraftHMRPlugin(
-  options: Pick<VisionCraftVitePluginOptions, 'root' | 'enableHMR'> = {}
+export function aiEyeHMRPlugin(
+  options: Pick<AIEyeVitePluginOptions, 'root' | 'enableHMR'> = {}
 ): Plugin {
-  return visionCraftVitePlugin({
+  return aiEyeVitePlugin({
     ...options,
     enabled: false,
     enableHMR: options.enableHMR !== false,

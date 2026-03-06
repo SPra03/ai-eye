@@ -1,8 +1,8 @@
 /**
- * VisionCraft Type Definitions
+ * AI Eye Type Definitions
  */
 
-export interface VisionCraftConfig {
+export interface AIEyeConfig {
   devServerUrl: string;
   framework: 'auto' | 'react' | 'vue' | 'svelte' | 'html';
   screenshotQuality: number;

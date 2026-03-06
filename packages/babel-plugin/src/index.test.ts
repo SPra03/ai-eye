@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as babel from '@babel/core';
-import visionCraftBabelPlugin, {
-  VisionCraftBabelPluginOptions,
+import aiEyeBabelPlugin, {
+  AIEyeBabelPluginOptions,
 } from './index';
 
 /**
@@ -9,21 +9,21 @@ import visionCraftBabelPlugin, {
  */
 function transform(
   code: string,
-  options?: VisionCraftBabelPluginOptions,
+  options?: AIEyeBabelPluginOptions,
   filename = '/test/src/Component.tsx'
 ) {
   const result = babel.transformSync(code, {
     filename,
-    plugins: [[visionCraftBabelPlugin, options]],
+    plugins: [[aiEyeBabelPlugin, options]],
     presets: ['@babel/preset-react'],
   });
 
   return result?.code || '';
 }
 
-describe('VisionCraft Babel Plugin', () => {
+describe('AI Eye Babel Plugin', () => {
   describe('Basic Attribute Injection', () => {
-    it('should inject data-vc attributes into simple div element', () => {
+    it('should inject data-ae attributes into simple div element', () => {
       const input = `
         function Component() {
           return <div>Hello</div>;
@@ -32,9 +32,9 @@ describe('VisionCraft Babel Plugin', () => {
 
       const output = transform(input);
 
-      expect(output).toContain('data-vc-source');
-      expect(output).toContain('data-vc-line');
-      expect(output).toContain('data-vc-col');
+      expect(output).toContain('data-ae-source');
+      expect(output).toContain('data-ae-line');
+      expect(output).toContain('data-ae-col');
     });
 
     it('should inject correct source file path', () => {
@@ -42,7 +42,7 @@ describe('VisionCraft Babel Plugin', () => {
       const output = transform(input, { root: '/test' }, '/test/src/App.tsx');
 
       // Check for JSON format (Babel outputs as object properties)
-      expect(output).toContain('"data-vc-source": "src/App.tsx"');
+      expect(output).toContain('"data-ae-source": "src/App.tsx"');
     });
 
     it('should inject correct line number', () => {
@@ -54,7 +54,7 @@ function App() {
       const output = transform(input);
 
       // Line 3 is where the <div> is (JSON format in compiled output)
-      expect(output).toContain('"data-vc-line": "3"');
+      expect(output).toContain('"data-ae-line": "3"');
     });
 
     it('should inject attributes into nested elements', () => {
@@ -67,7 +67,7 @@ function App() {
       const output = transform(input);
 
       // Should have attributes on both div and span
-      const divMatches = output.match(/data-vc-source/g);
+      const divMatches = output.match(/data-ae-source/g);
       expect(divMatches).toHaveLength(2);
     });
 
@@ -82,7 +82,7 @@ function App() {
       const output = transform(input);
 
       // Should have attributes on both divs
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(2);
     });
   });
@@ -92,9 +92,9 @@ function App() {
       const input = `<div>Test</div>`;
       const output = transform(input, { enabled: false });
 
-      expect(output).not.toContain('data-vc-source');
-      expect(output).not.toContain('data-vc-line');
-      expect(output).not.toContain('data-vc-col');
+      expect(output).not.toContain('data-ae-source');
+      expect(output).not.toContain('data-ae-line');
+      expect(output).not.toContain('data-ae-col');
     });
 
     it('should use custom attribute prefix', () => {
@@ -104,7 +104,7 @@ function App() {
       expect(output).toContain('data-custom-source');
       expect(output).toContain('data-custom-line');
       expect(output).toContain('data-custom-col');
-      expect(output).not.toContain('data-vc-source');
+      expect(output).not.toContain('data-ae-source');
     });
 
     it('should use custom root directory', () => {
@@ -115,7 +115,7 @@ function App() {
         '/custom/root/components/Button.tsx'
       );
 
-      expect(output).toContain('"data-vc-source": "components/Button.tsx"');
+      expect(output).toContain('"data-ae-source": "components/Button.tsx"');
     });
   });
 
@@ -132,7 +132,7 @@ function App() {
 
       // Fragment and div both get attributes (React.Fragment is a component name, not "Fragment")
       // Only the bare name "Fragment" is skipped
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(2); // React.Fragment + div
     });
 
@@ -146,16 +146,16 @@ function App() {
       const output = transform(input);
 
       // Only div should have attributes
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(1);
     });
 
     it('should skip already tagged elements', () => {
-      const input = `<div data-vc-source="already-tagged.tsx">Test</div>`;
+      const input = `<div data-ae-source="already-tagged.tsx">Test</div>`;
       const output = transform(input);
 
-      // Should only have one data-vc-source (the existing one)
-      const matches = output.match(/data-vc-source/g);
+      // Should only have one data-ae-source (the existing one)
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(1);
       expect(output).toContain('already-tagged.tsx');
     });
@@ -165,8 +165,8 @@ function App() {
       const output = transform(input);
 
       // In compiled output, spreads are converted to Object.assign or similar
-      // Just verify that data-vc attributes exist
-      expect(output).toContain('data-vc-source');
+      // Just verify that data-ae attributes exist
+      expect(output).toContain('data-ae-source');
       expect(output).toContain('className');
     });
 
@@ -174,9 +174,9 @@ function App() {
       const input = `<img src="test.jpg" alt="Test" />`;
       const output = transform(input);
 
-      expect(output).toContain('data-vc-source');
-      expect(output).toContain('data-vc-line');
-      expect(output).toContain('data-vc-col');
+      expect(output).toContain('data-ae-source');
+      expect(output).toContain('data-ae-line');
+      expect(output).toContain('data-ae-col');
     });
 
     it('should handle elements with existing attributes', () => {
@@ -192,7 +192,7 @@ function App() {
 
       const output = transform(input);
 
-      expect(output).toContain('data-vc-source');
+      expect(output).toContain('data-ae-source');
       expect(output).toContain('className');
       expect(output).toContain('onClick');
       expect(output).toContain('disabled');
@@ -202,14 +202,14 @@ function App() {
       const input = `<CustomButton>Click</CustomButton>`;
       const output = transform(input);
 
-      expect(output).toContain('data-vc-source');
+      expect(output).toContain('data-ae-source');
     });
 
     it('should handle elements with children expressions', () => {
       const input = `<div>{someVariable}</div>`;
       const output = transform(input);
 
-      expect(output).toContain('data-vc-source');
+      expect(output).toContain('data-ae-source');
     });
 
     it('should handle conditional rendering', () => {
@@ -222,7 +222,7 @@ function App() {
       const output = transform(input);
 
       // Both div and span should have attributes
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(2);
     });
 
@@ -235,7 +235,7 @@ function App() {
 
       const output = transform(input);
 
-      expect(output).toContain('data-vc-source');
+      expect(output).toContain('data-ae-source');
     });
   });
 
@@ -248,7 +248,7 @@ function App() {
         '/project/node_modules/some-lib/Component.tsx'
       );
 
-      expect(output).not.toContain('data-vc-source');
+      expect(output).not.toContain('data-ae-source');
     });
 
     it('should handle Windows-style paths', () => {
@@ -260,7 +260,7 @@ function App() {
       );
 
       // Should have source attribute (path handling works on Windows)
-      expect(output).toContain('data-vc-source');
+      expect(output).toContain('data-ae-source');
     });
 
     it('should handle deeply nested file paths', () => {
@@ -272,7 +272,7 @@ function App() {
       );
 
       expect(output).toContain(
-        '"data-vc-source": "src/components/ui/buttons/PrimaryButton.tsx"'
+        '"data-ae-source": "src/components/ui/buttons/PrimaryButton.tsx"'
       );
     });
   });
@@ -288,7 +288,7 @@ function App() {
       const output = transform(input);
 
       // Both div and span should have attributes
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(2);
     });
 
@@ -305,7 +305,7 @@ function App() {
       const output = transform(input);
 
       // div + 3 spans
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(4);
     });
 
@@ -319,7 +319,7 @@ function App() {
       const output = transform(input);
 
       // Container and div
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(2);
     });
 
@@ -329,7 +329,7 @@ function App() {
 
       expect(output).toContain('data-testid');
       expect(output).toContain('data-custom');
-      expect(output).toContain('data-vc-source');
+      expect(output).toContain('data-ae-source');
     });
   });
 
@@ -352,9 +352,9 @@ function App() {
 
       const output = transform(input);
 
-      expect(output).toContain('data-vc-source');
-      expect(output).toContain('data-vc-line');
-      expect(output).toContain('data-vc-col');
+      expect(output).toContain('data-ae-source');
+      expect(output).toContain('data-ae-line');
+      expect(output).toContain('data-ae-col');
       // Should preserve all existing attributes
       expect(output).toContain('className');
       expect(output).toContain('onClick');
@@ -378,7 +378,7 @@ function App() {
       const output = transform(input);
 
       // form + 2 inputs + button = 4 elements
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(4);
     });
 
@@ -401,7 +401,7 @@ function App() {
       const output = transform(input);
 
       // ul + li + span + button = 4 elements
-      const matches = output.match(/data-vc-source/g);
+      const matches = output.match(/data-ae-source/g);
       expect(matches).toHaveLength(4);
     });
   });

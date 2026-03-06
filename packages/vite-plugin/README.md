@@ -1,13 +1,13 @@
-# @visioncraft/vite-plugin
+# @ai-eye/vite-plugin
 
-Vite plugin for VisionCraft source mapping and HMR integration. Works with React, Vue, Svelte, and any framework supported by Vite.
+Vite plugin for AI Eye source mapping and HMR integration. Works with React, Vue, Svelte, and any framework supported by Vite.
 
 ## Installation
 
 ```bash
-npm install --save-dev @visioncraft/vite-plugin
+npm install --save-dev @ai-eye/vite-plugin
 # or
-pnpm add -D @visioncraft/vite-plugin
+pnpm add -D @ai-eye/vite-plugin
 ```
 
 ## Usage
@@ -18,12 +18,12 @@ pnpm add -D @visioncraft/vite-plugin
 // vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(),
-    visionCraft({
+    aiEye({
       root: __dirname,
     }),
   ],
@@ -36,12 +36,12 @@ export default defineConfig({
 // vite.config.ts
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     vue(),
-    visionCraft(),
+    aiEye(),
   ],
 });
 ```
@@ -52,12 +52,12 @@ export default defineConfig({
 // vite.config.ts
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     svelte(),
-    visionCraft(),
+    aiEye(),
   ],
 });
 ```
@@ -68,7 +68,7 @@ export default defineConfig({
 |--------|------|---------|-------------|
 | `root` | `string` | `process.cwd()` | Root directory for relative path calculation |
 | `enabled` | `boolean` | `true` in dev | Enable/disable source mapping |
-| `attributePrefix` | `string` | `'data-vc'` | Custom attribute prefix |
+| `attributePrefix` | `string` | `'data-ae'` | Custom attribute prefix |
 | `enableHMR` | `boolean` | `true` | Enable HMR status broadcasting |
 | `include` | `RegExp` | `/\.(jsx\|tsx\|vue\|svelte)$/` | File extensions to process |
 | `exclude` | `RegExp` | `/node_modules/` | File paths to exclude |
@@ -81,7 +81,7 @@ export default defineConfig({
 export default defineConfig({
   plugins: [
     react(),
-    visionCraft({
+    aiEye({
       enabled: process.env.NODE_ENV === 'development',
     }),
   ],
@@ -93,12 +93,12 @@ export default defineConfig({
 If you only want HMR integration without source mapping:
 
 ```ts
-import { visionCraftHMRPlugin } from '@visioncraft/vite-plugin';
+import { aiEyeHMRPlugin } from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(),
-    visionCraftHMRPlugin(),
+    aiEyeHMRPlugin(),
   ],
 });
 ```
@@ -106,7 +106,7 @@ export default defineConfig({
 ### Custom File Extensions
 
 ```ts
-visionCraft({
+aiEye({
   include: /\.(jsx|tsx|vue|svelte|astro)$/,
 })
 ```
@@ -115,7 +115,7 @@ visionCraft({
 
 ### Source Mapping
 
-Injects `data-vc-source`, `data-vc-line`, `data-vc-col` attributes:
+Injects `data-ae-source`, `data-ae-line`, `data-ae-col` attributes:
 
 ```jsx
 // src/App.tsx
@@ -127,19 +127,19 @@ Injects `data-vc-source`, `data-vc-line`, `data-vc-col` attributes:
 Becomes:
 
 ```jsx
-<div data-vc-source="src/App.tsx" data-vc-line="10" data-vc-col="2" className="container">
-  <h1 data-vc-source="src/App.tsx" data-vc-line="11" data-vc-col="4">Hello</h1>
+<div data-ae-source="src/App.tsx" data-ae-line="10" data-ae-col="2" className="container">
+  <h1 data-ae-source="src/App.tsx" data-ae-line="11" data-ae-col="4">Hello</h1>
 </div>
 ```
 
 ### HMR Integration
 
-Broadcasts custom HMR events to VisionCraft:
+Broadcasts custom HMR events to AI Eye:
 
-- `vc:connected` - When client connects
-- `vc:hmr-update` - When files are updated
+- `ae:connected` - When client connects
+- `ae:hmr-update` - When files are updated
 
-These events are used by VisionCraft to show real-time status in the preview.
+These events are used by AI Eye to show real-time status in the preview.
 
 ## Performance
 
@@ -157,8 +157,8 @@ These events are used by VisionCraft to show real-time status in the preview.
 4. **Source map generation:** Preserves original source maps
 
 ### Virtual Module Architecture (Bridge Injection)
-1. **Virtual module:** Bridge loaded as `/@visioncraft/bridge` (not bundled file)
-2. **resolveId hook:** Maps `@visioncraft/bridge` → `\0@visioncraft/bridge.ts`
+1. **Virtual module:** Bridge loaded as `/@ai-eye/bridge` (not bundled file)
+2. **resolveId hook:** Maps `@ai-eye/bridge` → `\0@ai-eye/bridge.ts`
 3. **load hook:** Transforms TypeScript → JavaScript using esbuild
 4. **Vite processing:** Injects `import.meta.hot` context automatically
 5. **HMR integration:** Bridge has full access to Vite's HMR API
@@ -190,8 +190,8 @@ These events are used by VisionCraft to show real-time status in the preview.
 
 1. Check Vite dev server is running
 2. Verify `enableHMR: true`
-3. Open browser console for `vc:` events
-4. Check VisionCraft extension output panel
+3. Open browser console for `ae:` events
+4. Check AI Eye extension output panel
 
 ### Performance Issues
 
@@ -203,12 +203,12 @@ These events are used by VisionCraft to show real-time status in the preview.
 
 ### Why This Plugin Matters
 
-As an AI agent using VisionCraft, this plugin is **critical** because it enables **source mapping** - the ability to trace UI elements back to their source code.
+As an AI agent using AI Eye, this plugin is **critical** because it enables **source mapping** - the ability to trace UI elements back to their source code.
 
 Without this plugin:
-- ❌ No `data-vc-source` attributes on elements
-- ❌ `visioncraft_get_source` returns "not available"
-- ❌ `visioncraft_inspect_element` has no file location
+- ❌ No `data-ae-source` attributes on elements
+- ❌ `aieye_get_source` returns "not available"
+- ❌ `aieye_inspect_element` has no file location
 - ❌ Cannot jump from UI → code
 
 With this plugin:
@@ -223,17 +223,17 @@ When helping users debug "source mapping not working" issues, check:
 
 1. **Plugin is installed:**
    ```bash
-   npm list @visioncraft/vite-plugin
-   # Should show: @visioncraft/vite-plugin@1.0.0
+   npm list @ai-eye/vite-plugin
+   # Should show: @ai-eye/vite-plugin@1.0.0
    ```
 
 2. **Plugin is configured in vite.config.ts:**
    ```typescript
-   import visionCraft from '@visioncraft/vite-plugin';
+   import aiEye from '@ai-eye/vite-plugin';
 
    export default defineConfig({
      plugins: [
-       visionCraft(), // ← Must be here
+       aiEye(), // ← Must be here
      ],
    });
    ```
@@ -245,10 +245,10 @@ When helping users debug "source mapping not working" issues, check:
    ```
 
 4. **Attributes are present in HTML:**
-   Use `visioncraft_inspect_element` on any element and check if it has:
-   - `data-vc-source`: File path
-   - `data-vc-line`: Line number
-   - `data-vc-col`: Column number
+   Use `aieye_inspect_element` on any element and check if it has:
+   - `data-ae-source`: File path
+   - `data-ae-line`: Line number
+   - `data-ae-col`: Column number
 
 ### Common Issues AI Agents Encounter
 
@@ -257,8 +257,8 @@ When helping users debug "source mapping not working" issues, check:
 **Diagnosis:**
 ```
 1. Take screenshot to see the element
-2. Use visioncraft_inspect_element to check attributes
-3. If no data-vc-* attributes:
+2. Use aieye_inspect_element to check attributes
+3. If no data-ae-* attributes:
    - Plugin not installed
    - Plugin not configured
    - Dev server not restarted after adding plugin
@@ -267,14 +267,14 @@ When helping users debug "source mapping not working" issues, check:
 **Solution Guide for User:**
 ```typescript
 // 1. Install plugin
-npm install @visioncraft/vite-plugin --save-dev
+npm install @ai-eye/vite-plugin --save-dev
 
 // 2. Add to vite.config.ts
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    visionCraft({
+    aiEye({
       enabled: true,
     }),
   ],
@@ -288,14 +288,14 @@ npm run dev
 **Issue:** "Third-party library elements have no source mapping"
 
 **Explanation:**
-This is expected! Only the user's code has source mapping. Elements from libraries like Material-UI, Ant Design, etc. won't have `data-vc-source` attributes because they're in `node_modules`.
+This is expected! Only the user's code has source mapping. Elements from libraries like Material-UI, Ant Design, etc. won't have `data-ae-source` attributes because they're in `node_modules`.
 
 **AI Response:**
 > "This element is from a third-party library (not your code), so source mapping isn't available. I can still inspect its styles and attributes, but I can't navigate to its source file since it's in node_modules."
 
 ### HMR Status for AI Agents
 
-The plugin also broadcasts HMR events. Use `visioncraft_get_hmr_status` to check:
+The plugin also broadcasts HMR events. Use `aieye_get_hmr_status` to check:
 
 ```json
 {
@@ -318,12 +318,12 @@ When recommending configuration to users:
 
 **Minimal (recommended for most users):**
 ```typescript
-visionCraft()
+aiEye()
 ```
 
 **With options (for specific needs):**
 ```typescript
-visionCraft({
+aiEye({
   enabled: true,              // Explicitly enable
   enableHMR: true,            // Track HMR updates
   root: __dirname,            // For correct relative paths
@@ -333,7 +333,7 @@ visionCraft({
 
 **Development only (production optimization):**
 ```typescript
-visionCraft({
+aiEye({
   enabled: process.env.NODE_ENV === 'development',
 })
 ```
@@ -371,11 +371,11 @@ Reassure users that performance impact is minimal:
 
 ### Quick Diagnostic for AI Agents
 
-When a user says "VisionCraft isn't working":
+When a user says "AI Eye isn't working":
 
 ```
 1. Check plugin installed:
-   npm list @visioncraft/vite-plugin
+   npm list @ai-eye/vite-plugin
 
 2. Check vite.config.ts has the plugin
 
@@ -383,9 +383,9 @@ When a user says "VisionCraft isn't working":
    curl http://localhost:5173
 
 4. Inspect an element:
-   visioncraft_inspect_element: "button"
+   aieye_inspect_element: "button"
 
-5. Look for data-vc-source attribute:
+5. Look for data-ae-source attribute:
    - Present → Plugin working ✅
    - Missing → Plugin not working ❌
 ```

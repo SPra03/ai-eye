@@ -1,12 +1,12 @@
-# VisionCraft MCP Tools - Quick Reference
+# AI Eye MCP Tools - Quick Reference
 
-**Fast lookup for all 14 VisionCraft tools**
+**Fast lookup for all 14 AI Eye tools**
 
 ---
 
 ## 📸 Visual Tools (2)
 
-### `visioncraft_screenshot`
+### `aieye_screenshot`
 **Capture page screenshot**
 
 **Parameters:**
@@ -19,7 +19,7 @@
 
 ---
 
-### `visioncraft_navigate`
+### `aieye_navigate`
 **Navigate to different URL**
 
 **Parameters:**
@@ -33,7 +33,7 @@
 
 ## 🔍 Inspection Tools (4)
 
-### `visioncraft_inspect_element`
+### `aieye_inspect_element`
 **Get full element details**
 
 **Parameters:**
@@ -49,7 +49,7 @@
 
 ---
 
-### `visioncraft_get_source`
+### `aieye_get_source`
 **Get element source location only**
 
 **Parameters:**
@@ -64,7 +64,7 @@
 
 ---
 
-### `visioncraft_get_structure`
+### `aieye_get_structure`
 **Get DOM tree with source mapping**
 
 **Parameters:**
@@ -76,7 +76,7 @@
 
 ---
 
-### `visioncraft_find_elements`
+### `aieye_find_elements`
 **Search for elements**
 
 **Parameters:**
@@ -96,7 +96,7 @@
 
 ## 🖱️ Interaction Tools (3)
 
-### `visioncraft_click`
+### `aieye_click`
 **Click an element**
 
 **Parameters:**
@@ -108,7 +108,7 @@
 
 ---
 
-### `visioncraft_type`
+### `aieye_type`
 **Type text into input**
 
 **Parameters:**
@@ -121,7 +121,7 @@
 
 ---
 
-### `visioncraft_scroll`
+### `aieye_scroll`
 **Scroll the page**
 
 **Parameters:**
@@ -136,7 +136,7 @@
 
 ## 🐛 Debugging Tools (5)
 
-### `visioncraft_get_console_logs`
+### `aieye_get_console_logs`
 **Read browser console**
 
 **Parameters:**
@@ -149,7 +149,7 @@
 
 ---
 
-### `visioncraft_clear_console_logs`
+### `aieye_clear_console_logs`
 **Clear console log buffer**
 
 **Parameters:** None
@@ -160,7 +160,7 @@
 
 ---
 
-### `visioncraft_get_hmr_status`
+### `aieye_get_hmr_status`
 **Check HMR status and errors**
 
 **Parameters:** None
@@ -175,7 +175,7 @@
 
 ---
 
-### `visioncraft_clear_hmr_errors`
+### `aieye_clear_hmr_errors`
 **Clear HMR error history**
 
 **Parameters:** None
@@ -186,7 +186,7 @@
 
 ---
 
-### `visioncraft_get_current_url`
+### `aieye_get_current_url`
 **Get current page URL**
 
 **Parameters:** None

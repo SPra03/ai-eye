@@ -1,7 +1,7 @@
 import { PluginObj, types as t, NodePath } from '@babel/core';
 import * as path from 'path';
 
-export interface VisionCraftBabelPluginOptions {
+export interface AIEyeBabelPluginOptions {
   /**
    * Root directory for relative path calculation
    * Defaults to process.cwd()
@@ -15,26 +15,26 @@ export interface VisionCraftBabelPluginOptions {
   enabled?: boolean;
 
   /**
-   * Custom attribute prefix (default: 'data-vc')
+   * Custom attribute prefix (default: 'data-ae')
    */
   attributePrefix?: string;
 }
 
 /**
- * Babel plugin for VisionCraft source mapping
- * Injects data-vc-source, data-vc-line, data-vc-col attributes into JSX elements
+ * Babel plugin for AI Eye source mapping
+ * Injects data-ae-source, data-ae-line, data-ae-col attributes into JSX elements
  */
-export default function visionCraftBabelPlugin(
+export default function aiEyeBabelPlugin(
   babel: typeof import('@babel/core')
 ): PluginObj {
   const { types: t } = babel;
 
   return {
-    name: 'visioncraft-source-map',
+    name: 'aieye-source-map',
     visitor: {
       JSXOpeningElement(nodePath: NodePath<t.JSXOpeningElement>, state: any) {
         try {
-          const options: VisionCraftBabelPluginOptions = state.opts || {};
+          const options: AIEyeBabelPluginOptions = state.opts || {};
 
           // Check if plugin is enabled
           if (options.enabled === false) {
@@ -63,7 +63,7 @@ export default function visionCraftBabelPlugin(
           const relPath = path.relative(root, filename);
 
           // Get attribute prefix
-          const prefix = options.attributePrefix || 'data-vc';
+          const prefix = options.attributePrefix || 'data-ae';
 
           // Check if already has source mapping attributes
           const attributes = nodePath.node.attributes;
@@ -119,7 +119,7 @@ export default function visionCraftBabelPlugin(
           // Silently skip on error to avoid breaking the build
           // Log to console in development or tests for debugging
           if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-            console.warn('[VisionCraft Babel] Failed to add source mapping:', error);
+            console.warn('[AI Eye Babel] Failed to add source mapping:', error);
           }
         }
       },

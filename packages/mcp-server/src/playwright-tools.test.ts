@@ -191,8 +191,8 @@ describe('Playwright Tools', () => {
     it('getSource should return error for external sites', () => {
       const result = {
         error: 'Source file mapping is not available for external websites. ' +
-               'Source mapping requires the @visioncraft/vite-plugin to inject ' +
-               'data-vc-source attributes during development builds.',
+               'Source mapping requires the @ai-eye/vite-plugin to inject ' +
+               'data-ae-source attributes during development builds.',
       };
 
       expect(result.error).toContain('not available');

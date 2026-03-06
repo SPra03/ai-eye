@@ -1,6 +1,6 @@
-# @visioncraft/bridge
+# @ai-eye/bridge
 
-Browser bridge script for VisionCraft. Provides inspection, interaction, and debugging APIs that run inside the user's application.
+Browser bridge script for AI Eye. Provides inspection, interaction, and debugging APIs that run inside the user's application.
 
 ## What It Does
 
@@ -13,7 +13,7 @@ The bridge script runs in your application's browser context and provides:
 
 ## How It Works
 
-The bridge is automatically injected by the Vite plugin and exposes `window.__VISIONCRAFT__` API.
+The bridge is automatically injected by the Vite plugin and exposes `window.__AIEYE__` API.
 
 ## API Reference
 
@@ -24,7 +24,7 @@ The bridge is automatically injected by the Vite plugin and exposes `window.__VI
 Get detailed information about an element:
 
 ```javascript
-window.__VISIONCRAFT__.inspectElement('button.primary');
+window.__AIEYE__.inspectElement('button.primary');
 // Returns:
 {
   tagName: "BUTTON",
@@ -43,7 +43,7 @@ window.__VISIONCRAFT__.inspectElement('button.primary');
 Get just the source location:
 
 ```javascript
-window.__VISIONCRAFT__.getElementSource('button.primary');
+window.__AIEYE__.getElementSource('button.primary');
 // Returns:
 {
   file: "src/App.tsx",
@@ -57,7 +57,7 @@ window.__VISIONCRAFT__.getElementSource('button.primary');
 Get DOM tree with source locations:
 
 ```javascript
-window.__VISIONCRAFT__.getPageStructure(3);
+window.__AIEYE__.getPageStructure(3);
 // Returns:
 {
   tag: "body",
@@ -73,13 +73,13 @@ Find elements by text, role, or selector:
 
 ```javascript
 // Find by text content
-window.__VISIONCRAFT__.findElements('Submit', 'text');
+window.__AIEYE__.findElements('Submit', 'text');
 
 // Find by ARIA role
-window.__VISIONCRAFT__.findElements('button', 'role');
+window.__AIEYE__.findElements('button', 'role');
 
 // Find by CSS selector
-window.__VISIONCRAFT__.findElements('.btn-primary', 'css');
+window.__AIEYE__.findElements('.btn-primary', 'css');
 
 // Returns array of:
 [
@@ -94,7 +94,7 @@ window.__VISIONCRAFT__.findElements('.btn-primary', 'css');
 Click an element:
 
 ```javascript
-window.__VISIONCRAFT__.clickElement('button.submit');
+window.__AIEYE__.clickElement('button.submit');
 // Returns: { success: true }
 ```
 
@@ -103,7 +103,7 @@ window.__VISIONCRAFT__.clickElement('button.submit');
 Type text into an input:
 
 ```javascript
-window.__VISIONCRAFT__.typeText('input[name="email"]', 'test@example.com');
+window.__AIEYE__.typeText('input[name="email"]', 'test@example.com');
 // Returns: { success: true }
 ```
 
@@ -112,7 +112,7 @@ window.__VISIONCRAFT__.typeText('input[name="email"]', 'test@example.com');
 Scroll to position:
 
 ```javascript
-window.__VISIONCRAFT__.scrollTo(0, 500);
+window.__AIEYE__.scrollTo(0, 500);
 // Returns: { success: true }
 ```
 
@@ -123,7 +123,7 @@ window.__VISIONCRAFT__.scrollTo(0, 500);
 Array of captured console logs (last 200):
 
 ```javascript
-window.__VISIONCRAFT__.consoleLogs;
+window.__AIEYE__.consoleLogs;
 // Returns array of:
 [
   { level: "log", message: "Hello", timestamp: 1234567890 }
@@ -136,10 +136,10 @@ Get filtered console logs:
 
 ```javascript
 // Get last 10 errors
-window.__VISIONCRAFT__.getConsoleLogs('error', 10);
+window.__AIEYE__.getConsoleLogs('error', 10);
 
 // Get all warnings
-window.__VISIONCRAFT__.getConsoleLogs('warn');
+window.__AIEYE__.getConsoleLogs('warn');
 ```
 
 #### `clearConsoleLogs()`
@@ -147,7 +147,7 @@ window.__VISIONCRAFT__.getConsoleLogs('warn');
 Clear captured logs:
 
 ```javascript
-window.__VISIONCRAFT__.clearConsoleLogs();
+window.__AIEYE__.clearConsoleLogs();
 ```
 
 ### Screenshots
@@ -157,7 +157,7 @@ window.__VISIONCRAFT__.clearConsoleLogs();
 Capture page screenshot (requires html2canvas):
 
 ```javascript
-const dataUrl = await window.__VISIONCRAFT__.captureScreenshot('jpeg', 80);
+const dataUrl = await window.__AIEYE__.captureScreenshot('jpeg', 80);
 // Returns: "data:image/jpeg;base64,..."
 ```
 
@@ -168,7 +168,7 @@ const dataUrl = await window.__VISIONCRAFT__.captureScreenshot('jpeg', 80);
 Get Hot Module Replacement status:
 
 ```javascript
-window.__VISIONCRAFT__.getHMRStatus();
+window.__AIEYE__.getHMRStatus();
 // Returns:
 {
   connected: true,
@@ -181,21 +181,21 @@ window.__VISIONCRAFT__.getHMRStatus();
 
 ### Automatic (via Vite Plugin)
 
-The bridge is automatically injected when using `@visioncraft/vite-plugin`:
+The bridge is automatically injected when using `@ai-eye/vite-plugin`:
 
 ```ts
 // vite.config.ts
-import visionCraft from '@visioncraft/vite-plugin';
+import aiEye from '@ai-eye/vite-plugin';
 
 export default defineConfig({
-  plugins: [visionCraft()],
+  plugins: [aiEye()],
 });
 ```
 
 ### Manual (for other setups)
 
 ```html
-<script src="./node_modules/@visioncraft/bridge/dist/visioncraft-bridge.js"></script>
+<script src="./node_modules/@ai-eye/bridge/dist/aieye-bridge.js"></script>
 ```
 
 ## Testing the Bridge
@@ -203,10 +203,10 @@ export default defineConfig({
 ### Check if Loaded
 
 ```javascript
-console.log(window.__VISIONCRAFT__);
+console.log(window.__AIEYE__);
 // Should show the API object
 
-console.log(window.__VISIONCRAFT__.ready);
+console.log(window.__AIEYE__.ready);
 // Should return: true
 ```
 
@@ -214,7 +214,7 @@ console.log(window.__VISIONCRAFT__.ready);
 
 ```javascript
 // Inspect any element on the page
-const result = window.__VISIONCRAFT__.inspectElement('button');
+const result = window.__AIEYE__.inspectElement('button');
 console.log(result.sourceFile); // Should show source file path
 ```
 
@@ -222,7 +222,7 @@ console.log(result.sourceFile); // Should show source file path
 
 ```javascript
 console.log('Test message');
-const logs = window.__VISIONCRAFT__.getConsoleLogs();
+const logs = window.__AIEYE__.getConsoleLogs();
 console.log(logs[logs.length - 1]); // Should show the test message
 ```
 
@@ -245,7 +245,7 @@ The bridge script runs in your application's context and has full access to the 
 **Recommendation:** Only enable in development:
 
 ```ts
-visionCraft({
+aiEye({
   enabled: process.env.NODE_ENV === 'development'
 })
 ```
@@ -254,7 +254,7 @@ visionCraft({
 
 ### What You Need to Know
 
-As an AI agent, **you don't directly call the bridge API**. Instead, you call MCP tools (like `visioncraft_inspect_element`), and the MCP server calls the bridge API for you.
+As an AI agent, **you don't directly call the bridge API**. Instead, you call MCP tools (like `aieye_inspect_element`), and the MCP server calls the bridge API for you.
 
 However, understanding the bridge helps you:
 1. Know what's happening under the hood
@@ -265,18 +265,18 @@ However, understanding the bridge helps you:
 
 ```
 You (AI Agent)
-  ↓ Call MCP tool: visioncraft_inspect_element
+  ↓ Call MCP tool: aieye_inspect_element
 MCP Server
-  ↓ Calls: window.__VISIONCRAFT__.inspectElement()
+  ↓ Calls: window.__AIEYE__.inspectElement()
 Browser Bridge (this package)
-  ↓ Reads: data-vc-source attributes
+  ↓ Reads: data-ae-source attributes
 User's DOM
 ```
 
 **Key points:**
 - The bridge runs **inside the user's browser**
 - It's injected by the Vite/Babel plugin
-- It provides the `window.__VISIONCRAFT__` API
+- It provides the `window.__AIEYE__` API
 - The MCP server uses this API to inspect elements
 
 ### Why "Bridge Not Available" Happens
@@ -284,9 +284,9 @@ User's DOM
 When you see: `"Bridge not available in CDP-only mode"`
 
 **What it means:**
-- VisionCraft Vite/Babel plugin is **not configured**
+- AI Eye Vite/Babel plugin is **not configured**
 - The bridge script wasn't injected into the page
-- No `window.__VISIONCRAFT__` object exists
+- No `window.__AIEYE__` object exists
 
 **What you can still do:**
 - ✅ Take screenshots (uses CDP)
@@ -294,17 +294,17 @@ When you see: `"Bridge not available in CDP-only mode"`
 - ✅ Navigate pages (uses CDP)
 
 **What you CAN'T do:**
-- ❌ Get source locations (`visioncraft_get_source`)
-- ❌ Inspect with source mapping (`visioncraft_inspect_element`)
-- ❌ Get page structure (`visioncraft_get_structure`)
+- ❌ Get source locations (`aieye_get_source`)
+- ❌ Inspect with source mapping (`aieye_inspect_element`)
+- ❌ Get page structure (`aieye_get_structure`)
 
 ### Verifying Bridge is Available
 
-When helping users set up VisionCraft, check if bridge is working:
+When helping users set up AI Eye, check if bridge is working:
 
 **Method 1: Through MCP tools**
 ```
-visioncraft_inspect_element: "body"
+aieye_inspect_element: "body"
 
 // Check response:
 {
@@ -320,11 +320,11 @@ visioncraft_inspect_element: "body"
 
 **Method 2: Direct check (if you can access browser console)**
 ```javascript
-console.log(window.__VISIONCRAFT__);
+console.log(window.__AIEYE__);
 // Should show object with methods ✅
 // If undefined, bridge not loaded ❌
 
-console.log(window.__VISIONCRAFT__.ready);
+console.log(window.__AIEYE__.ready);
 // Should return true ✅
 ```
 
@@ -333,7 +333,7 @@ console.log(window.__VISIONCRAFT__.ready);
 For the bridge to provide source locations, **all three parts must be in place:**
 
 1. **Plugin configured** (Vite or Babel)
-   - Injects `data-vc-source`, `data-vc-line`, `data-vc-col` attributes
+   - Injects `data-ae-source`, `data-ae-line`, `data-ae-col` attributes
 
 2. **Bridge loaded** (this package)
    - Reads those attributes from DOM elements
@@ -345,11 +345,11 @@ If any part is missing → No source mapping.
 
 ### What the Bridge Actually Does
 
-**When you call `visioncraft_inspect_element("button")`:**
+**When you call `aieye_inspect_element("button")`:**
 
-1. MCP server calls `window.__VISIONCRAFT__.inspectElement("button")`
+1. MCP server calls `window.__AIEYE__.inspectElement("button")`
 2. Bridge finds the button element in DOM
-3. Bridge reads `data-vc-source="src/App.tsx"` attribute
+3. Bridge reads `data-ae-source="src/App.tsx"` attribute
 4. Bridge gets computed styles, bounding box, etc.
 5. Bridge returns all data to MCP server
 6. MCP server returns to you (AI agent)
@@ -365,11 +365,11 @@ If any part is missing → No source mapping.
 
 **Diagnosis:**
 - Bridge is present ✅
-- But elements don't have `data-vc-*` attributes ❌
+- But elements don't have `data-ae-*` attributes ❌
 - Plugin not configured or dev server not restarted
 
 **Tell user:**
-1. Check vite.config.ts has VisionCraft plugin
+1. Check vite.config.ts has AI Eye plugin
 2. Restart dev server
 3. Verify attributes in browser inspector
 
@@ -391,7 +391,7 @@ If any part is missing → No source mapping.
 - Console logs captured **after** bridge loads
 
 **Tell user:**
-- Use `visioncraft_clear_console_logs` before testing
+- Use `aieye_clear_console_logs` before testing
 - Only recent logs (last 200) are available
 - Logs from before bridge loaded won't be captured
 
@@ -400,7 +400,7 @@ If any part is missing → No source mapping.
 **Two ways MCP server can interact with browser:**
 
 1. **Via Bridge (preferred):**
-   - Full VisionCraft features
+   - Full AI Eye features
    - Source mapping available
    - Console log capture
    - HMR status tracking
@@ -411,7 +411,7 @@ If any part is missing → No source mapping.
    - Limited to CDP capabilities
 
 **AI agent guidance:**
-- If bridge available → Use all VisionCraft tools freely
+- If bridge available → Use all AI Eye tools freely
 - If CDP-only → Explain limitations to user
 
 ### Performance Notes
@@ -445,16 +445,16 @@ The bridge runs in the browser and has access to:
 
 | Method | What It Does | MCP Tool Equivalent |
 |--------|--------------|---------------------|
-| `inspectElement()` | Get element details | `visioncraft_inspect_element` |
-| `getElementSource()` | Get source location | `visioncraft_get_source` |
-| `getPageStructure()` | Get DOM tree | `visioncraft_get_structure` |
-| `findElements()` | Search elements | `visioncraft_find_elements` |
-| `clickElement()` | Click element | `visioncraft_click` |
-| `typeText()` | Type in input | `visioncraft_type` |
-| `scrollTo()` | Scroll page | `visioncraft_scroll` |
-| `getConsoleLogs()` | Get console logs | `visioncraft_get_console_logs` |
-| `clearConsoleLogs()` | Clear logs | `visioncraft_clear_console_logs` |
-| `getHMRStatus()` | HMR status | `visioncraft_get_hmr_status` |
+| `inspectElement()` | Get element details | `aieye_inspect_element` |
+| `getElementSource()` | Get source location | `aieye_get_source` |
+| `getPageStructure()` | Get DOM tree | `aieye_get_structure` |
+| `findElements()` | Search elements | `aieye_find_elements` |
+| `clickElement()` | Click element | `aieye_click` |
+| `typeText()` | Type in input | `aieye_type` |
+| `scrollTo()` | Scroll page | `aieye_scroll` |
+| `getConsoleLogs()` | Get console logs | `aieye_get_console_logs` |
+| `clearConsoleLogs()` | Clear logs | `aieye_clear_console_logs` |
+| `getHMRStatus()` | HMR status | `aieye_get_hmr_status` |
 
 **You never call these directly** - the MCP server calls them for you.
 
@@ -468,13 +468,13 @@ The bridge runs in the browser and has access to:
      Ask user or check with them
 
 □ 2. Is plugin configured?
-     Check vite.config.ts for visionCraft plugin
+     Check vite.config.ts for aiEye plugin
 
 □ 3. Did user restart server after adding plugin?
      Tell them to restart
 
 □ 4. Is bridge loaded?
-     visioncraft_inspect_element: "body"
+     aieye_inspect_element: "body"
      Check if sourceFile is present
 
 □ 5. Are elements from user's code?
@@ -509,7 +509,7 @@ The bridge runs in the browser and has access to:
 
 **DON'T mention the bridge when:**
 - Everything is working normally
-- User just wants to use VisionCraft
+- User just wants to use AI Eye
 - It's an implementation detail they don't need to know
 
 **Keep it simple:**

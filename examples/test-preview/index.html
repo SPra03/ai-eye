@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VisionCraft Test Page</title>
+  <title>AI Eye Test Page</title>
   <style>
     * {
       margin: 0;
@@ -123,8 +123,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎨 VisionCraft Test Page</h1>
-    <p>This is a simple test page for VisionCraft live preview functionality. You should see this page rendered inside VS Code!</p>
+    <h1>🎨 AI Eye Test Page</h1>
+    <p>This is a simple test page for AI Eye live preview functionality. You should see this page rendered inside VS Code!</p>
 
     <ul class="feature-list">
       <li>Live preview with embedded iframe</li>
@@ -184,13 +184,13 @@
 
       // Try to communicate with parent (will work once bridge is implemented)
       window.parent.postMessage({
-        type: 'visioncraft-test',
+        type: 'aieye-test',
         data: 'Hello from test page!'
       }, '*');
     }
 
     // Log page load
-    console.log('VisionCraft test page loaded successfully!');
+    console.log('AI Eye test page loaded successfully!');
     console.log('Current URL:', window.location.href);
 
     // Listen for messages from parent

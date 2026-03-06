@@ -1,6 +1,6 @@
 /**
  * Swift helper subprocess wrapper.
- * Spawns the visioncraft-macos-helper binary and communicates via JSON over stdio.
+ * Spawns the aieye-macos-helper binary and communicates via JSON over stdio.
  */
 
 import { execFile } from 'node:child_process';
@@ -14,15 +14,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Locate the Swift binary
 function findHelperBinary(): string {
   // Check dist/bin (built location)
-  const distBin = join(__dirname, 'bin', 'visioncraft-macos-helper');
+  const distBin = join(__dirname, 'bin', 'aieye-macos-helper');
   if (existsSync(distBin)) return distBin;
 
   // Check swift-helper build directory (dev mode)
-  const devBin = join(__dirname, '..', 'swift-helper', '.build', 'release', 'visioncraft-macos-helper');
+  const devBin = join(__dirname, '..', 'swift-helper', '.build', 'release', 'aieye-macos-helper');
   if (existsSync(devBin)) return devBin;
 
   // Check debug build
-  const debugBin = join(__dirname, '..', 'swift-helper', '.build', 'debug', 'visioncraft-macos-helper');
+  const debugBin = join(__dirname, '..', 'swift-helper', '.build', 'debug', 'aieye-macos-helper');
   if (existsSync(debugBin)) return debugBin;
 
   throw new Error(

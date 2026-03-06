@@ -1,7 +1,7 @@
 {
-  "name": "@visioncraft/vite-plugin",
+  "name": "@ai-eye/vite-plugin",
   "version": "1.0.0",
-  "description": "Vite plugin for VisionCraft source mapping, HMR integration, and browser bridge injection",
+  "description": "Vite plugin for AI Eye source mapping, HMR integration, and browser bridge injection",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,7 +11,7 @@
       "import": "./dist/index.js"
     }
   },
-  "author": "VisionCraft Team",
+  "author": "AI Eye Team",
   "license": "MIT",
   "homepage": "https://github.com/SPra03/ai-eye#readme",
   "repository": {
@@ -31,7 +31,7 @@
     "react",
     "vue",
     "svelte",
-    "visioncraft",
+    "ai-eye",
     "ai",
     "mcp",
     "claude",

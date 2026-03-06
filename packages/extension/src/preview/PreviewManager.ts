@@ -34,7 +34,7 @@ export class PreviewManager {
         );
 
         if (action === 'Open Settings') {
-          vscode.commands.executeCommand('workbench.action.openSettings', 'visioncraft.devServerUrl');
+          vscode.commands.executeCommand('workbench.action.openSettings', 'aieye.devServerUrl');
           return;
         } else if (action === 'Retry') {
           return this.openPreview(silent);
@@ -50,8 +50,8 @@ export class PreviewManager {
     }
 
     this.panel = vscode.window.createWebviewPanel(
-      'visioncraft.preview',
-      'VisionCraft Preview',
+      'aieye.preview',
+      'AI Eye Preview',
       vscode.ViewColumn.Two,
       {
         enableScripts: true,
@@ -77,7 +77,7 @@ export class PreviewManager {
       this.disposables
     );
 
-    vscode.window.showInformationMessage('VisionCraft Preview opened!');
+    vscode.window.showInformationMessage('AI Eye Preview opened!');
   }
 
   /**
@@ -237,7 +237,7 @@ export class PreviewManager {
     frame-src http: https: http://localhost:* https://localhost:*;
     connect-src http: https:;
   ">
-  <title>VisionCraft Preview</title>
+  <title>AI Eye Preview</title>
   <style>
     * {
       margin: 0;
@@ -487,7 +487,7 @@ export class PreviewManager {
     let isLoading = false;
 
     // Notify extension that webview is ready
-    console.log('VisionCraft webview script loaded!');
+    console.log('AI Eye webview script loaded!');
     vscode.postMessage({ type: 'ready' });
 
     // ---- Toolbar Actions ----
@@ -596,8 +596,8 @@ export class PreviewManager {
 
     // Handle responses from iframe
     window.addEventListener('message', (e) => {
-      // Check if this is a response from the iframe's VisionCraft bridge
-      if (e.source === frame.contentWindow && e.data?.type === 'visioncraft:response') {
+      // Check if this is a response from the iframe's AI Eye bridge
+      if (e.source === frame.contentWindow && e.data?.type === 'aieye:response') {
         const { id, result, error } = e.data;
 
         if (pendingIframeRequests.has(id)) {
@@ -639,7 +639,7 @@ export class PreviewManager {
 
             // Send message to iframe
             frame.contentWindow.postMessage({
-              type: 'visioncraft:eval',
+              type: 'aieye:eval',
               id: message.id,
               code: message.code
             }, '*');
@@ -711,7 +711,7 @@ export class PreviewManager {
             });
 
             frame.contentWindow.postMessage({
-              type: 'visioncraft:call',
+              type: 'aieye:call',
               id: message.id,
               method: message.method,
               args: message.args || []

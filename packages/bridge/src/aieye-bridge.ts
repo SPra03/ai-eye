@@ -1,10 +1,10 @@
 /**
- * VisionCraft Bridge Script
+ * AI Eye Bridge Script
  * Runs inside the user's application to provide inspection and interaction APIs
- * This is injected into the page and provides the window.__VISIONCRAFT__ interface
+ * This is injected into the page and provides the window.__AIEYE__ interface
  */
 
-interface VisionCraftAPI {
+interface AIEyeAPI {
   // Core inspection
   elementAtPoint: (x: number, y: number) => ElementInspectionResult | ErrorResult;
   inspectElement: (selector: string) => ElementInspectionResult | ErrorResult;
@@ -127,18 +127,18 @@ interface HMRStatus {
   }>;
 }
 
-// Initialize VisionCraft Bridge
+// Initialize AI Eye Bridge
 // This runs as an ES module with full access to import.meta.hot
-(function initVisionCraft() {
+(function initAIEye() {
   'use strict';
 
   // Check if already initialized
-  if ((window as any).__VISIONCRAFT__) {
-    console.log('[VisionCraft] Bridge already initialized');
+  if ((window as any).__AIEYE__) {
+    console.log('[AI Eye] Bridge already initialized');
     return;
   }
 
-  console.log('[VisionCraft] Initializing bridge script...');
+  console.log('[AI Eye] Initializing bridge script...');
 
   // ====== Network Request Capture ======
   interface NetworkRequest {
@@ -330,7 +330,7 @@ interface HMRStatus {
 
       // Walk up to find nearest source-mapped parent if needed
       let sourceEl: Element | null = el;
-      while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+      while (sourceEl && !sourceEl.getAttribute('data-ae-source')) {
         sourceEl = sourceEl.parentElement;
       }
 
@@ -338,9 +338,9 @@ interface HMRStatus {
       const rect = targetEl.getBoundingClientRect();
       const computed = window.getComputedStyle(targetEl);
 
-      const sourceFile = sourceEl?.getAttribute('data-vc-source') || null;
-      const sourceLine = sourceEl?.getAttribute('data-vc-line') || null;
-      const sourceCol = sourceEl?.getAttribute('data-vc-col') || null;
+      const sourceFile = sourceEl?.getAttribute('data-ae-source') || null;
+      const sourceLine = sourceEl?.getAttribute('data-ae-line') || null;
+      const sourceCol = sourceEl?.getAttribute('data-ae-col') || null;
 
       const computedStyles: Record<string, string> = {
         display: computed.display,
@@ -403,9 +403,9 @@ interface HMRStatus {
       const computed = window.getComputedStyle(el);
 
       // Get source mapping attributes
-      const sourceFile = el.getAttribute('data-vc-source');
-      const sourceLine = el.getAttribute('data-vc-line');
-      const sourceCol = el.getAttribute('data-vc-col');
+      const sourceFile = el.getAttribute('data-ae-source');
+      const sourceLine = el.getAttribute('data-ae-line');
+      const sourceCol = el.getAttribute('data-ae-col');
 
       // Get computed styles (most useful ones)
       const computedStyles: Record<string, string> = {
@@ -473,7 +473,7 @@ interface HMRStatus {
 
     if (region) {
       // Find all source-mapped elements in the region
-      const allElements = document.querySelectorAll('[data-vc-source]');
+      const allElements = document.querySelectorAll('[data-ae-source]');
       for (let i = 0; i < allElements.length; i++) {
         const el = allElements[i];
         const rect = el.getBoundingClientRect();
@@ -485,9 +485,9 @@ interface HMRStatus {
           rect.bottom > region.y &&
           rect.top < region.y + region.height
         ) {
-          const sourceFile = el.getAttribute('data-vc-source');
-          const sourceLine = el.getAttribute('data-vc-line');
-          const sourceCol = el.getAttribute('data-vc-col');
+          const sourceFile = el.getAttribute('data-ae-source');
+          const sourceLine = el.getAttribute('data-ae-line');
+          const sourceCol = el.getAttribute('data-ae-col');
 
           const entry: any = {
             tagName: el.tagName,
@@ -550,15 +550,15 @@ interface HMRStatus {
         return { error: `Element not found: ${selector}` };
       }
 
-      const file = el.getAttribute('data-vc-source');
-      const line = el.getAttribute('data-vc-line');
-      const col = el.getAttribute('data-vc-col');
+      const file = el.getAttribute('data-ae-source');
+      const line = el.getAttribute('data-ae-line');
+      const col = el.getAttribute('data-ae-col');
 
       // Check if source mapping attributes exist
       if (!file || !line || !col) {
         return {
           error: 'Source mapping not available for this element. ' +
-                 'Ensure @visioncraft/vite-plugin or @visioncraft/babel-plugin is configured.'
+                 'Ensure @ai-eye/vite-plugin or @ai-eye/babel-plugin is configured.'
         };
       }
 
@@ -585,7 +585,7 @@ interface HMRStatus {
 
       const node: PageStructureNode = {
         tag: el.tagName?.toLowerCase(),
-        source: el.getAttribute('data-vc-source'),
+        source: el.getAttribute('data-ae-source'),
         role: el.getAttribute('role'),
       };
 
@@ -654,20 +654,20 @@ interface HMRStatus {
       return elements.map((el, index) => {
         const result: any = {
           selector: generateSelector(el, index),
-          source: el.getAttribute('data-vc-source'),
+          source: el.getAttribute('data-ae-source'),
           text: (el as HTMLElement).innerText?.substring(0, 50),
           role: el.getAttribute('role'),
         };
 
         if (includeSource) {
-          result.line = el.getAttribute('data-vc-line');
-          result.col = el.getAttribute('data-vc-col');
+          result.line = el.getAttribute('data-ae-line');
+          result.col = el.getAttribute('data-ae-col');
         }
 
         return result;
       });
     } catch (error) {
-      console.error('[VisionCraft] Error finding elements:', error);
+      console.error('[AI Eye] Error finding elements:', error);
       return [];
     }
   }
@@ -804,7 +804,7 @@ interface HMRStatus {
 
   /**
    * Get the source file for a stylesheet.
-   * Checks: sheet.href → data-vc-source → data-vite-dev-id → "inline"
+   * Checks: sheet.href → data-ae-source → data-vite-dev-id → "inline"
    */
   function getStyleSheetFile(sheet: CSSStyleSheet): string {
     if (sheet.href) {
@@ -823,8 +823,8 @@ interface HMRStatus {
     const ownerNode = sheet.ownerNode as HTMLElement | null;
     if (!ownerNode) return 'inline';
 
-    // Check data-vc-source (VisionCraft plugin attribute)
-    const vcSource = ownerNode.getAttribute('data-vc-source');
+    // Check data-ae-source (AI Eye plugin attribute)
+    const vcSource = ownerNode.getAttribute('data-ae-source');
     if (vcSource) return vcSource;
 
     // Check data-vite-dev-id (Vite injects this on <style> tags)
@@ -1144,7 +1144,7 @@ interface HMRStatus {
             overlay.style.backgroundColor = highlightColor;
             overlay.style.pointerEvents = 'none';
             overlay.style.zIndex = '999999';
-            overlay.setAttribute('data-vc-highlight', 'true');
+            overlay.setAttribute('data-ae-highlight', 'true');
             document.body.appendChild(overlay);
             overlays.push(overlay);
           });
@@ -1194,7 +1194,7 @@ interface HMRStatus {
 
       return canvas.toDataURL(`image/${format}`, quality / 100);
     } catch (error) {
-      console.error('[VisionCraft] Screenshot failed:', error);
+      console.error('[AI Eye] Screenshot failed:', error);
       throw error;
     }
   }
@@ -1260,35 +1260,35 @@ interface HMRStatus {
         hmrStatus.errors.shift();
       }
 
-      console.error('[VisionCraft HMR] Error:', error.message);
+      console.error('[AI Eye HMR] Error:', error.message);
     });
 
     hot.on('vite:ws:disconnect', () => {
       hmrStatus.connected = false;
-      console.warn('[VisionCraft HMR] Disconnected from dev server');
+      console.warn('[AI Eye HMR] Disconnected from dev server');
     });
 
     hot.on('vite:ws:connect', () => {
       hmrStatus.connected = true;
-      console.log('[VisionCraft HMR] Reconnected to dev server');
+      console.log('[AI Eye HMR] Reconnected to dev server');
     });
   }
 
-  // Listen for custom VisionCraft events from Vite plugin
+  // Listen for custom AI Eye events from Vite plugin
   if (typeof window !== 'undefined' && (import.meta as any).hot) {
     const hot = (import.meta as any).hot;
 
-    hot.on('vc:connected', (data: any) => {
+    hot.on('ae:connected', (data: any) => {
       hmrStatus.connected = true;
       hmrStatus.connectionId = data.connectionId;
-      console.log(`[VisionCraft] Connected (ID: ${data.connectionId})`);
+      console.log(`[AI Eye] Connected (ID: ${data.connectionId})`);
     });
 
-    hot.on('vc:disconnected', (data: any) => {
-      console.log(`[VisionCraft] Disconnected (ID: ${data.connectionId})`);
+    hot.on('ae:disconnected', (data: any) => {
+      console.log(`[AI Eye] Disconnected (ID: ${data.connectionId})`);
     });
 
-    hot.on('vc:hmr-update', (data: any) => {
+    hot.on('ae:hmr-update', (data: any) => {
       const update: HMRUpdate = {
         timestamp: data.timestamp || Date.now(),
         file: data.file,
@@ -1304,10 +1304,10 @@ interface HMRStatus {
         hmrStatus.updates.shift();
       }
 
-      console.log(`[VisionCraft HMR] Updated: ${data.file} (${data.type})`);
+      console.log(`[AI Eye HMR] Updated: ${data.file} (${data.type})`);
     });
 
-    hot.on('vc:error', (data: any) => {
+    hot.on('ae:error', (data: any) => {
       const error = {
         message: data.error?.message || 'Unknown error',
         stack: data.error?.stack,
@@ -1969,7 +1969,7 @@ interface HMRStatus {
   }
 
   // ====== Public API ======
-  const VisionCraftAPI: VisionCraftAPI & { clearHMRErrors: () => void; getStyleDiff: typeof getStyleDiff; getComponentTree: typeof getComponentTree; auditAccessibility: typeof auditAccessibility } = {
+  const AIEyeAPI: AIEyeAPI & { clearHMRErrors: () => void; getStyleDiff: typeof getStyleDiff; getComponentTree: typeof getComponentTree; auditAccessibility: typeof auditAccessibility } = {
     // Inspection
     elementAtPoint,
     inspectElement,
@@ -2032,16 +2032,16 @@ interface HMRStatus {
   };
 
   // Expose API
-  (window as any).__VISIONCRAFT__ = VisionCraftAPI;
+  (window as any).__AIEYE__ = AIEyeAPI;
 
-  console.log('[VisionCraft] Bridge initialized successfully ✨');
-  console.log('[VisionCraft] API available at window.__VISIONCRAFT__');
+  console.log('[AI Eye] Bridge initialized successfully ✨');
+  console.log('[AI Eye] API available at window.__AIEYE__');
 
   // Notify parent window (if in iframe)
   try {
     window.parent.postMessage(
       {
-        type: 'visioncraft:ready',
+        type: 'aieye:ready',
         version: '1.0.0',
       },
       '*'
@@ -2054,8 +2054,8 @@ interface HMRStatus {
   window.addEventListener('message', async (event) => {
     const message = event.data;
 
-    // Only handle visioncraft messages
-    if (!message || typeof message !== 'object' || !message.type?.startsWith('visioncraft:')) {
+    // Only handle aieye messages
+    if (!message || typeof message !== 'object' || !message.type?.startsWith('aieye:')) {
       return;
     }
 
@@ -2063,7 +2063,7 @@ interface HMRStatus {
       let result: any;
 
       switch (message.type) {
-        case 'visioncraft:eval':
+        case 'aieye:eval':
           // Execute arbitrary code
           result = eval(message.code);
 
@@ -2073,9 +2073,9 @@ interface HMRStatus {
           }
           break;
 
-        case 'visioncraft:call':
+        case 'aieye:call':
           // Call a method on the API
-          const api = (window as any).__VISIONCRAFT__;
+          const api = (window as any).__AIEYE__;
           if (!api || !api[message.method]) {
             throw new Error(`Method not found: ${message.method}`);
           }
@@ -2089,7 +2089,7 @@ interface HMRStatus {
       // Send response back to parent
       window.parent.postMessage(
         {
-          type: 'visioncraft:response',
+          type: 'aieye:response',
           id: message.id,
           result,
         },
@@ -2099,7 +2099,7 @@ interface HMRStatus {
       // Send error response
       window.parent.postMessage(
         {
-          type: 'visioncraft:response',
+          type: 'aieye:response',
           id: message.id,
           error: error.message || String(error),
         },

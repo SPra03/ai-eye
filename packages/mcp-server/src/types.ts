@@ -1,5 +1,5 @@
 /**
- * Type definitions for VisionCraft MCP Server
+ * Type definitions for AI Eye MCP Server
  */
 
 export interface BrowserConnection {
@@ -70,7 +70,7 @@ export interface HMRStatus {
   }>;
 }
 
-export interface VisionCraftBridge {
+export interface AIEyeBridge {
   // Inspection
   inspectElement: (selector: string) => ElementInspectionResult | ErrorResult;
   getPageStructure: (maxDepth?: number) => PageStructureNode;

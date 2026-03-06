@@ -19,7 +19,7 @@ let outputChannel: vscode.OutputChannel | undefined;
 /**
  * Extension API exposed to other extensions and AI agents
  */
-export interface VisionCraftAPI {
+export interface AIEyeAPI {
   /**
    * Get the webview bridge for direct interaction
    */
@@ -45,9 +45,9 @@ export interface VisionCraftAPI {
  * Extension activation
  * Called when the extension is activated (lazy activation via activationEvents)
  */
-export async function activate(context: vscode.ExtensionContext): Promise<VisionCraftAPI> {
-  outputChannel = vscode.window.createOutputChannel('VisionCraft');
-  outputChannel.appendLine('VisionCraft extension is activating...');
+export async function activate(context: vscode.ExtensionContext): Promise<AIEyeAPI> {
+  outputChannel = vscode.window.createOutputChannel('AI Eye');
+  outputChannel.appendLine('AI Eye extension is activating...');
 
   try {
     // Initialize managers
@@ -64,7 +64,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Vision
     outputChannel.appendLine(`✨ HTTP Bridge started on port ${bridgePort}`);
 
     // Store bridge port in context for MCP provider
-    await context.globalState.update('visioncraft.bridgePort', bridgePort);
+    await context.globalState.update('aieye.bridgePort', bridgePort);
 
     // Register commands
     registerCommands(context);
@@ -72,7 +72,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Vision
     // Register MCP server provider (for Claude Code / Copilot auto-discovery)
     registerMcpServerProvider(context);
 
-    outputChannel.appendLine('VisionCraft extension activated successfully!');
+    outputChannel.appendLine('AI Eye extension activated successfully!');
     outputChannel.appendLine('✨ v2 Embedded MCP Server initialized');
     outputChannel.appendLine('✨ v2.2 HTTP Bridge ready for embedded webview mode');
     outputChannel.appendLine(`Configuration: ${JSON.stringify(ConfigManager.getConfig(), null, 2)}`);
@@ -92,7 +92,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Vision
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     outputChannel.appendLine(`Failed to activate: ${errorMessage}`);
-    vscode.window.showErrorMessage(`VisionCraft failed to activate: ${errorMessage}`);
+    vscode.window.showErrorMessage(`AI Eye failed to activate: ${errorMessage}`);
     throw error;
   }
 }
@@ -103,7 +103,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Vision
 function registerCommands(context: vscode.ExtensionContext): void {
   // Command: Open Live Preview
   context.subscriptions.push(
-    vscode.commands.registerCommand('visioncraft.openPreview', async () => {
+    vscode.commands.registerCommand('aieye.openPreview', async () => {
       try {
         outputChannel?.appendLine('Opening preview...');
         await previewManager?.openPreview();
@@ -117,7 +117,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
   // Command: Start MCP Server
   context.subscriptions.push(
-    vscode.commands.registerCommand('visioncraft.startServer', async () => {
+    vscode.commands.registerCommand('aieye.startServer', async () => {
       try {
         outputChannel?.appendLine('Starting MCP server...');
         // MCP server will be implemented in Phase 5
@@ -134,7 +134,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
   // Command: Reload Preview
   context.subscriptions.push(
-    vscode.commands.registerCommand('visioncraft.reloadPreview', async () => {
+    vscode.commands.registerCommand('aieye.reloadPreview', async () => {
       try {
         outputChannel?.appendLine('Reloading preview...');
         previewManager?.reload();
@@ -149,7 +149,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
   // Command: Toggle CDP Mode
   context.subscriptions.push(
-    vscode.commands.registerCommand('visioncraft.toggleCDP', async () => {
+    vscode.commands.registerCommand('aieye.toggleCDP', async () => {
       const config = ConfigManager.getConfig();
       const newValue = !config.enableCDP;
       await ConfigManager.updateConfig('enableCDP', newValue);
@@ -160,7 +160,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
   // Command: Test Screenshot (v2)
   context.subscriptions.push(
-    vscode.commands.registerCommand('visioncraft.testScreenshot', async () => {
+    vscode.commands.registerCommand('aieye.testScreenshot', async () => {
       try {
         outputChannel?.appendLine('Testing v2 screenshot...');
 
@@ -189,7 +189,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
         const os = require('os');
 
         const tempDir = os.tmpdir();
-        const filename = `visioncraft-screenshot-${Date.now()}.jpg`;
+        const filename = `aieye-screenshot-${Date.now()}.jpg`;
         const filepath = path.join(tempDir, filename);
 
         // Extract base64 data (remove data:image/jpeg;base64, prefix)
@@ -222,7 +222,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
   // Command: Run V2 Comprehensive Tests
   context.subscriptions.push(
-    vscode.commands.registerCommand('visioncraft.runV2Tests', async () => {
+    vscode.commands.registerCommand('aieye.runV2Tests', async () => {
       try {
         outputChannel?.appendLine('='.repeat(60));
         outputChannel?.appendLine('STARTING V2 COMPREHENSIVE TESTS');
@@ -307,10 +307,10 @@ function registerCommands(context: vscode.ExtensionContext): void {
         outputChannel?.appendLine('\n--- Testing MCP Server Tools ---');
 
         const mcpTests = [
-          { name: 'visioncraft_get_current_url', args: {} },
-          { name: 'visioncraft_screenshot', args: { format: 'jpeg', quality: 80 } },
-          { name: 'visioncraft_find_elements', args: { query: 'div', mode: 'css' } },
-          { name: 'visioncraft_get_console_logs', args: {} },
+          { name: 'aieye_get_current_url', args: {} },
+          { name: 'aieye_screenshot', args: { format: 'jpeg', quality: 80 } },
+          { name: 'aieye_find_elements', args: { query: 'div', mode: 'css' } },
+          { name: 'aieye_get_console_logs', args: {} },
         ];
 
         for (const test of mcpTests) {
@@ -361,7 +361,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 /**
  * Register MCP server provider for auto-discovery by AI agents
  * This allows Claude Code, Cursor, and other MCP-aware agents to automatically
- * discover and use VisionCraft's tools without manual configuration
+ * discover and use AI Eye's tools without manual configuration
  */
 function registerMcpServerProvider(context: vscode.ExtensionContext): void {
   try {
@@ -369,23 +369,23 @@ function registerMcpServerProvider(context: vscode.ExtensionContext): void {
     if ('lm' in vscode && 'registerMcpServerDefinitionProvider' in (vscode as any).lm) {
       const emitter = new vscode.EventEmitter<void>();
 
-      (vscode as any).lm.registerMcpServerDefinitionProvider('visioncraft', {
+      (vscode as any).lm.registerMcpServerDefinitionProvider('aieye', {
         onDidChangeMcpServerDefinitions: emitter.event,
         async provideMcpServerDefinitions() {
           const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
-          const bridgePort = context.globalState.get<number>('visioncraft.bridgePort');
+          const bridgePort = context.globalState.get<number>('aieye.bridgePort');
 
           return [
             {
-              label: 'VisionCraft Live Preview Tools',
+              label: 'AI Eye Live Preview Tools',
               command: 'node',
               args: [context.asAbsolutePath('../mcp-server/dist/index.js')],
               env: {
                 // Enable webview mode if bridge is available
-                VISIONCRAFT_WEBVIEW_ENABLED: bridgePort ? 'true' : 'false',
-                VISIONCRAFT_BRIDGE_URL: bridgePort ? `http://localhost:${bridgePort}` : '',
+                AIEYE_WEBVIEW_ENABLED: bridgePort ? 'true' : 'false',
+                AIEYE_BRIDGE_URL: bridgePort ? `http://localhost:${bridgePort}` : '',
                 // Legacy mode (fallback to external browser)
-                VISIONCRAFT_URL: 'http://localhost:5175',
+                AIEYE_URL: 'http://localhost:5175',
                 WORKSPACE: workspaceRoot,
                 VSCODE_PID: String(process.pid),
               },
@@ -411,7 +411,7 @@ function registerMcpServerProvider(context: vscode.ExtensionContext): void {
  * Called when the extension is deactivated
  */
 export async function deactivate(): Promise<void> {
-  outputChannel?.appendLine('VisionCraft extension is deactivating...');
+  outputChannel?.appendLine('AI Eye extension is deactivating...');
 
   try {
     // Cleanup resources
@@ -432,7 +432,7 @@ export async function deactivate(): Promise<void> {
     //   cdpBridge = undefined;
     // }
 
-    outputChannel?.appendLine('VisionCraft extension deactivated successfully');
+    outputChannel?.appendLine('AI Eye extension deactivated successfully');
     outputChannel?.dispose();
     outputChannel = undefined;
   } catch (error) {

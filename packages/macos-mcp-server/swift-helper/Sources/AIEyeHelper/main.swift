@@ -1,7 +1,7 @@
 import Foundation
 
-/// VisionCraft macOS Helper
-/// Usage: visioncraft-macos-helper <command> --args '<json>'
+/// AI Eye macOS Helper
+/// Usage: aieye-macos-helper <command> --args '<json>'
 ///
 /// Commands:
 ///   screenshot      - Capture screen, window, or region
@@ -22,7 +22,7 @@ import Foundation
 let args = CommandLine.arguments
 
 guard args.count >= 2 else {
-    outputError("Usage: visioncraft-macos-helper <command> [--args '<json>']")
+    outputError("Usage: aieye-macos-helper <command> [--args '<json>']")
     exit(1)
 }
 

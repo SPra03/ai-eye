@@ -1,5 +1,5 @@
 /**
- * VisionCraft macOS MCP Server
+ * AI Eye macOS MCP Server
  * Gives AI agents visual access to the entire macOS screen via Accessibility framework.
  */
 
@@ -463,7 +463,7 @@ class MacOSMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: 'visioncraft-macos',
+        name: 'aieye-macos',
         version: '1.0.0',
       },
       {

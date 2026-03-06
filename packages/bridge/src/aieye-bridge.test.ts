@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 /**
  * Bridge Interface Tests
  *
- * The VisionCraft bridge runs in a browser environment with full DOM access
+ * The AI Eye bridge runs in a browser environment with full DOM access
  * and Vite HMR integration. These tests verify the expected interface contract.
  *
  * Full functional testing is done via:
@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
  * 2. Manual browser testing with the example app
  */
 
-describe('VisionCraft Bridge Interface', () => {
+describe('AI Eye Bridge Interface', () => {
   describe('API Contract', () => {
     it('should define expected inspection methods', () => {
       const expectedMethods = [
@@ -216,22 +216,22 @@ describe('VisionCraft Bridge Interface', () => {
   });
 
   describe('Source Mapping Attributes', () => {
-    it('should read data-vc-source attribute', () => {
-      const attr = 'data-vc-source';
+    it('should read data-ae-source attribute', () => {
+      const attr = 'data-ae-source';
 
-      expect(attr).toBe('data-vc-source');
+      expect(attr).toBe('data-ae-source');
     });
 
-    it('should read data-vc-line attribute', () => {
-      const attr = 'data-vc-line';
+    it('should read data-ae-line attribute', () => {
+      const attr = 'data-ae-line';
 
-      expect(attr).toBe('data-vc-line');
+      expect(attr).toBe('data-ae-line');
     });
 
-    it('should read data-vc-col attribute', () => {
-      const attr = 'data-vc-col';
+    it('should read data-ae-col attribute', () => {
+      const attr = 'data-ae-col';
 
-      expect(attr).toBe('data-vc-col');
+      expect(attr).toBe('data-ae-col');
     });
   });
 
@@ -336,10 +336,10 @@ describe('VisionCraft Bridge Interface', () => {
   });
 
   describe('Global Exposure', () => {
-    it('should expose API on window.__VISIONCRAFT__', () => {
-      const globalKey = '__VISIONCRAFT__';
+    it('should expose API on window.__AIEYE__', () => {
+      const globalKey = '__AIEYE__';
 
-      expect(globalKey).toBe('__VISIONCRAFT__');
+      expect(globalKey).toBe('__AIEYE__');
     });
 
     it('should have version 1.0.0', () => {
@@ -349,9 +349,9 @@ describe('VisionCraft Bridge Interface', () => {
     });
 
     it('should post ready message to parent window', () => {
-      const messageType = 'visioncraft:ready';
+      const messageType = 'aieye:ready';
 
-      expect(messageType).toBe('visioncraft:ready');
+      expect(messageType).toBe('aieye:ready');
     });
   });
 
@@ -383,8 +383,8 @@ describe('VisionCraft Bridge Interface', () => {
     });
 
     it('should walk up ancestors for source-mapped parent', () => {
-      // The bridge walks up via parentElement to find data-vc-source
-      const walkUpLogic = 'while (sourceEl && !sourceEl.getAttribute("data-vc-source")) sourceEl = sourceEl.parentElement';
+      // The bridge walks up via parentElement to find data-ae-source
+      const walkUpLogic = 'while (sourceEl && !sourceEl.getAttribute("data-ae-source")) sourceEl = sourceEl.parentElement';
 
       expect(walkUpLogic).toContain('parentElement');
     });
@@ -902,18 +902,18 @@ describe('VisionCraft Bridge Interface', () => {
         color: 'rgba(255, 0, 0, 0.3)',
         zIndex: '999999',
         pointerEvents: 'none',
-        dataAttribute: 'data-vc-highlight',
+        dataAttribute: 'data-ae-highlight',
       };
 
-      expect(highlightConfig.dataAttribute).toBe('data-vc-highlight');
+      expect(highlightConfig.dataAttribute).toBe('data-ae-highlight');
       expect(highlightConfig.zIndex).toBe('999999');
     });
 
     it('should remove overlays after screenshot capture', () => {
-      // Overlays have data-vc-highlight attribute for cleanup
-      const cleanupSelector = '[data-vc-highlight]';
+      // Overlays have data-ae-highlight attribute for cleanup
+      const cleanupSelector = '[data-ae-highlight]';
 
-      expect(cleanupSelector).toBe('[data-vc-highlight]');
+      expect(cleanupSelector).toBe('[data-ae-highlight]');
     });
 
     it('should support cropping via canvas drawImage', () => {
@@ -1102,12 +1102,12 @@ describe('VisionCraft Bridge Interface', () => {
  *
  * 2. Manual Browser Testing
  *    - Load example app with bridge injected
- *    - Interact with VisionCraft MCP tools
+ *    - Interact with AI Eye MCP tools
  *    - Verify source mapping attribution
  *    - Test click/type interactions
  *
  * 3. Example App Tests
  *    - Playwright tests that verify bridge presence
- *    - Test window.__VISIONCRAFT__ API in real browser
+ *    - Test window.__AIEYE__ API in real browser
  *    - Verify all methods work correctly
  */

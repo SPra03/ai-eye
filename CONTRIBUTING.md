@@ -1,6 +1,6 @@
-# Contributing to VisionCraft
+# Contributing to AI Eye
 
-Thank you for your interest in contributing to VisionCraft! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to AI Eye! This document provides guidelines and instructions for contributing.
 
 ## Table of Contents
 
@@ -94,7 +94,7 @@ Follow the [Getting Started Guide](./docs/GETTING-STARTED.md#claude-desktop-inte
 ## Project Structure
 
 ```
-visioncraft/
+ai-eye/
 ├── packages/
 │   ├── extension/          # VS Code extension (future)
 │   ├── mcp-server/         # MCP server for AI agents
@@ -583,13 +583,13 @@ Create release on GitHub with:
 
 - **Questions**: Open a [Discussion](https://github.com/SPra03/ai-eye/discussions)
 - **Bugs**: Open an [Issue](https://github.com/SPra03/ai-eye/issues)
-- **Security**: Email security@visioncraft.dev (do not open public issue)
+- **Security**: Email security@ai-eye.dev (do not open public issue)
 
 ---
 
 ## License
 
-By contributing to VisionCraft, you agree that your contributions will be licensed under the MIT License.
+By contributing to AI Eye, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
@@ -602,4 +602,4 @@ This Contributing Guide was inspired by:
 
 ---
 
-Thank you for contributing to VisionCraft! 🚀
+Thank you for contributing to AI Eye! 🚀

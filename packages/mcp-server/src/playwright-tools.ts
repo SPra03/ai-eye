@@ -3,8 +3,8 @@
  * Each function accepts a Playwright Page and returns the same data shapes
  * as the bridge methods, using page.evaluate() with vanilla JS.
  *
- * Source mapping: When the @visioncraft/vite-plugin is active, elements have
- * data-vc-source, data-vc-line, data-vc-col attributes. These functions read
+ * Source mapping: When the @ai-eye/vite-plugin is active, elements have
+ * data-ae-source, data-ae-line, data-ae-col attributes. These functions read
  * those attributes (walking up to the nearest source-mapped ancestor if needed).
  */
 
@@ -35,16 +35,16 @@ export async function inspectElement(page: Page, selector: string) {
 
     // Walk up to find nearest source-mapped ancestor
     let sourceEl: Element | null = el;
-    while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+    while (sourceEl && !sourceEl.getAttribute('data-ae-source')) {
       sourceEl = sourceEl.parentElement;
     }
 
     return {
       tagName: el.tagName.toLowerCase(),
       selector: generatedSelector,
-      sourceFile: sourceEl?.getAttribute('data-vc-source') || null,
-      sourceLine: sourceEl?.getAttribute('data-vc-line') || null,
-      sourceCol: sourceEl?.getAttribute('data-vc-col') || null,
+      sourceFile: sourceEl?.getAttribute('data-ae-source') || null,
+      sourceLine: sourceEl?.getAttribute('data-ae-line') || null,
+      sourceCol: sourceEl?.getAttribute('data-ae-col') || null,
       boundingBox: {
         x: Math.round(rect.x),
         y: Math.round(rect.y),
@@ -95,16 +95,16 @@ export async function elementAtPoint(page: Page, x: number, y: number) {
 
     // Walk up to find nearest source-mapped ancestor
     let sourceEl: Element | null = el;
-    while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+    while (sourceEl && !sourceEl.getAttribute('data-ae-source')) {
       sourceEl = sourceEl.parentElement;
     }
 
     return {
       tagName: el.tagName.toLowerCase(),
       selector,
-      sourceFile: sourceEl?.getAttribute('data-vc-source') || null,
-      sourceLine: sourceEl?.getAttribute('data-vc-line') || null,
-      sourceCol: sourceEl?.getAttribute('data-vc-col') || null,
+      sourceFile: sourceEl?.getAttribute('data-ae-source') || null,
+      sourceLine: sourceEl?.getAttribute('data-ae-line') || null,
+      sourceCol: sourceEl?.getAttribute('data-ae-col') || null,
       boundingBox: {
         x: Math.round(rect.x),
         y: Math.round(rect.y),
@@ -166,16 +166,16 @@ export async function batchInspect(
 
         // Walk up to find nearest source-mapped ancestor
         let sourceEl: Element | null = el;
-        while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+        while (sourceEl && !sourceEl.getAttribute('data-ae-source')) {
           sourceEl = sourceEl.parentElement;
         }
 
         const result: any = {
           tagName: el.tagName.toLowerCase(),
           selector,
-          sourceFile: sourceEl?.getAttribute('data-vc-source') || null,
-          sourceLine: sourceEl?.getAttribute('data-vc-line') || null,
-          sourceCol: sourceEl?.getAttribute('data-vc-col') || null,
+          sourceFile: sourceEl?.getAttribute('data-ae-source') || null,
+          sourceLine: sourceEl?.getAttribute('data-ae-line') || null,
+          sourceCol: sourceEl?.getAttribute('data-ae-col') || null,
           boundingBox: {
             x: Math.round(rect.x),
             y: Math.round(rect.y),
@@ -303,7 +303,7 @@ export async function findElements(
 
         // Walk up to find nearest source-mapped ancestor
         let sourceEl: Element | null = el;
-        while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+        while (sourceEl && !sourceEl.getAttribute('data-ae-source')) {
           sourceEl = sourceEl.parentElement;
         }
 
@@ -317,9 +317,9 @@ export async function findElements(
             width: Math.round(rect.width),
             height: Math.round(rect.height),
           },
-          sourceFile: sourceEl?.getAttribute('data-vc-source') || null,
-          sourceLine: sourceEl?.getAttribute('data-vc-line') || null,
-          sourceCol: sourceEl?.getAttribute('data-vc-col') || null,
+          sourceFile: sourceEl?.getAttribute('data-ae-source') || null,
+          sourceLine: sourceEl?.getAttribute('data-ae-line') || null,
+          sourceCol: sourceEl?.getAttribute('data-ae-col') || null,
         });
       }
 
@@ -342,7 +342,7 @@ export async function getStructure(page: Page, maxDepth: number = 5) {
         selector,
       };
 
-      const source = el.getAttribute('data-vc-source');
+      const source = el.getAttribute('data-ae-source');
       if (source) node.source = source;
 
       if (el.id) node.id = el.id;
@@ -603,20 +603,20 @@ export async function getSource(page: Page, selector: string) {
 
     // Walk up to find nearest source-mapped ancestor
     let sourceEl: Element | null = el;
-    while (sourceEl && !sourceEl.getAttribute('data-vc-source')) {
+    while (sourceEl && !sourceEl.getAttribute('data-ae-source')) {
       sourceEl = sourceEl.parentElement;
     }
 
-    const file = sourceEl?.getAttribute('data-vc-source') || null;
-    const line = sourceEl?.getAttribute('data-vc-line') || null;
-    const col = sourceEl?.getAttribute('data-vc-col') || null;
+    const file = sourceEl?.getAttribute('data-ae-source') || null;
+    const line = sourceEl?.getAttribute('data-ae-line') || null;
+    const col = sourceEl?.getAttribute('data-ae-col') || null;
 
     if (!file) {
       return {
         error:
           'No source mapping found for this element. ' +
-          'Source mapping requires the @visioncraft/vite-plugin to inject ' +
-          'data-vc-source attributes during development builds.',
+          'Source mapping requires the @ai-eye/vite-plugin to inject ' +
+          'data-ae-source attributes during development builds.',
       };
     }
 

@@ -1,5 +1,5 @@
 /**
- * VisionCraft MCP Server
+ * AI Eye MCP Server
  * Exposes browser automation and inspection tools to AI agents
  */
 
@@ -33,7 +33,7 @@ async function loadDiffDeps() {
 // Tool schemas
 const tools: Tool[] = [
   {
-    name: 'visioncraft_screenshot',
+    name: 'aieye_screenshot',
     description: 'Capture a screenshot of the current page. Returns a base64-encoded image data URL. Optionally crop to a specific element and/or highlight elements with colored overlays.',
     inputSchema: {
       type: 'object',
@@ -70,7 +70,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_element_at_point',
+    name: 'aieye_element_at_point',
     description: 'Identify the element at a specific pixel coordinate on the page. Returns the same detailed information as inspect_element (tag, source location, bounding box, styles, selector). Useful for going from "what\'s at this pixel?" to source code without needing to guess a CSS selector.',
     inputSchema: {
       type: 'object',
@@ -88,7 +88,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_inspect_element',
+    name: 'aieye_inspect_element',
     description: 'Inspect an element and get detailed information including source location, styles, and bounding box. Use CSS selectors to target elements.',
     inputSchema: {
       type: 'object',
@@ -102,7 +102,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_source',
+    name: 'aieye_get_source',
     description: 'Get the source file location for an element. Returns the file path, line number, and column number where the element is defined in the source code.',
     inputSchema: {
       type: 'object',
@@ -116,7 +116,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_click',
+    name: 'aieye_click',
     description: 'Click an element on the page. Use CSS selectors to target the element.',
     inputSchema: {
       type: 'object',
@@ -130,7 +130,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_type',
+    name: 'aieye_type',
     description: 'Type text into an input or textarea element. Triggers input and change events.',
     inputSchema: {
       type: 'object',
@@ -148,7 +148,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_scroll',
+    name: 'aieye_scroll',
     description: 'Scroll the page to specific coordinates.',
     inputSchema: {
       type: 'object',
@@ -167,7 +167,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_batch_inspect',
+    name: 'aieye_batch_inspect',
     description: 'Inspect multiple elements at once. Provide an array of CSS selectors and/or a rectangular region to find all source-mapped elements. Reduces multiple serial inspect calls to a single request.',
     inputSchema: {
       type: 'object',
@@ -198,7 +198,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_hover',
+    name: 'aieye_hover',
     description: 'Hover over an element to trigger CSS :hover states, tooltips, dropdown menus, and other hover-activated UI. Use CSS selectors to target the element.',
     inputSchema: {
       type: 'object',
@@ -212,7 +212,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_find_elements',
+    name: 'aieye_find_elements',
     description: 'Find elements on the page by text content, ARIA role, or CSS selector. Returns an array of matching elements with their selectors and source locations.',
     inputSchema: {
       type: 'object',
@@ -237,7 +237,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_structure',
+    name: 'aieye_get_structure',
     description: 'Get the page structure as a tree of elements with source mapping information. Useful for understanding the DOM hierarchy.',
     inputSchema: {
       type: 'object',
@@ -254,7 +254,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_css_source',
+    name: 'aieye_get_css_source',
     description: 'Trace which CSS rules apply to an element. Returns matched CSS rules with their selectors and source files. Useful for understanding where styles come from.',
     inputSchema: {
       type: 'object',
@@ -273,7 +273,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_set_viewport',
+    name: 'aieye_set_viewport',
     description: 'Set the viewport size for responsive design testing. Use presets for common device sizes or specify custom dimensions.',
     inputSchema: {
       type: 'object',
@@ -301,7 +301,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_console_logs',
+    name: 'aieye_get_console_logs',
     description: 'Get captured console logs from the page. Can filter by level (log, warn, error, info) and limit the number of results.',
     inputSchema: {
       type: 'object',
@@ -321,7 +321,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_clear_console_logs',
+    name: 'aieye_clear_console_logs',
     description: 'Clear all captured console logs.',
     inputSchema: {
       type: 'object',
@@ -330,7 +330,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_network_requests',
+    name: 'aieye_get_network_requests',
     description: 'Get captured network requests (fetch and XHR). Useful for debugging API calls, seeing failed requests, and understanding data flow.',
     inputSchema: {
       type: 'object',
@@ -355,7 +355,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_clear_network_requests',
+    name: 'aieye_clear_network_requests',
     description: 'Clear all captured network requests.',
     inputSchema: {
       type: 'object',
@@ -364,7 +364,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_hmr_status',
+    name: 'aieye_get_hmr_status',
     description: 'Get the Hot Module Replacement (HMR) status, including connection state, recent errors, update history, and average latency.',
     inputSchema: {
       type: 'object',
@@ -373,7 +373,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_clear_hmr_errors',
+    name: 'aieye_clear_hmr_errors',
     description: 'Clear all captured HMR errors. Useful after fixing issues to reset error state.',
     inputSchema: {
       type: 'object',
@@ -382,8 +382,8 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_visual_diff',
-    description: 'Compare the current page to the last screenshot taken. Highlights changed pixels and returns a diff image plus summary statistics. Call visioncraft_screenshot first to establish a baseline, then make changes and call this to see what changed.',
+    name: 'aieye_visual_diff',
+    description: 'Compare the current page to the last screenshot taken. Highlights changed pixels and returns a diff image plus summary statistics. Call aieye_screenshot first to establish a baseline, then make changes and call this to see what changed.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -403,7 +403,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_navigate',
+    name: 'aieye_navigate',
     description: 'Navigate to a different URL in the browser.',
     inputSchema: {
       type: 'object',
@@ -417,7 +417,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_current_url',
+    name: 'aieye_get_current_url',
     description: 'Get the current URL of the browser.',
     inputSchema: {
       type: 'object',
@@ -426,7 +426,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_style_diff',
+    name: 'aieye_style_diff',
     description: 'Capture computed styles before and after an action (hover, click, focus, addClass, etc.) and return only the changed properties. Useful for debugging CSS transitions and interactive states. Note: JS mouseenter/mouseover events do NOT trigger CSS :hover pseudo-class — use addClass/toggleClass for reliable style comparison, or use Playwright mode for real cursor hover.',
     inputSchema: {
       type: 'object',
@@ -454,7 +454,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_component_tree',
+    name: 'aieye_get_component_tree',
     description: 'Show the React, Vue, or Svelte component hierarchy with component names, props, and state. Walks framework-specific internals (React Fiber, Vue instance tree) to provide a developer-friendly view instead of raw DOM.',
     inputSchema: {
       type: 'object',
@@ -481,7 +481,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_audit_accessibility',
+    name: 'aieye_audit_accessibility',
     description: 'Run a WCAG accessibility audit using axe-core (same engine as Chrome DevTools Lighthouse). Returns violations with impact level, description, help URL, and affected elements.',
     inputSchema: {
       type: 'object',
@@ -501,7 +501,7 @@ const tools: Tool[] = [
   },
   // v6 new tools
   {
-    name: 'visioncraft_measure_element',
+    name: 'aieye_measure_element',
     description: 'Measure the distance between two elements. Returns gap distances (top, right, bottom, left, horizontal, vertical) and overlap detection. Replaces manual bounding-box math from two inspect_element calls.',
     inputSchema: {
       type: 'object',
@@ -519,7 +519,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_measure_spacing',
+    name: 'aieye_measure_spacing',
     description: 'Get the padding, margin, border-width, and gap of an element as clean numeric pixel values. More precise than get_css_source which returns shorthand CSS text.',
     inputSchema: {
       type: 'object',
@@ -533,7 +533,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_computed_layout',
+    name: 'aieye_get_computed_layout',
     description: 'Get flex/grid layout properties and children sizes for a container element. Returns display, flexDirection, justifyContent, alignItems, gap, gridTemplateColumns, and child element dimensions.',
     inputSchema: {
       type: 'object',
@@ -547,7 +547,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_diff_against_reference',
+    name: 'aieye_diff_against_reference',
     description: 'Compare the current page (or a specific element) against a reference PNG image file. Returns similarity percentage, changed pixel count, and a visual diff image. Use this to compare rendered output against a design mockup or Figma export.',
     inputSchema: {
       type: 'object',
@@ -572,7 +572,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_get_palette',
+    name: 'aieye_get_palette',
     description: 'Extract the color palette from the page or a specific element. Returns colors sorted by frequency with hex values, RGB, occurrence count, and which CSS properties use each color.',
     inputSchema: {
       type: 'object',
@@ -591,7 +591,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_snapshot',
+    name: 'aieye_snapshot',
     description: 'Capture a screenshot, inspect elements, and optionally run accessibility audit in a single call. Replaces 4-6 individual tool calls with one request. Returns screenshot image, element inspection results, and optional audit.',
     inputSchema: {
       type: 'object',
@@ -616,7 +616,7 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'visioncraft_wait_for_hmr',
+    name: 'aieye_wait_for_hmr',
     description: 'Wait for a Hot Module Replacement update to complete before taking screenshots or inspecting elements. Polls HMR status until a new update is detected or timeout is reached.',
     inputSchema: {
       type: 'object',
@@ -635,7 +635,7 @@ const tools: Tool[] = [
 /**
  * Main server implementation
  */
-class VisionCraftMCPServer {
+class AIEyeMCPServer {
   private server: Server;
   private isWebviewMode: boolean;
   private webviewClient: WebviewClient | null = null;
@@ -649,7 +649,7 @@ class VisionCraftMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: 'visioncraft-mcp-server',
+        name: 'aieye-mcp-server',
         version: '1.0.0',
       },
       {
@@ -660,12 +660,12 @@ class VisionCraftMCPServer {
     );
 
     // Check if running in webview mode
-    this.isWebviewMode = process.env.VISIONCRAFT_WEBVIEW_ENABLED === 'true';
+    this.isWebviewMode = process.env.AIEYE_WEBVIEW_ENABLED === 'true';
 
     if (this.isWebviewMode) {
-      const bridgeUrl = process.env.VISIONCRAFT_BRIDGE_URL;
+      const bridgeUrl = process.env.AIEYE_BRIDGE_URL;
       if (!bridgeUrl) {
-        console.error('[MCP] VISIONCRAFT_WEBVIEW_ENABLED is true but VISIONCRAFT_BRIDGE_URL is not set');
+        console.error('[MCP] AIEYE_WEBVIEW_ENABLED is true but AIEYE_BRIDGE_URL is not set');
         this.isWebviewMode = false;
         this.currentMode = 'browser';
       } else {
@@ -694,7 +694,7 @@ class VisionCraftMCPServer {
       return this.webviewClient;
     }
     return getBrowserClient(url, {
-      headless: process.env.VISIONCRAFT_HEADLESS === 'true',
+      headless: process.env.AIEYE_HEADLESS === 'true',
     });
   }
 
@@ -726,7 +726,7 @@ class VisionCraftMCPServer {
         mode: 'playwright-launch' as any,
         enableFallback: false,
         skipBridgeCheck: true,
-        headless: process.env.VISIONCRAFT_HEADLESS === 'true',
+        headless: process.env.AIEYE_HEADLESS === 'true',
       });
     }
     await this.browserClient.ensureConnected();
@@ -740,7 +740,7 @@ class VisionCraftMCPServer {
   private getPlaywrightPage(): Page {
     const page = this.browserClient?.page;
     if (!page) {
-      throw new Error('Browser not connected. Call visioncraft_navigate with an external URL first.');
+      throw new Error('Browser not connected. Call aieye_navigate with an external URL first.');
     }
     return page;
   }
@@ -884,7 +884,7 @@ class VisionCraftMCPServer {
         const client = this.getClient(args?.url as string);
 
         switch (name) {
-          case 'visioncraft_screenshot': {
+          case 'aieye_screenshot': {
             const format = (args?.format as 'jpeg' | 'png') || 'jpeg';
             const quality = (args?.quality as number) || 80;
             const selector = args?.selector as string | undefined;
@@ -943,7 +943,7 @@ class VisionCraftMCPServer {
                       const rect = el.getBoundingClientRect();
                       const overlay = document.createElement('div');
                       overlay.style.cssText = `position:absolute;left:${rect.left+window.scrollX}px;top:${rect.top+window.scrollY}px;width:${rect.width}px;height:${rect.height}px;background:${color};pointer-events:none;z-index:999999;`;
-                      overlay.setAttribute('data-vc-highlight', 'true');
+                      overlay.setAttribute('data-ae-highlight', 'true');
                       document.body.appendChild(overlay);
                     });
                   }
@@ -968,7 +968,7 @@ class VisionCraftMCPServer {
               // Remove highlight overlays
               if (highlight && highlight.length > 0) {
                 await page.evaluate(() => {
-                  document.querySelectorAll('[data-vc-highlight]').forEach((el: any) => el.remove());
+                  document.querySelectorAll('[data-ae-highlight]').forEach((el: any) => el.remove());
                 });
               }
 
@@ -998,7 +998,7 @@ class VisionCraftMCPServer {
             }
           }
 
-          case 'visioncraft_element_at_point': {
+          case 'aieye_element_at_point': {
             const x = args?.x as number;
             const y = args?.y as number;
             if (this.currentMode === 'browser') {
@@ -1009,7 +1009,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_inspect_element': {
+          case 'aieye_inspect_element': {
             const selector = args?.selector as string;
             if (this.currentMode === 'browser') {
               const result = await playwrightTools.inspectElement(this.getPlaywrightPage(), selector);
@@ -1019,7 +1019,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_get_source': {
+          case 'aieye_get_source': {
             const selector = args?.selector as string;
             if (this.currentMode === 'browser') {
               const result = await playwrightTools.getSource(this.getPlaywrightPage(), selector);
@@ -1029,7 +1029,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_click': {
+          case 'aieye_click': {
             const selector = args?.selector as string;
             if (this.currentMode === 'browser') {
               const result = await playwrightTools.click(this.getPlaywrightPage(), selector);
@@ -1039,7 +1039,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_type': {
+          case 'aieye_type': {
             const selector = args?.selector as string;
             const text = args?.text as string;
             if (this.currentMode === 'browser') {
@@ -1050,7 +1050,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_scroll': {
+          case 'aieye_scroll': {
             const x = (args?.x as number) || 0;
             const y = args?.y as number;
             if (this.currentMode === 'browser') {
@@ -1061,7 +1061,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_batch_inspect': {
+          case 'aieye_batch_inspect': {
             const selectors = args?.selectors as string[] | undefined;
             const region = args?.region as { x: number; y: number; width: number; height: number } | undefined;
             const includeStyles = (args?.includeStyles as boolean) || false;
@@ -1073,7 +1073,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_hover': {
+          case 'aieye_hover': {
             const selector = args?.selector as string;
             if (this.currentMode === 'browser') {
               const result = await playwrightTools.hover(this.getPlaywrightPage(), selector);
@@ -1083,7 +1083,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_find_elements': {
+          case 'aieye_find_elements': {
             const query = args?.query as string;
             const mode = (args?.mode as 'text' | 'role' | 'css') || 'css';
             const includeSource = (args?.includeSource as boolean) || false;
@@ -1095,7 +1095,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_get_structure': {
+          case 'aieye_get_structure': {
             const maxDepth = (args?.maxDepth as number) || 5;
             if (this.currentMode === 'browser') {
               const result = await playwrightTools.getStructure(this.getPlaywrightPage(), maxDepth);
@@ -1105,7 +1105,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_get_css_source': {
+          case 'aieye_get_css_source': {
             const selector = args?.selector as string;
             const properties = args?.properties as string[] | undefined;
             if (this.currentMode === 'browser') {
@@ -1116,7 +1116,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_set_viewport': {
+          case 'aieye_set_viewport': {
             const presets: Record<string, { width: number; height: number }> = {
               mobile: { width: 375, height: 812 },
               mobile_landscape: { width: 812, height: 375 },
@@ -1155,7 +1155,7 @@ class VisionCraftMCPServer {
             }
           }
 
-          case 'visioncraft_get_console_logs': {
+          case 'aieye_get_console_logs': {
             const level = args?.level as string | undefined;
             const limit = args?.limit as number | undefined;
             if (this.currentMode === 'browser') {
@@ -1166,7 +1166,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_clear_console_logs': {
+          case 'aieye_clear_console_logs': {
             if (this.currentMode === 'browser') {
               this.consoleLogs = [];
               return { content: [{ type: 'text', text: 'Console logs cleared' }] };
@@ -1175,7 +1175,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: 'Console logs cleared' }] };
           }
 
-          case 'visioncraft_get_network_requests': {
+          case 'aieye_get_network_requests': {
             const filter = args?.filter as { urlPattern?: string; method?: string; status?: number; hasError?: boolean } | undefined;
             const limit = (args?.limit as number) || 50;
             if (this.currentMode === 'browser') {
@@ -1186,7 +1186,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_clear_network_requests': {
+          case 'aieye_clear_network_requests': {
             if (this.currentMode === 'browser') {
               this.networkRequests = [];
               return { content: [{ type: 'text', text: 'Network requests cleared' }] };
@@ -1195,7 +1195,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: 'Network requests cleared' }] };
           }
 
-          case 'visioncraft_get_hmr_status': {
+          case 'aieye_get_hmr_status': {
             if (this.currentMode === 'browser') {
               const result = playwrightTools.getHMRStatus();
               return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
@@ -1204,7 +1204,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_clear_hmr_errors': {
+          case 'aieye_clear_hmr_errors': {
             if (this.currentMode === 'browser') {
               const result = playwrightTools.clearHMRErrors();
               return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
@@ -1213,9 +1213,9 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: 'HMR errors cleared' }] };
           }
 
-          case 'visioncraft_visual_diff': {
+          case 'aieye_visual_diff': {
             if (!this.lastScreenshotBuffer) {
-              throw new Error('No previous screenshot to compare. Call visioncraft_screenshot first to establish a baseline.');
+              throw new Error('No previous screenshot to compare. Call aieye_screenshot first to establish a baseline.');
             }
 
             const threshold = (args?.threshold as number) || 30;
@@ -1310,7 +1310,7 @@ class VisionCraftMCPServer {
             };
           }
 
-          case 'visioncraft_navigate': {
+          case 'aieye_navigate': {
             const url = args?.url as string;
             const previousMode = this.currentMode;
 
@@ -1345,7 +1345,7 @@ class VisionCraftMCPServer {
             }
           }
 
-          case 'visioncraft_get_current_url': {
+          case 'aieye_get_current_url': {
             if (this.currentMode === 'browser') {
               const url = await playwrightTools.getCurrentUrl(this.getPlaywrightPage());
               return { content: [{ type: 'text', text: url }] };
@@ -1362,7 +1362,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: url }] };
           }
 
-          case 'visioncraft_style_diff': {
+          case 'aieye_style_diff': {
             const selector = args?.selector as string;
             const action = args?.action as string;
             const actionArg = args?.actionArg as string | undefined;
@@ -1375,7 +1375,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_get_component_tree': {
+          case 'aieye_get_component_tree': {
             const selector = args?.selector as string | undefined;
             const maxDepth = (args?.maxDepth as number) || 10;
             const framework = (args?.framework as string) || 'auto';
@@ -1387,7 +1387,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_audit_accessibility': {
+          case 'aieye_audit_accessibility': {
             const selector = args?.selector as string | undefined;
             const tags = args?.tags as string[] | undefined;
             if (this.currentMode === 'browser') {
@@ -1400,7 +1400,7 @@ class VisionCraftMCPServer {
 
           // v6 new tool handlers
 
-          case 'visioncraft_measure_element': {
+          case 'aieye_measure_element': {
             const selectorA = args?.selectorA as string;
             const selectorB = args?.selectorB as string;
             if (this.currentMode === 'browser') {
@@ -1411,7 +1411,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_measure_spacing': {
+          case 'aieye_measure_spacing': {
             const selector = args?.selector as string;
             if (this.currentMode === 'browser') {
               const result = await playwrightTools.measureSpacing(this.getPlaywrightPage(), selector);
@@ -1421,7 +1421,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_get_computed_layout': {
+          case 'aieye_get_computed_layout': {
             const selector = args?.selector as string;
             if (this.currentMode === 'browser') {
               const result = await playwrightTools.getComputedLayout(this.getPlaywrightPage(), selector);
@@ -1431,7 +1431,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_diff_against_reference': {
+          case 'aieye_diff_against_reference': {
             const referencePath = args?.referencePath as string;
             const refSelector = args?.selector as string | undefined;
             const tolerance = (args?.tolerance as number) || 30;
@@ -1528,7 +1528,7 @@ class VisionCraftMCPServer {
             };
           }
 
-          case 'visioncraft_get_palette': {
+          case 'aieye_get_palette': {
             const selector = args?.selector as string | undefined;
             const limit = (args?.limit as number) || 20;
             if (this.currentMode === 'browser') {
@@ -1539,7 +1539,7 @@ class VisionCraftMCPServer {
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
           }
 
-          case 'visioncraft_snapshot': {
+          case 'aieye_snapshot': {
             const selectors = args?.selectors as string[] | undefined;
             const includeScreenshot = args?.screenshot !== false;
             const includeAudit = (args?.audit as boolean) || false;
@@ -1611,7 +1611,7 @@ class VisionCraftMCPServer {
             return { content };
           }
 
-          case 'visioncraft_wait_for_hmr': {
+          case 'aieye_wait_for_hmr': {
             const timeout = (args?.timeout as number) || 10000;
             if (this.currentMode === 'browser') {
               const result = playwrightTools.waitForHMR();
@@ -1642,7 +1642,7 @@ class VisionCraftMCPServer {
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('[MCP] VisionCraft MCP Server running on stdio');
+    console.error('[MCP] AI Eye MCP Server running on stdio');
   }
 }
 
@@ -1652,7 +1652,7 @@ export { CDPClient } from './cdp-client.js';
 export { ConnectionMode, ConnectionConfig } from './connection-mode.js';
 
 // Start the server
-const server = new VisionCraftMCPServer();
+const server = new AIEyeMCPServer();
 server.run().catch((error) => {
   console.error('[MCP] Fatal error:', error);
   process.exit(1);

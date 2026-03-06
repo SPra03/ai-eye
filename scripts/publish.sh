@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# VisionCraft Publishing Script
+# AI Eye Publishing Script
 # Publishes all packages to NPM
 
 set -e  # Exit on error
 
-echo "🚀 VisionCraft Publishing Script"
+echo "🚀 AI Eye Publishing Script"
 echo "================================"
 echo ""
 
@@ -74,23 +74,27 @@ echo "📤 Publishing packages..."
 echo ""
 
 # Publish Babel plugin
-echo "Publishing @visioncraft/babel-plugin..."
+echo "Publishing @ai-eye/babel-plugin..."
 cd packages/babel-plugin
 npm publish --access public
 cd ../..
-echo "✅ @visioncraft/babel-plugin published"
+echo "✅ @ai-eye/babel-plugin published"
 echo ""
 
 # Publish Vite plugin
-echo "Publishing @visioncraft/vite-plugin..."
+echo "Publishing @ai-eye/vite-plugin..."
 cd packages/vite-plugin
 npm publish --access public
 cd ../..
-echo "✅ @visioncraft/vite-plugin published"
+echo "✅ @ai-eye/vite-plugin published"
 echo ""
 
-# Note: MCP server is not published to NPM (users clone repo)
-echo "ℹ️  Skipping @visioncraft/mcp-server (not published to NPM)"
+# Publish MCP server
+echo "Publishing aieye..."
+cd packages/mcp-server
+npm publish --access public
+cd ../..
+echo "✅ aieye published"
 echo ""
 
 # Create git tag
@@ -107,6 +111,7 @@ echo "Next steps:"
 echo "1. Create GitHub release: https://github.com/SPra03/ai-eye/releases/new"
 echo "2. Add release notes from CHANGELOG.md"
 echo "3. Verify packages on NPM:"
-echo "   - https://www.npmjs.com/package/@visioncraft/babel-plugin"
-echo "   - https://www.npmjs.com/package/@visioncraft/vite-plugin"
+echo "   - https://www.npmjs.com/package/@ai-eye/babel-plugin"
+echo "   - https://www.npmjs.com/package/@ai-eye/vite-plugin"
+echo "   - https://www.npmjs.com/package/aieye"
 echo ""

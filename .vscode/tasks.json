@@ -4,7 +4,7 @@
     {
       "label": "watch",
       "type": "shell",
-      "command": "npx pnpm --filter @visioncraft/extension dev",
+      "command": "npx pnpm --filter ai-eye-extension dev",
       "problemMatcher": {
         "owner": "typescript",
         "pattern": {
@@ -33,7 +33,7 @@
     {
       "label": "npm: dev - packages/extension",
       "type": "shell",
-      "command": "npx pnpm --filter @visioncraft/extension dev",
+      "command": "npx pnpm --filter ai-eye-extension dev",
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "presentation": {
@@ -43,7 +43,7 @@
     {
       "label": "npm: build - packages/extension",
       "type": "shell",
-      "command": "npx pnpm --filter @visioncraft/extension build",
+      "command": "npx pnpm --filter ai-eye-extension build",
       "problemMatcher": "$tsc",
       "group": "build"
     },

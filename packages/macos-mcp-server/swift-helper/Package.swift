@@ -2,15 +2,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "visioncraft-macos-helper",
+    name: "aieye-macos-helper",
     platforms: [
         .macOS(.v13)
     ],
     targets: [
         .executableTarget(
-            name: "visioncraft-macos-helper",
+            name: "aieye-macos-helper",
             dependencies: [],
-            path: "Sources/VisionCraftHelper",
+            path: "Sources/AIEyeHelper",
             linkerSettings: [
                 .linkedFramework("ApplicationServices"),
                 .linkedFramework("AppKit"),

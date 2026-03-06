@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Simple HTTP server for testing VisionCraft preview
+ * Simple HTTP server for testing AI Eye preview
  * Run with: node server.js
  */
 
@@ -69,14 +69,14 @@ function startServer(port, tries = 0) {
   server.listen(port, HOST, () => {
     console.log('');
     console.log('╔═══════════════════════════════════════════════╗');
-    console.log('║   VisionCraft Test Server                     ║');
+    console.log('║   AI Eye Test Server                     ║');
     console.log('╚═══════════════════════════════════════════════╝');
     console.log('');
     console.log(`  Server running at: http://${HOST}:${port}`);
     console.log('');
-    console.log('  To test VisionCraft preview:');
+    console.log('  To test AI Eye preview:');
     console.log('  1. Press F5 to launch Extension Development Host');
-    console.log('  2. Run: VisionCraft: Open Live Preview');
+    console.log('  2. Run: AI Eye: Open Live Preview');
     if (port !== 5173) {
       console.log(`  3. Change URL to: http://${HOST}:${port}`);
       console.log('  4. The test page should appear in the preview!');

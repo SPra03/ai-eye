@@ -43,7 +43,7 @@ export class WebviewBridge {
   async isReady(): Promise<boolean> {
     try {
       const result = await this.previewManager.evaluate(
-        'typeof window.__VISIONCRAFT__ !== "undefined" && window.__VISIONCRAFT__.ready === true',
+        'typeof window.__AIEYE__ !== "undefined" && window.__AIEYE__.ready === true',
         2000
       );
       return result === true;
@@ -69,12 +69,12 @@ export class WebviewBridge {
   }
 
   /**
-   * Check if VisionCraft bridge is available in the webview
+   * Check if AI Eye bridge is available in the webview
    */
   async isBridgeAvailable(): Promise<boolean> {
     try {
       const result = await this.previewManager.evaluate(
-        'typeof window.__VISIONCRAFT__ !== "undefined" && window.__VISIONCRAFT__.ready === true',
+        'typeof window.__AIEYE__ !== "undefined" && window.__AIEYE__.ready === true',
         2000
       );
       return result === true;
@@ -113,7 +113,7 @@ export class WebviewBridge {
       // Use bridge captureScreenshot with highlight/crop support
       const selectorArg = selector ? `'${this.escapeSelector(selector)}'` : 'undefined';
       const highlightArg = highlight ? JSON.stringify(highlight) : 'undefined';
-      const screenshotCode = `window.__VISIONCRAFT__.captureScreenshot('${format}', ${quality}, ${selectorArg}, ${highlightArg}, '${highlightColor}')`;
+      const screenshotCode = `window.__AIEYE__.captureScreenshot('${format}', ${quality}, ${selectorArg}, ${highlightArg}, '${highlightColor}')`;
 
       try {
         const dataUrl = await this.previewManager.evaluate(screenshotCode, 15000);
@@ -154,7 +154,7 @@ export class WebviewBridge {
     const bridgeAvailable = await this.isBridgeAvailable();
 
     if (bridgeAvailable) {
-      const code = `window.__VISIONCRAFT__.elementAtPoint(${x}, ${y})`;
+      const code = `window.__AIEYE__.elementAtPoint(${x}, ${y})`;
       const result = await this.previewManager.evaluate(code, 5000);
       if (result) {
         return result;
@@ -201,12 +201,12 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('Batch inspect requires VisionCraft bridge');
+      throw new Error('Batch inspect requires AI Eye bridge');
     }
 
     const selectorsArg = selectors ? JSON.stringify(selectors) : 'undefined';
     const regionArg = region ? JSON.stringify(region) : 'undefined';
-    const code = `window.__VISIONCRAFT__.batchInspect(${selectorsArg}, ${regionArg}, ${includeStyles})`;
+    const code = `window.__AIEYE__.batchInspect(${selectorsArg}, ${regionArg}, ${includeStyles})`;
     const result = await this.previewManager.evaluate(code, 10000);
     return Array.isArray(result) ? result : [];
   }
@@ -220,8 +220,8 @@ export class WebviewBridge {
     const bridgeAvailable = await this.isBridgeAvailable();
 
     if (bridgeAvailable) {
-      // Use VisionCraft bridge API
-      const code = `window.__VISIONCRAFT__.inspectElement('${this.escapeSelector(selector)}')`;
+      // Use AI Eye bridge API
+      const code = `window.__AIEYE__.inspectElement('${this.escapeSelector(selector)}')`;
       const result = await this.previewManager.evaluate(code, 5000);
 
       if (result && result.tagName) {
@@ -298,7 +298,7 @@ export class WebviewBridge {
     const bridgeAvailable = await this.isBridgeAvailable();
 
     if (bridgeAvailable) {
-      const code = `window.__VISIONCRAFT__.getElementSource('${this.escapeSelector(selector)}')`;
+      const code = `window.__AIEYE__.getElementSource('${this.escapeSelector(selector)}')`;
       const result = await this.previewManager.evaluate(code, 3000);
 
       if (result && result.file) {
@@ -306,15 +306,15 @@ export class WebviewBridge {
       }
       throw new Error(`Source mapping not available for: ${selector}`);
     } else {
-      // Fallback: read data-vc-* attributes directly
+      // Fallback: read data-ae-* attributes directly
       const code = `
         (() => {
           const element = document.querySelector('${this.escapeSelector(selector)}');
           if (!element) return null;
 
-          const file = element.getAttribute('data-vc-source');
-          const line = element.getAttribute('data-vc-line');
-          const col = element.getAttribute('data-vc-col');
+          const file = element.getAttribute('data-ae-source');
+          const line = element.getAttribute('data-ae-line');
+          const col = element.getAttribute('data-ae-col');
 
           if (file && line && col) {
             return { file, line, col };
@@ -342,7 +342,7 @@ export class WebviewBridge {
     const bridgeAvailable = await this.isBridgeAvailable();
 
     if (bridgeAvailable) {
-      const code = `window.__VISIONCRAFT__.clickElement('${this.escapeSelector(selector)}')`;
+      const code = `window.__AIEYE__.clickElement('${this.escapeSelector(selector)}')`;
       const result = await this.previewManager.evaluate(code, 3000);
 
       if (!result || !result.success) {
@@ -373,7 +373,7 @@ export class WebviewBridge {
     const bridgeAvailable = await this.isBridgeAvailable();
 
     if (bridgeAvailable) {
-      const code = `window.__VISIONCRAFT__.typeText('${this.escapeSelector(selector)}', '${escapedText}')`;
+      const code = `window.__AIEYE__.typeText('${this.escapeSelector(selector)}', '${escapedText}')`;
       const result = await this.previewManager.evaluate(code, 3000);
 
       if (!result || !result.success) {
@@ -441,11 +441,11 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('CSS source tracing requires VisionCraft bridge');
+      throw new Error('CSS source tracing requires AI Eye bridge');
     }
 
     const propsArg = properties ? JSON.stringify(properties) : 'undefined';
-    const code = `window.__VISIONCRAFT__.getCSSSource('${this.escapeSelector(selector)}', ${propsArg})`;
+    const code = `window.__AIEYE__.getCSSSource('${this.escapeSelector(selector)}', ${propsArg})`;
     return await this.previewManager.evaluate(code, 5000);
   }
 
@@ -464,7 +464,7 @@ export class WebviewBridge {
     }
 
     const filterArg = filter ? JSON.stringify(filter) : 'undefined';
-    const code = `window.__VISIONCRAFT__.getNetworkRequests(${filterArg}, ${limit})`;
+    const code = `window.__AIEYE__.getNetworkRequests(${filterArg}, ${limit})`;
     const result = await this.previewManager.evaluate(code, 5000);
     return Array.isArray(result) ? result : [];
   }
@@ -480,7 +480,7 @@ export class WebviewBridge {
       return;
     }
 
-    await this.previewManager.evaluate('window.__VISIONCRAFT__.clearNetworkRequests()', 2000);
+    await this.previewManager.evaluate('window.__AIEYE__.clearNetworkRequests()', 2000);
   }
 
   /**
@@ -570,8 +570,8 @@ export class WebviewBridge {
     }
 
     const code = level
-      ? `window.__VISIONCRAFT__.getConsoleLogs('${level}', ${limit || 100})`
-      : `window.__VISIONCRAFT__.consoleLogs.slice(-${limit || 100})`;
+      ? `window.__AIEYE__.getConsoleLogs('${level}', ${limit || 100})`
+      : `window.__AIEYE__.consoleLogs.slice(-${limit || 100})`;
 
     const result = await this.previewManager.evaluate(code, 2000);
     return Array.isArray(result) ? result : [];
@@ -588,7 +588,7 @@ export class WebviewBridge {
       return;
     }
 
-    await this.previewManager.evaluate('window.__VISIONCRAFT__.clearConsoleLogs()', 2000);
+    await this.previewManager.evaluate('window.__AIEYE__.clearConsoleLogs()', 2000);
   }
 
   /**
@@ -602,7 +602,7 @@ export class WebviewBridge {
       return { connected: false, lastUpdate: null, errors: [], updates: [], totalUpdates: 0, averageLatency: 0 };
     }
 
-    return await this.previewManager.evaluate('window.__VISIONCRAFT__.getHMRStatus()', 2000);
+    return await this.previewManager.evaluate('window.__AIEYE__.getHMRStatus()', 2000);
   }
 
   /**
@@ -616,7 +616,7 @@ export class WebviewBridge {
       return;
     }
 
-    await this.previewManager.evaluate('window.__VISIONCRAFT__.clearHMRErrors()', 2000);
+    await this.previewManager.evaluate('window.__AIEYE__.clearHMRErrors()', 2000);
   }
 
   /**
@@ -649,7 +649,7 @@ export class WebviewBridge {
     const bridgeAvailable = await this.isBridgeAvailable();
 
     if (bridgeAvailable) {
-      const code = `window.__VISIONCRAFT__.findElements('${this.escapeSelector(query)}', '${mode}', ${includeSource})`;
+      const code = `window.__AIEYE__.findElements('${this.escapeSelector(query)}', '${mode}', ${includeSource})`;
       const result = await this.previewManager.evaluate(code, 5000);
       return Array.isArray(result) ? result : [];
     } else {
@@ -666,7 +666,7 @@ export class WebviewBridge {
         return Array.isArray(result) ? result : [];
       }
 
-      throw new Error(`Find elements by ${mode} requires VisionCraft bridge`);
+      throw new Error(`Find elements by ${mode} requires AI Eye bridge`);
     }
   }
 
@@ -679,10 +679,10 @@ export class WebviewBridge {
     const bridgeAvailable = await this.isBridgeAvailable();
 
     if (!bridgeAvailable) {
-      throw new Error('Page structure requires VisionCraft bridge');
+      throw new Error('Page structure requires AI Eye bridge');
     }
 
-    const code = `window.__VISIONCRAFT__.getPageStructure(${maxDepth})`;
+    const code = `window.__AIEYE__.getPageStructure(${maxDepth})`;
     return await this.previewManager.evaluate(code, 10000);
   }
 
@@ -699,12 +699,12 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('Style diff requires VisionCraft bridge');
+      throw new Error('Style diff requires AI Eye bridge');
     }
 
     const actionArgStr = actionArg ? `'${this.escapeSelector(actionArg)}'` : 'undefined';
     const propsStr = properties ? JSON.stringify(properties) : 'undefined';
-    const code = `window.__VISIONCRAFT__.getStyleDiff('${this.escapeSelector(selector)}', '${action}', ${actionArgStr}, ${propsStr})`;
+    const code = `window.__AIEYE__.getStyleDiff('${this.escapeSelector(selector)}', '${action}', ${actionArgStr}, ${propsStr})`;
     return await this.previewManager.evaluate(code, 10000);
   }
 
@@ -720,11 +720,11 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('Component tree requires VisionCraft bridge');
+      throw new Error('Component tree requires AI Eye bridge');
     }
 
     const selectorArg = selector ? `'${this.escapeSelector(selector)}'` : 'undefined';
-    const code = `window.__VISIONCRAFT__.getComponentTree(${selectorArg}, ${maxDepth}, '${framework}')`;
+    const code = `window.__AIEYE__.getComponentTree(${selectorArg}, ${maxDepth}, '${framework}')`;
     return await this.previewManager.evaluate(code, 10000);
   }
 
@@ -739,12 +739,12 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('Accessibility audit requires VisionCraft bridge');
+      throw new Error('Accessibility audit requires AI Eye bridge');
     }
 
     const selectorArg = selector ? `'${this.escapeSelector(selector)}'` : 'undefined';
     const tagsArg = tags ? JSON.stringify(tags) : 'undefined';
-    const code = `window.__VISIONCRAFT__.auditAccessibility(${selectorArg}, ${tagsArg})`;
+    const code = `window.__AIEYE__.auditAccessibility(${selectorArg}, ${tagsArg})`;
     return await this.previewManager.evaluate(code, 35000);
   }
 
@@ -756,10 +756,10 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('Measure element requires VisionCraft bridge');
+      throw new Error('Measure element requires AI Eye bridge');
     }
 
-    const code = `window.__VISIONCRAFT__.measureElement('${this.escapeSelector(selectorA)}', '${this.escapeSelector(selectorB)}')`;
+    const code = `window.__AIEYE__.measureElement('${this.escapeSelector(selectorA)}', '${this.escapeSelector(selectorB)}')`;
     return await this.previewManager.evaluate(code, 5000);
   }
 
@@ -771,10 +771,10 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('Measure spacing requires VisionCraft bridge');
+      throw new Error('Measure spacing requires AI Eye bridge');
     }
 
-    const code = `window.__VISIONCRAFT__.measureSpacing('${this.escapeSelector(selector)}')`;
+    const code = `window.__AIEYE__.measureSpacing('${this.escapeSelector(selector)}')`;
     return await this.previewManager.evaluate(code, 5000);
   }
 
@@ -786,10 +786,10 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('Computed layout requires VisionCraft bridge');
+      throw new Error('Computed layout requires AI Eye bridge');
     }
 
-    const code = `window.__VISIONCRAFT__.getComputedLayout('${this.escapeSelector(selector)}')`;
+    const code = `window.__AIEYE__.getComputedLayout('${this.escapeSelector(selector)}')`;
     return await this.previewManager.evaluate(code, 5000);
   }
 
@@ -801,11 +801,11 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('Palette extraction requires VisionCraft bridge');
+      throw new Error('Palette extraction requires AI Eye bridge');
     }
 
     const selectorArg = selector ? `'${this.escapeSelector(selector)}'` : 'undefined';
-    const code = `window.__VISIONCRAFT__.getPalette(${selectorArg}, ${limit})`;
+    const code = `window.__AIEYE__.getPalette(${selectorArg}, ${limit})`;
     return await this.previewManager.evaluate(code, 10000);
   }
 
@@ -817,10 +817,10 @@ export class WebviewBridge {
 
     const bridgeAvailable = await this.isBridgeAvailable();
     if (!bridgeAvailable) {
-      throw new Error('HMR wait requires VisionCraft bridge');
+      throw new Error('HMR wait requires AI Eye bridge');
     }
 
-    const code = `window.__VISIONCRAFT__.waitForHMR(${timeout})`;
+    const code = `window.__AIEYE__.waitForHMR(${timeout})`;
     return await this.previewManager.evaluate(code, timeout + 2000);
   }
 

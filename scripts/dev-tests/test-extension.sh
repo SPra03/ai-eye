@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔧 VisionCraft Extension Test"
+echo "🔧 AI Eye Extension Test"
 echo "=============================="
 echo ""
 
@@ -16,7 +16,7 @@ echo ""
 
 # Build the extension
 echo "📦 Building extension..."
-npx pnpm --filter @visioncraft/extension build
+npx pnpm --filter ai-eye-extension build
 
 if [ $? -ne 0 ]; then
     echo "❌ Build failed!"
@@ -43,7 +43,7 @@ echo "   1. Make sure this folder is open in VS Code"
 echo "   2. Press Cmd+Shift+D (Run and Debug panel)"
 echo "   3. Select 'Run Extension' from dropdown"
 echo "   4. Press F5 or click the green play button"
-echo "   5. In the new window, run: VisionCraft: Open Live Preview"
+echo "   5. In the new window, run: AI Eye: Open Live Preview"
 echo ""
 echo "💡 Tip: If F5 doesn't work, see DEBUGGING.md"
 echo ""

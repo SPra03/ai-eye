@@ -1,12 +1,12 @@
 {
-  "name": "visioncraft-test-preview",
+  "name": "ai-eye-test-preview",
   "version": "1.0.0",
-  "description": "Test page for VisionCraft preview functionality",
+  "description": "Test page for AI Eye preview functionality",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["visioncraft", "test", "preview"],
+  "keywords": ["ai-eye", "test", "preview"],
   "author": "",
   "license": "MIT"
 }

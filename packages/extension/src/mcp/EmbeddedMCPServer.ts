@@ -40,7 +40,7 @@ interface MCPToolCallResponse {
 /**
  * Embedded MCP Server - Runs in extension host process
  *
- * This server provides the 14 VisionCraft MCP tools to AI agents,
+ * This server provides the 14 AI Eye MCP tools to AI agents,
  * but uses the VS Code webview instead of launching an external browser.
  *
  * Communication flow:
@@ -68,91 +68,91 @@ export class EmbeddedMCPServer {
 
     try {
       switch (name) {
-        case 'visioncraft_screenshot':
+        case 'aieye_screenshot':
           return await this.handleScreenshot(args);
 
-        case 'visioncraft_navigate':
+        case 'aieye_navigate':
           return await this.handleNavigate(args);
 
-        case 'visioncraft_element_at_point':
+        case 'aieye_element_at_point':
           return await this.handleElementAtPoint(args);
 
-        case 'visioncraft_batch_inspect':
+        case 'aieye_batch_inspect':
           return await this.handleBatchInspect(args);
 
-        case 'visioncraft_inspect_element':
+        case 'aieye_inspect_element':
           return await this.handleInspectElement(args);
 
-        case 'visioncraft_get_source':
+        case 'aieye_get_source':
           return await this.handleGetSource(args);
 
-        case 'visioncraft_get_structure':
+        case 'aieye_get_structure':
           return await this.handleGetStructure(args);
 
-        case 'visioncraft_find_elements':
+        case 'aieye_find_elements':
           return await this.handleFindElements(args);
 
-        case 'visioncraft_click':
+        case 'aieye_click':
           return await this.handleClick(args);
 
-        case 'visioncraft_type':
+        case 'aieye_type':
           return await this.handleType(args);
 
-        case 'visioncraft_scroll':
+        case 'aieye_scroll':
           return await this.handleScroll(args);
 
-        case 'visioncraft_get_console_logs':
+        case 'aieye_get_console_logs':
           return await this.handleGetConsoleLogs(args);
 
-        case 'visioncraft_clear_console_logs':
+        case 'aieye_clear_console_logs':
           return await this.handleClearConsoleLogs(args);
 
-        case 'visioncraft_get_hmr_status':
+        case 'aieye_get_hmr_status':
           return await this.handleGetHMRStatus(args);
 
-        case 'visioncraft_clear_hmr_errors':
+        case 'aieye_clear_hmr_errors':
           return await this.handleClearHMRErrors(args);
 
-        case 'visioncraft_get_current_url':
+        case 'aieye_get_current_url':
           return await this.handleGetCurrentUrl(args);
 
-        case 'visioncraft_hover':
+        case 'aieye_hover':
           return await this.handleHover(args);
 
-        case 'visioncraft_set_viewport':
+        case 'aieye_set_viewport':
           return await this.handleSetViewport(args);
 
-        case 'visioncraft_get_css_source':
+        case 'aieye_get_css_source':
           return await this.handleGetCSSSource(args);
 
-        case 'visioncraft_get_network_requests':
+        case 'aieye_get_network_requests':
           return await this.handleGetNetworkRequests(args);
 
-        case 'visioncraft_clear_network_requests':
+        case 'aieye_clear_network_requests':
           return await this.handleClearNetworkRequests(args);
 
-        case 'visioncraft_style_diff':
+        case 'aieye_style_diff':
           return await this.handleStyleDiff(args);
 
-        case 'visioncraft_get_component_tree':
+        case 'aieye_get_component_tree':
           return await this.handleGetComponentTree(args);
 
-        case 'visioncraft_audit_accessibility':
+        case 'aieye_audit_accessibility':
           return await this.handleAuditAccessibility(args);
 
-        case 'visioncraft_measure_element':
+        case 'aieye_measure_element':
           return await this.handleMeasureElement(args);
 
-        case 'visioncraft_measure_spacing':
+        case 'aieye_measure_spacing':
           return await this.handleMeasureSpacing(args);
 
-        case 'visioncraft_get_computed_layout':
+        case 'aieye_get_computed_layout':
           return await this.handleGetComputedLayout(args);
 
-        case 'visioncraft_get_palette':
+        case 'aieye_get_palette':
           return await this.handleGetPalette(args);
 
-        case 'visioncraft_wait_for_hmr':
+        case 'aieye_wait_for_hmr':
           return await this.handleWaitForHMR(args);
 
         default:
@@ -166,7 +166,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_screenshot
+   * Tool: aieye_screenshot
    */
   private async handleScreenshot(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const format = args.format || 'jpeg';
@@ -193,7 +193,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_navigate
+   * Tool: aieye_navigate
    */
   private async handleNavigate(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const url = args.url;
@@ -215,7 +215,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_element_at_point
+   * Tool: aieye_element_at_point
    */
   private async handleElementAtPoint(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const x = args.x;
@@ -238,7 +238,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_batch_inspect
+   * Tool: aieye_batch_inspect
    */
   private async handleBatchInspect(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selectors = args.selectors as string[] | undefined;
@@ -258,7 +258,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_inspect_element
+   * Tool: aieye_inspect_element
    */
   private async handleInspectElement(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -280,7 +280,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_source
+   * Tool: aieye_get_source
    */
   private async handleGetSource(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -302,7 +302,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_structure
+   * Tool: aieye_get_structure
    */
   private async handleGetStructure(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const maxDepth = args.maxDepth || 5;
@@ -320,7 +320,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_find_elements
+   * Tool: aieye_find_elements
    */
   private async handleFindElements(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const query = args.query;
@@ -344,7 +344,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_click
+   * Tool: aieye_click
    */
   private async handleClick(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -366,7 +366,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_type
+   * Tool: aieye_type
    */
   private async handleType(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -392,7 +392,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_scroll
+   * Tool: aieye_scroll
    */
   private async handleScroll(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const x = args.x || 0;
@@ -411,7 +411,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_console_logs
+   * Tool: aieye_get_console_logs
    */
   private async handleGetConsoleLogs(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const level = args.level;
@@ -430,18 +430,18 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_clear_console_logs
+   * Tool: aieye_clear_console_logs
    */
   private async handleClearConsoleLogs(args: Record<string, any>): Promise<MCPToolCallResponse> {
     // Note: This requires bridge support
     const bridgeAvailable = await this.webviewBridge.isBridgeAvailable();
 
     if (!bridgeAvailable) {
-      return this.errorResponse('Console log clearing requires VisionCraft bridge');
+      return this.errorResponse('Console log clearing requires AI Eye bridge');
     }
 
     // Call bridge method directly
-    const code = 'window.__VISIONCRAFT__.clearConsoleLogs()';
+    const code = 'window.__AIEYE__.clearConsoleLogs()';
     await this.webviewBridge['previewManager'].evaluate(code, 2000);
 
     return {
@@ -455,16 +455,16 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_hmr_status
+   * Tool: aieye_get_hmr_status
    */
   private async handleGetHMRStatus(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const bridgeAvailable = await this.webviewBridge.isBridgeAvailable();
 
     if (!bridgeAvailable) {
-      return this.errorResponse('HMR status requires VisionCraft bridge');
+      return this.errorResponse('HMR status requires AI Eye bridge');
     }
 
-    const code = 'window.__VISIONCRAFT__.getHMRStatus()';
+    const code = 'window.__AIEYE__.getHMRStatus()';
     const status = await this.webviewBridge['previewManager'].evaluate(code, 2000);
 
     return {
@@ -478,17 +478,17 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_clear_hmr_errors
+   * Tool: aieye_clear_hmr_errors
    */
   private async handleClearHMRErrors(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const bridgeAvailable = await this.webviewBridge.isBridgeAvailable();
 
     if (!bridgeAvailable) {
-      return this.errorResponse('HMR error clearing requires VisionCraft bridge');
+      return this.errorResponse('HMR error clearing requires AI Eye bridge');
     }
 
     // Assuming bridge has this method (may need to add it)
-    const code = 'window.__VISIONCRAFT__.hmrErrors = []';
+    const code = 'window.__AIEYE__.hmrErrors = []';
     await this.webviewBridge['previewManager'].evaluate(code, 2000);
 
     return {
@@ -502,7 +502,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_current_url
+   * Tool: aieye_get_current_url
    */
   private async handleGetCurrentUrl(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const url = await this.webviewBridge.getCurrentUrl();
@@ -518,7 +518,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_css_source
+   * Tool: aieye_get_css_source
    */
   private async handleGetCSSSource(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -541,7 +541,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_network_requests
+   * Tool: aieye_get_network_requests
    */
   private async handleGetNetworkRequests(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const filter = args.filter;
@@ -560,7 +560,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_clear_network_requests
+   * Tool: aieye_clear_network_requests
    */
   private async handleClearNetworkRequests(args: Record<string, any>): Promise<MCPToolCallResponse> {
     await this.webviewBridge.clearNetworkRequests();
@@ -576,7 +576,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_style_diff
+   * Tool: aieye_style_diff
    */
   private async handleStyleDiff(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -604,7 +604,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_component_tree
+   * Tool: aieye_get_component_tree
    */
   private async handleGetComponentTree(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -624,7 +624,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_audit_accessibility
+   * Tool: aieye_audit_accessibility
    */
   private async handleAuditAccessibility(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -643,7 +643,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_set_viewport
+   * Tool: aieye_set_viewport
    */
   private async handleSetViewport(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const presets: Record<string, { width: number; height: number }> = {
@@ -681,7 +681,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_hover
+   * Tool: aieye_hover
    */
   private async handleHover(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -703,7 +703,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_measure_element
+   * Tool: aieye_measure_element
    */
   private async handleMeasureElement(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selectorA = args.selectorA;
@@ -726,7 +726,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_measure_spacing
+   * Tool: aieye_measure_spacing
    */
   private async handleMeasureSpacing(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -748,7 +748,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_computed_layout
+   * Tool: aieye_get_computed_layout
    */
   private async handleGetComputedLayout(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -770,7 +770,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_get_palette
+   * Tool: aieye_get_palette
    */
   private async handleGetPalette(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const selector = args.selector;
@@ -789,7 +789,7 @@ export class EmbeddedMCPServer {
   }
 
   /**
-   * Tool: visioncraft_wait_for_hmr
+   * Tool: aieye_wait_for_hmr
    */
   private async handleWaitForHMR(args: Record<string, any>): Promise<MCPToolCallResponse> {
     const timeout = args.timeout || 10000;
@@ -827,7 +827,7 @@ export class EmbeddedMCPServer {
   private defineTools(): MCPTool[] {
     return [
       {
-        name: 'visioncraft_screenshot',
+        name: 'aieye_screenshot',
         description: 'Capture a screenshot of the current page in VS Code webview. Optionally crop to an element or highlight elements.',
         inputSchema: {
           type: 'object',
@@ -860,7 +860,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_navigate',
+        name: 'aieye_navigate',
         description: 'Navigate the webview to a different URL',
         inputSchema: {
           type: 'object',
@@ -874,7 +874,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_element_at_point',
+        name: 'aieye_element_at_point',
         description: 'Identify the element at a specific pixel coordinate on the page',
         inputSchema: {
           type: 'object',
@@ -886,7 +886,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_inspect_element',
+        name: 'aieye_inspect_element',
         description: 'Inspect an element and get detailed information including source location',
         inputSchema: {
           type: 'object',
@@ -900,7 +900,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_source',
+        name: 'aieye_get_source',
         description: 'Get source code location for an element',
         inputSchema: {
           type: 'object',
@@ -914,7 +914,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_structure',
+        name: 'aieye_get_structure',
         description: 'Get page DOM structure with source mapping',
         inputSchema: {
           type: 'object',
@@ -927,7 +927,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_find_elements',
+        name: 'aieye_find_elements',
         description: 'Find elements by text, role, or CSS selector',
         inputSchema: {
           type: 'object',
@@ -950,7 +950,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_click',
+        name: 'aieye_click',
         description: 'Click an element',
         inputSchema: {
           type: 'object',
@@ -964,7 +964,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_type',
+        name: 'aieye_type',
         description: 'Type text into an input element',
         inputSchema: {
           type: 'object',
@@ -982,7 +982,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_scroll',
+        name: 'aieye_scroll',
         description: 'Scroll the page to specified coordinates',
         inputSchema: {
           type: 'object',
@@ -999,7 +999,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_console_logs',
+        name: 'aieye_get_console_logs',
         description: 'Get console logs from the webview',
         inputSchema: {
           type: 'object',
@@ -1017,7 +1017,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_clear_console_logs',
+        name: 'aieye_clear_console_logs',
         description: 'Clear captured console logs',
         inputSchema: {
           type: 'object',
@@ -1025,7 +1025,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_hmr_status',
+        name: 'aieye_get_hmr_status',
         description: 'Get Hot Module Replacement status',
         inputSchema: {
           type: 'object',
@@ -1033,7 +1033,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_clear_hmr_errors',
+        name: 'aieye_clear_hmr_errors',
         description: 'Clear HMR error history',
         inputSchema: {
           type: 'object',
@@ -1041,7 +1041,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_current_url',
+        name: 'aieye_get_current_url',
         description: 'Get current page URL',
         inputSchema: {
           type: 'object',
@@ -1049,7 +1049,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_batch_inspect',
+        name: 'aieye_batch_inspect',
         description: 'Inspect multiple elements at once by selectors or rectangular region',
         inputSchema: {
           type: 'object',
@@ -1065,7 +1065,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_hover',
+        name: 'aieye_hover',
         description: 'Hover over an element to trigger CSS :hover states, tooltips, and dropdowns',
         inputSchema: {
           type: 'object',
@@ -1079,7 +1079,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_css_source',
+        name: 'aieye_get_css_source',
         description: 'Trace CSS rules that apply to an element',
         inputSchema: {
           type: 'object',
@@ -1091,7 +1091,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_network_requests',
+        name: 'aieye_get_network_requests',
         description: 'Get captured network requests (fetch and XHR)',
         inputSchema: {
           type: 'object',
@@ -1110,12 +1110,12 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_clear_network_requests',
+        name: 'aieye_clear_network_requests',
         description: 'Clear captured network requests',
         inputSchema: { type: 'object', properties: {} },
       },
       {
-        name: 'visioncraft_set_viewport',
+        name: 'aieye_set_viewport',
         description: 'Set viewport size for responsive design testing. Resizes the actual iframe for true @media query support.',
         inputSchema: {
           type: 'object',
@@ -1127,7 +1127,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_style_diff',
+        name: 'aieye_style_diff',
         description: 'Capture computed styles before/after an action and return only changes',
         inputSchema: {
           type: 'object',
@@ -1141,7 +1141,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_component_tree',
+        name: 'aieye_get_component_tree',
         description: 'Show React/Vue/Svelte component hierarchy with names, props, and state',
         inputSchema: {
           type: 'object',
@@ -1153,7 +1153,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_audit_accessibility',
+        name: 'aieye_audit_accessibility',
         description: 'Run WCAG accessibility audit using axe-core',
         inputSchema: {
           type: 'object',
@@ -1165,7 +1165,7 @@ export class EmbeddedMCPServer {
       },
       // v6 new tools
       {
-        name: 'visioncraft_measure_element',
+        name: 'aieye_measure_element',
         description: 'Measure distance between two elements',
         inputSchema: {
           type: 'object',
@@ -1177,7 +1177,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_measure_spacing',
+        name: 'aieye_measure_spacing',
         description: 'Get padding, margin, border-width, and gap as numeric pixel values',
         inputSchema: {
           type: 'object',
@@ -1188,7 +1188,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_computed_layout',
+        name: 'aieye_get_computed_layout',
         description: 'Get flex/grid layout properties and children sizes',
         inputSchema: {
           type: 'object',
@@ -1199,7 +1199,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_get_palette',
+        name: 'aieye_get_palette',
         description: 'Extract color palette from page or element',
         inputSchema: {
           type: 'object',
@@ -1210,7 +1210,7 @@ export class EmbeddedMCPServer {
         },
       },
       {
-        name: 'visioncraft_wait_for_hmr',
+        name: 'aieye_wait_for_hmr',
         description: 'Wait for HMR update to complete',
         inputSchema: {
           type: 'object',

@@ -71,7 +71,7 @@ export class BrowserClient {
     // Check if bridge is available
     if (!this.cdpClient.hasBridgeAvailable()) {
       throw new Error(
-        'VisionCraft bridge not available. ' +
+        'AI Eye bridge not available. ' +
         'Make sure the dev server is running and the bridge script loaded. ' +
         `Current mode: ${this.cdpClient.getMode()}`
       );

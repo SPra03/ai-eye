@@ -8,7 +8,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in VisionCraft, please report it responsibly.
+If you discover a security vulnerability in AI Eye, please report it responsibly.
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
@@ -34,8 +34,8 @@ If you discover a security vulnerability in VisionCraft, please report it respon
 
 The following are in scope:
 - `aieye` (MCP server package)
-- `@visioncraft/vite-plugin`
-- `@visioncraft/babel-plugin`
+- `@ai-eye/vite-plugin`
+- `@ai-eye/babel-plugin`
 - The VS Code extension
 - The bridge script injected into web pages
 
